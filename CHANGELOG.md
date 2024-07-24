@@ -8,4 +8,9 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- Bootstrap base backend boilerplate
+- Implement tasks endpoints
+
 [unreleased]: https://github.com/openfun/mork

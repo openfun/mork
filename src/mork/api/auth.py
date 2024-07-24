@@ -8,7 +8,7 @@ from mork.conf import settings
 api_key_header = APIKeyHeader(name="X-API-Key")
 
 
-def get_user(api_key_header: str = Security(api_key_header)):
+def authenticate_api_key(api_key_header: str = Security(api_key_header)):
     """Authenticate user with any allowed method, using credentials in the header."""
     if api_key_header not in settings.API_KEYS:
         raise HTTPException(
