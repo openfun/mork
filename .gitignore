@@ -27,6 +27,10 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+# Helm chart
+Chart.lock
+charts/
+
 # Environments
 .env
 .venv
@@ -36,7 +40,12 @@ ENV/
 env.bak/
 venv.bak/
 
+# Logs
+*.log
+
 # Test & lint
 .coverage
-.pylint.d
 .pytest_cache
+
+# Documentation site
+site/
