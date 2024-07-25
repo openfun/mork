@@ -41,7 +41,6 @@ class Settings(BaseSettings):
     SENTRY_API_TRACES_SAMPLE_RATE: float = 1.0
     SENTRY_IGNORE_HEALTH_CHECKS: bool = False
 
-    # pylint: disable=invalid-name
     @property
     def SERVER_URL(self) -> str:
         """Get the full server URL."""

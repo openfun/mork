@@ -14,8 +14,6 @@ services:
     image: "${MORK_IMAGE_NAME:-mork}:${MORK_IMAGE_TAG:-development}"
     env_file:
       - .env
-    environment:
-      PYLINTHOME: /app/.pylint.d
     ports:
       - "${MORK_SERVER_PORT:-8100}:${MORK_SERVER_PORT:-8100}"
     command:
