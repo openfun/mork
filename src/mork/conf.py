@@ -25,6 +25,15 @@ class Settings(BaseSettings):
     API_SERVER_PORT: int = 8100
     API_KEYS: list[str] = ["APIKeyToBeChanged"]
 
+    # EDX database
+    EDX_DB_ENGINE: str = "mysql+pymysql"
+    EDX_DB_USER: str = "fun"
+    EDX_DB_PASSWORD: str = "pass"
+    EDX_DB_HOST: str = "mysql"
+    EDX_DB_NAME: str = "mork"
+    EDX_DB_PORT: int = 5432
+    EDX_DB_DEBUG: bool = False
+
     # Celery
     broker_url: str = Field("redis://redis:6379/0", alias="MORK_CELERY_BROKER_URL")
     result_backend: str = Field(
@@ -40,6 +49,15 @@ class Settings(BaseSettings):
     SENTRY_EXECUTION_ENVIRONMENT: str = "development"
     SENTRY_API_TRACES_SAMPLE_RATE: float = 1.0
     SENTRY_IGNORE_HEALTH_CHECKS: bool = False
+
+    @property
+    def EDX_DB_URL(self) -> str:
+        """Get the edx database URL as required by SQLAlchemy."""
+        return (
+            f"{self.EDX_DB_ENGINE}://"
+            f"{self.EDX_DB_USER}:{self.EDX_DB_PASSWORD}@"
+            f"{self.EDX_DB_HOST}/{self.EDX_DB_NAME}"
+        )
 
     @property
     def SERVER_URL(self) -> str:
