@@ -186,12 +186,29 @@ jobs:
         auth:
           username: $DOCKER_HUB_USER
           password: $DOCKER_HUB_PASSWORD
+        environment:
+          MORK_DB_HOST: localhost
+      - image: cimg/postgres:12.14
+        auth:
+          username: $DOCKER_HUB_USER
+          password: $DOCKER_HUB_PASS
+        environment:
+          POSTGRES_DB: mork-db
+          POSTGRES_USER: fun
+          POSTGRES_PASSWORD: pass
     working_directory: ~/fun
     steps:
       - checkout
       - restore_cache:
           keys:
             - v1-dependencies-{{ .Revision }}
+      - run: sudo apt-get update
+      - run: sudo apt-get install postgresql-client
+      - run: whoami
+      - run: |
+          psql \
+          -d "postgresql://fun@localhost/postgres" \
+          -c "create database \"test-mork-db\";"
       - run:
           name: Run tests
           command: ~/.local/bin/pytest
