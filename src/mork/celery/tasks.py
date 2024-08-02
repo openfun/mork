@@ -24,7 +24,22 @@ logger = getLogger(__name__)
 @app.task
 def warn_inactive_users():
     """Celery task to warn inactive users by email."""
-    pass
+    db = OpenEdxDB()
+
+    threshold_date = datetime.now() - settings.WARNING_INACTIVITY_PERIOD
+
+    total = User.get_inactives_count(db.session, threshold_date)
+    for batch_offset in range(0, total, settings.EDX_QUERY_BATCH_SIZE):
+        inactive_users = User.get_inactives(
+            db.session,
+            threshold_date,
+            offset=batch_offset,
+            limit=settings.EDX_QUERY_BATCH_SIZE,
+        )
+        send_email_group = group(
+            [send_email_task.s(user.email, user.username) for user in inactive_users]
+        )
+        send_email_group.delay()
 
 
 @app.task

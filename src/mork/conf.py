@@ -1,6 +1,7 @@
 """Configurations for Mork."""
 
 import io
+from datetime import timedelta
 from pathlib import Path
 from typing import Optional
 
@@ -51,6 +52,7 @@ class Settings(BaseSettings):
     EDX_DB_PASSWORD: str = "pass"
     EDX_DB_PORT: int = 3306
     EDX_DB_DEBUG: bool = False
+    EDX_QUERY_BATCH_SIZE: int = 1000
 
     # Emails
     EMAIL_HOST: str = "mailcatcher"
@@ -61,6 +63,9 @@ class Settings(BaseSettings):
     EMAIL_FROM: str = "from@fun-mooc.fr"
     EMAIL_RATE_LIMIT: str = "100/m"
     EMAIL_MAX_RETRIES: int = 3
+
+    # Warning task configuration
+    WARNING_INACTIVITY_PERIOD: timedelta = "P3Y"
 
     # Celery
     broker_url: str = Field("redis://redis:6379/0", alias="MORK_CELERY_BROKER_URL")
