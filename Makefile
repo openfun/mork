@@ -2,8 +2,9 @@
 SHELL := /bin/bash
 
 # -- Docker
-COMPOSE          = bin/compose
-COMPOSE_RUN      = $(COMPOSE) run --rm --no-deps
+COMPOSE         = bin/compose
+COMPOSE_EXEC    = $(COMPOSE) exec
+COMPOSE_RUN     = $(COMPOSE) run --rm --no-deps
 COMPOSE_RUN_API = $(COMPOSE_RUN) api
 
 # -- MySQL
@@ -76,11 +77,11 @@ logs-celery: ## display celery logs (follow mode)
 .PHONY: logs-celery
 
 purge-celery: ## purge celery tasks
-	@$(COMPOSE_EXEC) celery celery -A mork.celery_app purge
+	@$(COMPOSE_EXEC) celery celery -A mork.celery.celery_app purge
 .PHONY: purge-celery
 
 flower: ## run flower
-	@$(COMPOSE_EXEC) celery celery -A mork.celery_app flower
+	@$(COMPOSE_EXEC) celery celery -A mork.celery.celery_app flower
 .PHONY: flower
 
 run: ## run the whole stack

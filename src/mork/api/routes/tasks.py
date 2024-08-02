@@ -6,8 +6,13 @@ from celery.result import AsyncResult
 from fastapi import APIRouter, Depends, Response, status
 
 from mork.api.auth import authenticate_api_key
-from mork.api.models import TaskCreate, TaskResponse, TaskStatus, TaskType
-from mork.worker.tasks import TASK_TYPE_TO_FUNC
+from mork.api.models import (
+    TASK_TYPE_TO_FUNC,
+    TaskCreate,
+    TaskResponse,
+    TaskStatus,
+    TaskType,
+)
 
 logger = logging.getLogger(__name__)
 

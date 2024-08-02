@@ -37,7 +37,7 @@ services:
 
   celery:
     image: mork:development
-    command: ["celery", "-A", "mork.worker.celery_app", "worker", "-l", "DEBUG", "-n", "mork@%h"]
+    command: ["celery", "-A", "mork.celery.celery_app", "worker", "-l", "DEBUG", "-n", "mork@%h"]
     env_file:
       - .env
     ports:
@@ -48,11 +48,17 @@ services:
     depends_on:
       - api
       - redis
+      - mailcatcher
       - mysql
       - postgresql
 
   dockerize:
     image: jwilder/dockerize
+
+  mailcatcher:
+    image: sj26/mailcatcher:latest
+    ports:
+      - "1081:1080"
 
   mysql:
     image: mysql:5.7
