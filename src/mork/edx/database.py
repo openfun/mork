@@ -1,4 +1,4 @@
-"""Mork database connection."""
+"""Mork edx database connection."""
 
 import logging
 

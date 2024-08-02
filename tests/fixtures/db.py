@@ -8,7 +8,7 @@ from mork.edx.models import Base
 
 
 @pytest.fixture
-def db():
+def edx_db():
     """"""
     db = OpenEdxDB(engine, session)
     Base.metadata.create_all(engine)

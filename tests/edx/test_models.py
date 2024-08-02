@@ -3,7 +3,7 @@
 from mork.edx.factories import EdxUserFactory
 
 
-def test_edx_models_user_safe_dict(db):
+def test_edx_models_user_safe_dict(edx_db):
     """Test the `safe_dict` method for the User model."""
     edx_user = EdxUserFactory()
 
