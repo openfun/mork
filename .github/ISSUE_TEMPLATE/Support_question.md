@@ -10,9 +10,9 @@ We primarily use GitHub as an issue tracker. If however you're encountering an i
 
 ---
 
-Please make sure you have read our [main Readme](https://github.com/openfun/ralph) as well as our [documentation folder](https://github.com/openfun/ralph/tree/master/docs).
+Please make sure you have read our [main Readme](https://github.com/openfun/mork) as well as our [documentation folder](https://github.com/openfun/mork/tree/main/docs).
 
-Also make sure it was not already answered in [an open or close issue](https://github.com/openfun/ralph/issues).
+Also make sure it was not already answered in [an open or close issue](https://github.com/openfun/mork/issues).
 
 If your question was not covered, and you feel like it should be, fire away! We'd love to improve our docs! 👌
 
