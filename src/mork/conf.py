@@ -1,6 +1,7 @@
 """Configurations for Mork."""
 
 import io
+from pathlib import Path
 from typing import Optional
 
 from pydantic import Field
@@ -25,13 +26,30 @@ class Settings(BaseSettings):
     API_SERVER_PORT: int = 8100
     API_KEYS: list[str] = ["APIKeyToBeChanged"]
 
+    # API Root path
+    # (used at least by everything that is alembic-configuration-related)
+    ROOT_PATH: Path = Path(__file__).parent
+
+    # Alembic
+    ALEMBIC_CFG_PATH: Path = ROOT_PATH / "alembic.ini"
+
+    # Mork database
+    DB_ENGINE: str = "postgresql+psycopg"
+    DB_HOST: str = "postgresql"
+    DB_NAME: str = "mork-db"
+    DB_USER: str = "fun"
+    DB_PASSWORD: str = "pass"
+    DB_PORT: int = 5432
+    DB_DEBUG: bool = False
+    TEST_DB_NAME: str = "test-mork-db"
+
     # EDX database
     EDX_DB_ENGINE: str = "mysql+pymysql"
-    EDX_DB_USER: str = "fun"
-    EDX_DB_PASSWORD: str = "pass"
     EDX_DB_HOST: str = "mysql"
-    EDX_DB_NAME: str = "mork"
-    EDX_DB_PORT: int = 5432
+    EDX_DB_NAME: str = "edxapp"
+    EDX_DB_USER: str = "edxapp"
+    EDX_DB_PASSWORD: str = "password"
+    EDX_DB_PORT: int = 3306
     EDX_DB_DEBUG: bool = False
 
     # Celery
@@ -49,6 +67,24 @@ class Settings(BaseSettings):
     SENTRY_EXECUTION_ENVIRONMENT: str = "development"
     SENTRY_API_TRACES_SAMPLE_RATE: float = 1.0
     SENTRY_IGNORE_HEALTH_CHECKS: bool = False
+
+    @property
+    def DB_URL(self) -> str:
+        """Get the Mork database URL as required by SQLAlchemy."""
+        return (
+            f"{self.DB_ENGINE}://"
+            f"{self.DB_USER}:{self.DB_PASSWORD}@"
+            f"{self.DB_HOST}/{self.DB_NAME}"
+        )
+
+    @property
+    def TEST_DB_URL(self) -> str:
+        """Get the test database URL as required by SQLAlchemy."""
+        return (
+            f"{self.DB_ENGINE}://"
+            f"{self.DB_USER}:{self.DB_PASSWORD}@"
+            f"{self.DB_HOST}/{self.TEST_DB_NAME}"
+        )
 
     @property
     def EDX_DB_URL(self) -> str:
