@@ -1,4 +1,9 @@
 services:
+  postgresql:
+    image: postgres:12
+    env_file:
+      - .env
+
   redis:
     image: redis:6.2.6
     ports:
@@ -46,6 +51,7 @@ services:
     depends_on:
       - api
       - redis
+      - postgresql
 
   dockerize:
     image: jwilder/dockerize
