@@ -52,6 +52,16 @@ class Settings(BaseSettings):
     EDX_DB_PORT: int = 3306
     EDX_DB_DEBUG: bool = False
 
+    # Emails
+    EMAIL_HOST: str = "mailcatcher"
+    EMAIL_HOST_USER: str = ""
+    EMAIL_HOST_PASSWORD: str = ""
+    EMAIL_PORT: int = 1025
+    EMAIL_USE_TLS: bool = False
+    EMAIL_FROM: str = "from@fun-mooc.fr"
+    EMAIL_RATE_LIMIT: str = "100/m"
+    EMAIL_MAX_RETRIES: int = 3
+
     # Celery
     broker_url: str = Field("redis://redis:6379/0", alias="MORK_CELERY_BROKER_URL")
     result_backend: str = Field(
