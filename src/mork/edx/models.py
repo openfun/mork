@@ -1,4 +1,4 @@
-"""Mork models."""
+"""Mork edx models."""
 
 import datetime
 from typing import Optional
