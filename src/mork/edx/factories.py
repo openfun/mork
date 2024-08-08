@@ -3,14 +3,15 @@
 import factory
 from faker import Faker
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, registry
+from sqlalchemy.orm import Session
 
 from mork.edx import models
+from mork.edx.models import Base
 
 faker = Faker()
 engine = create_engine("sqlite+pysqlite:///:memory:", echo=False, pool_pre_ping=True)
 session = Session(engine)
-registry().metadata.create_all(engine)
+Base.metadata.create_all(engine)
 
 
 class EdxUserFactory(factory.alchemy.SQLAlchemyModelFactory):

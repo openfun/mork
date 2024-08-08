@@ -6,6 +6,10 @@ COMPOSE          = bin/compose
 COMPOSE_RUN      = $(COMPOSE) run --rm --no-deps
 COMPOSE_RUN_API = $(COMPOSE_RUN) api
 
+# -- MySQL
+EDX_DB_HOST = mysql
+EDX_DB_PORT = 3306
+
 # -- Mork
 MORK_IMAGE_NAME         ?= mork
 MORK_IMAGE_TAG          ?= development
@@ -36,8 +40,10 @@ git-hook-pre-commit: .git/hooks/pre-commit
 bootstrap: ## bootstrap the project for development
 bootstrap: \
   .env \
-  build 
-#   migrate
+  build \
+  run \
+  migrate \
+  seed-edx-database
 .PHONY: bootstrap
 
 build: ## build the app containers
@@ -97,6 +103,12 @@ stop: ## stop all servers
 	@$(COMPOSE) stop
 .PHONY: stop
 
+seed-edx-database:  ## seed the edx database with test data
+	@echo "Waiting for mysql to be up and running…"
+	@$(COMPOSE_RUN) dockerize -wait tcp://$(EDX_DB_HOST):$(EDX_DB_PORT) -timeout 60s
+	@echo "Seeding the edx database…"
+	@$(COMPOSE) exec -T celery python /opt/src/seed_edx_database.py
+.PHONY: seed-experience-index
 
 # -- Linters
 
