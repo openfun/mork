@@ -2,10 +2,11 @@
 SHELL := /bin/bash
 
 # -- Docker
-COMPOSE         = bin/compose
-COMPOSE_EXEC    = $(COMPOSE) exec
-COMPOSE_RUN     = $(COMPOSE) run --rm --no-deps
-COMPOSE_RUN_API = $(COMPOSE_RUN) api
+COMPOSE          = bin/compose
+COMPOSE_EXEC     = $(COMPOSE) exec
+COMPOSE_RUN      = $(COMPOSE) run --rm --no-deps
+COMPOSE_RUN_API  = $(COMPOSE_RUN) api
+COMPOSE_RUN_MAIL = $(COMPOSE_RUN) mail-generator
 
 # -- Postgresql
 DB_HOST = postgresql
@@ -21,6 +22,8 @@ MORK_TEST_DB_NAME       ?= test-mork-db
 # -- Celery
 MORK_CELERY_SERVER_PORT		?= 5555
 
+# -- Mail
+MAIL_YARN = $(COMPOSE_RUN_MAIL) yarn
 
 # ==============================================================================
 # RULES
@@ -157,6 +160,25 @@ test: \
   create-test-db
 	bin/pytest
 .PHONY: test
+
+
+# -- Mail generator
+
+mails-build: ## Convert mjml files to html and text
+	@$(MAIL_YARN) build
+.PHONY: mails-build
+
+mails-build-html-to-plain-text: ## Convert html files to text
+	@$(MAIL_YARN) build-html-to-plain-text
+.PHONY: mails-build-html-to-plain-text
+
+mails-build-mjml-to-html:	## Convert mjml files to html and text
+	@$(MAIL_YARN) build-mjml-to-html
+.PHONY: mails-build-mjml-to-html
+
+mails-install: ## mail-generator yarn install
+	@$(MAIL_YARN) install
+.PHONY: mails-install
 
 
 # -- Misc
