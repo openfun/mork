@@ -149,13 +149,15 @@ jobs:
           password: $DOCKER_HUB_PASSWORD
     working_directory: ~/fun
     steps:
-      - checkout
+      - checkout:
+          path: ~/fun
       - restore_cache:
           keys:
             - v1-dependencies-{{ .Revision }}
       - run:
           name: Install development dependencies
           command: pip install --user .[dev]
+          working_directory: src/app
       - save_cache:
           paths:
             - ~/.local
@@ -167,18 +169,19 @@ jobs:
         auth:
           username: $DOCKER_HUB_USER
           password: $DOCKER_HUB_PASSWORD
-    working_directory: ~/fun
+    working_directory: ~/fun/src/app
     steps:
-      - checkout
+      - checkout:
+          path: ~/fun
       - restore_cache:
           keys:
             - v1-dependencies-{{ .Revision }}
       - run:
           name: Lint code with black
-          command: ~/.local/bin/black src/mork tests --check
+          command: ~/.local/bin/black mork --check
       - run:
           name: Lint code with Ruff check
-          command: ~/.local/bin/ruff check .
+          command: ~/.local/bin/ruff check mork
 
   test:
     docker:
@@ -188,6 +191,7 @@ jobs:
           password: $DOCKER_HUB_PASSWORD
         environment:
           MORK_DB_HOST: localhost
+          PYTHONPATH: /home/circleci/fun
       - image: cimg/postgres:12.14
         auth:
           username: $DOCKER_HUB_USER
@@ -196,12 +200,16 @@ jobs:
           POSTGRES_DB: mork-db
           POSTGRES_USER: fun
           POSTGRES_PASSWORD: pass
-    working_directory: ~/fun
+    working_directory: ~/fun/src/app
     steps:
-      - checkout
+      - checkout:
+          path: ~/fun
+      - attach_workspace:
+          at: ~/fun
       - restore_cache:
           keys:
             - v1-dependencies-{{ .Revision }}
+      # Create test database
       - run: sudo apt-get update
       - run: sudo apt-get install postgresql-client
       - run: whoami
@@ -213,6 +221,37 @@ jobs:
           name: Run tests
           command: ~/.local/bin/pytest
 
+  # ---- Email jobs ----
+  build-mails:
+    docker:
+      - image: cimg/node:20.16.0
+        auth:
+          username: $DOCKER_HUB_USER
+          password: $DOCKER_HUB_PASSWORD
+    working_directory: ~/fun/src/mail
+    steps:
+      - checkout:
+          path: ~/fun
+      - restore_cache:
+          keys:
+            - v1-mail-dependencies-{{ .Revision }}
+      # If the yarn.lock file is not up-to-date with the package.json file,
+      # using the --frozen-lockfile should fail.
+      - run:
+          name: Install node dependencies
+          command: yarn install --frozen-lockfile
+      - run:
+          name: Build mails
+          command: yarn build
+      - persist_to_workspace:
+          root: ~/fun
+          paths:
+            - src/app/mork/templates
+      - save_cache:
+          paths:
+            - ./node_modules
+          key: v1-mail-dependencies-{{ .Revision }}
+
   # ---- Packaging jobs ----
   package:
     docker:
@@ -220,9 +259,10 @@ jobs:
         auth:
           username: $DOCKER_HUB_USER
           password: $DOCKER_HUB_PASSWORD
-    working_directory: ~/fun
+    working_directory: ~/fun/src/app
     steps:
-      - checkout
+      - checkout:
+          path: ~/fun
       - restore_cache:
           keys:
             - v1-dependencies-{{ .Revision }}
@@ -235,7 +275,7 @@ jobs:
       - persist_to_workspace:
           root: ~/fun
           paths:
-            - dist
+            - src/app/dist
       # Store packages as artifacts to download/test them
       - store_artifacts:
           path: ~/fun/dist
@@ -402,6 +442,11 @@ workflows:
           filters:
             tags:
               only: /.*/
+      # Build mails
+      - build-mails:
+          filters:
+            tags:
+              only: /.*/
 
       # Docker jobs
       #
@@ -428,6 +473,7 @@ workflows:
       - test:
           requires:
             - build
+            - build-mails
           filters:
             tags:
               only: /.*/

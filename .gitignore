@@ -40,6 +40,12 @@ ENV/
 env.bak/
 venv.bak/
 
+# npm
+node_modules
+
+# Mails
+src/app/mork/templates/
+
 # Logs
 *.log
 
