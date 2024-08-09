@@ -2,10 +2,11 @@
 SHELL := /bin/bash
 
 # -- Docker
-COMPOSE         = bin/compose
-COMPOSE_EXEC    = $(COMPOSE) exec
-COMPOSE_RUN     = $(COMPOSE) run --rm --no-deps
-COMPOSE_RUN_API = $(COMPOSE_RUN) api
+COMPOSE          = bin/compose
+COMPOSE_EXEC     = $(COMPOSE) exec
+COMPOSE_RUN      = $(COMPOSE) run --rm --no-deps
+COMPOSE_RUN_API  = $(COMPOSE_RUN) api
+COMPOSE_RUN_MAIL = $(COMPOSE_RUN) mail-generator
 
 # -- MySQL
 EDX_DB_HOST = mysql
@@ -25,6 +26,8 @@ MORK_TEST_DB_NAME       ?= test-mork-db
 # -- Celery
 MORK_CELERY_SERVER_PORT		?= 5555
 
+# -- Mail
+MAIL_YARN = $(COMPOSE_RUN_MAIL) yarn
 
 # ==============================================================================
 # RULES
@@ -48,7 +51,10 @@ bootstrap: \
   .env \
   build \
   run \
-  seed-edx-database
+  migrate \
+  seed-edx-database \
+  mails-install \
+  mails-build
 .PHONY: bootstrap
 
 build: ## build the app containers
@@ -147,17 +153,17 @@ lint: \
 
 lint-black: ## lint python sources with black
 	@echo 'lint:black started…'
-	@$(COMPOSE_RUN_API) black --config pyproject.toml src/mork tests
+	@$(COMPOSE_RUN_API) black mork
 .PHONY: lint-black
 
 lint-ruff: ## lint python sources with ruff
 	@echo 'lint:ruff started…'
-	@$(COMPOSE_RUN_API) ruff check --config pyproject.toml .
+	@$(COMPOSE_RUN_API) ruff check .
 .PHONY: lint-ruff
 
 lint-ruff-fix: ## lint and fix python sources with ruff
 	@echo 'lint:ruff-fix started…'
-	@$(COMPOSE_RUN_API) ruff check --config pyproject.toml . --fix
+	@$(COMPOSE_RUN_API) ruff check . --fix
 .PHONY: lint-ruff-fix
 
 ## -- Tests
@@ -168,6 +174,25 @@ test: \
   create-test-db
 	bin/pytest
 .PHONY: test
+
+
+# -- Mail generator
+
+mails-build: ## Convert mjml files to html and text
+	@$(MAIL_YARN) build
+.PHONY: mails-build
+
+mails-build-html-to-plain-text: ## Convert html files to text
+	@$(MAIL_YARN) build-html-to-plain-text
+.PHONY: mails-build-html-to-plain-text
+
+mails-build-mjml-to-html:	## Convert mjml files to html and text
+	@$(MAIL_YARN) build-mjml-to-html
+.PHONY: mails-build-mjml-to-html
+
+mails-install: ## mail-generator yarn install
+	@$(MAIL_YARN) install
+.PHONY: mails-install
 
 
 # -- Misc

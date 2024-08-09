@@ -1,0 +1,7 @@
+<mj-section padding="0">
+  <mj-column>
+    <mj-text mj-class="text--small" align="center" padding="20px 20px">
+        Cet email a été envoyé à {{ email }} par <a href="{{ site.url }}">{{ site.name }}</a>
+    </mj-text>
+  </mj-column>
+</mj-section>

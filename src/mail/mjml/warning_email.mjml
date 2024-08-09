@@ -1,0 +1,42 @@
+<mjml>
+  <mj-include path="./partial/header.mjml" />
+  <mj-body mj-class="bg--blue-100">
+    <mj-wrapper css-class="wrapper" padding="20px 40px 40px 40px">
+    <mj-section>
+      <mj-column>
+        <mj-image src="{% svg_static 'images/logo-fr.svg' %}" width="200px" align="left" alt="Logo de France Université Numérique" />
+      </mj-column>
+    </mj-section>
+      <mj-section mj-class="bg--blue-100" padding="20px 40px 0 40px">
+        <mj-column>
+          <mj-text align="center" padding="0 0 20px 0">
+            <h1>Votre compte va être supprimé dans 30 jours.</h1>
+          </mj-text>
+        </mj-column>
+      </mj-section>
+      <mj-section mj-class="bg--blue-100" border-radius="6px 6px 0 0" padding="20px 40px 20px 40px">
+        <mj-column>
+          <mj-text padding="0">
+            {{ fullname }},<br/> 
+            Vous ne vous êtes pas connecté sur fun-mooc.fr depuis longtemps.
+            <br/>
+            Malheureusement, sans action de votre part et
+            conformément à notre politique de protection des données, nous procéderons
+            à la suppression de votre compte dans 30 jours.
+            <br/>
+            <br/>
+            Si vous souhaitez conserver votre compte, veuillez vous connecter à la plateforme.
+          </mj-text>
+        </mj-column>
+      </mj-section>
+      <mj-section mj-class="bg--blue-100" border-radius="0 0 6px 6px" padding="0 50px 30px 50px">
+        <mj-column>
+          <mj-button background-color="#055FD2" color="white" href="{{ site.login_url }}">
+          Se connecter
+        </mj-button>
+        </mj-column>
+      </mj-section>
+    </mj-wrapper>
+    <mj-include path="./partial/footer.mjml" />
+  </mj-body>
+</mjml>

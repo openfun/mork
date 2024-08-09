@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     # Alembic
     ALEMBIC_CFG_PATH: Path = ROOT_PATH / "alembic.ini"
 
+    # Static path
+    STATIC_PATH: Path = ROOT_PATH / "static"
+
     # Mork database
     DB_ENGINE: str = "postgresql+psycopg"
     DB_HOST: str = "postgresql"
@@ -58,9 +61,12 @@ class Settings(BaseSettings):
     EMAIL_HOST_PASSWORD: str = ""
     EMAIL_PORT: int = 1025
     EMAIL_USE_TLS: bool = False
-    EMAIL_FROM: str = "from@fun-mooc.fr"
+    EMAIL_FROM: str = ""
     EMAIL_RATE_LIMIT: str = "100/m"
     EMAIL_MAX_RETRIES: int = 3
+    EMAIL_SITE_NAME: str = ""
+    EMAIL_SITE_BASE_URL: str = ""
+    EMAIL_SITE_LOGIN_URL: str = ""
 
     # Celery
     broker_url: str = Field("redis://redis:6379/0", alias="MORK_CELERY_BROKER_URL")

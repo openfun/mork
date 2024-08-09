@@ -9,21 +9,35 @@ RUN apt-get update && \
     apt-get -y upgrade && \
     rm -rf /var/lib/apt/lists/*
 
-
 # -- Builder --
 FROM base AS builder
 
 WORKDIR /build
 
-COPY . /build/
+# Copy required python dependencies
+COPY ./src/app /build
 
-RUN pip install .
+RUN mkdir /install && \
+    pip install --prefix=/install .
 
+# ---- mails ----
+FROM node:20 AS mail-builder
 
+COPY ./src/mail /mail/app
+
+WORKDIR /mail/app
+
+RUN yarn install --frozen-lockfile && \
+    yarn build
+        
 # -- Core --
 FROM base AS core
 
-COPY --from=builder /usr/local /usr/local
+# Copy installed python dependencies
+COPY --from=builder /install /usr/local
+
+# Copy mork application (see .dockerignore)
+COPY ./src/app /app/
 
 WORKDIR /app
 
@@ -31,9 +45,8 @@ WORKDIR /app
 # -- Development --
 FROM core AS development
 
-# Copy all sources, not only runtime-required files
-COPY . /app/
-
+# Switch to privileged user to uninstall app
+USER root:root
 
 # Uninstall mork and re-install it in editable mode along with development
 # dependencies
@@ -51,6 +64,9 @@ FROM core AS production
 # Un-privileged user running the application
 ARG DOCKER_USER=1000
 USER ${DOCKER_USER}
+
+# Copy mork mails
+COPY --from=mail-builder /mail/app/mork/templates /app/src/app/mork/templates
 
 CMD ["uvicorn", \
      "mork.api:app", \

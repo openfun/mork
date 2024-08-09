@@ -26,8 +26,11 @@ keywords = ["FastAPI", "Celery", "emails", "Open edX"]
 dependencies = [
     "alembic==1.13.2",
     "celery[redis]==5.4.0",
+    "Jinja2==3.1.4",
+    "jinja2-simple-tags==0.6.1",
     "psycopg[binary]==3.2.1",
     "pydantic_settings==2.4.0",
+    "python-datauri==2.2.0",
     "fastapi[standard]==0.112.1",
     "pymysql==1.1.1",
     "sentry-sdk==2.13.0",
@@ -109,7 +112,7 @@ section-order = ["future", "standard-library", "third-party", "mork", "first-par
 mork = ["mork"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = [
+"mork/**/tests/*" = [
     "ARG",  # flake8-unused-arguments
     "D",  # pydocstyle
     "S",  # flake8-bandit
