@@ -31,16 +31,12 @@ services:
       - .:/app
 
   celery:
-    build:
-      context: .
-      target: "${MORK_IMAGE_BUILD_TARGET:-development}"
-      args:
-        DOCKER_USER: ${DOCKER_USER:-1000}
-    command: ["celery", "-A", "mork.celery_app", "worker", "-l", "DEBUG", "-n", "mork@%h"]
+    image: mork:development
+    command: ["celery", "-A", "mork.worker.celery_app", "worker", "-l", "DEBUG", "-n", "mork@%h"]
     env_file:
       - .env
     ports:
-      - "${MORK_CELERY_SERVER_PORT:-5555}"
+      - "5555:5555"
     volumes:
       - ./src:/app
       - ./bin/seed_edx_database.py:/opt/src/seed_edx_database.py

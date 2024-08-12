@@ -42,7 +42,6 @@ bootstrap: \
   .env \
   build \
   run \
-  migrate \
   seed-edx-database
 .PHONY: bootstrap
 
