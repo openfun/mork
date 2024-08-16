@@ -2,7 +2,9 @@
 
 from celery import Celery
 
-app = Celery("mork", include=["mork.celery.tasks"])
+app = Celery(
+    "mork", include=["mork.celery.deletion_tasks", "mork.celery.emailing_tasks"]
+)
 
 # Using a string here means the worker doesn't have to serialize
 # the configuration object to child processes.

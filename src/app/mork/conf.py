@@ -1,6 +1,7 @@
 """Configurations for Mork."""
 
 import io
+from datetime import timedelta
 from pathlib import Path
 from typing import Optional
 
@@ -25,6 +26,9 @@ class Settings(BaseSettings):
     API_SERVER_HOST: str = "localhost"
     API_SERVER_PORT: int = 8100
     API_KEYS: list[str] = ["APIKeyToBeChanged"]
+
+    # Warning task configuration
+    WARNING_PERIOD: timedelta = "P3Y30D"
 
     # API Root path
     # (used at least by everything that is alembic-configuration-related)
@@ -54,6 +58,7 @@ class Settings(BaseSettings):
     EDX_DB_PASSWORD: str = "password"
     EDX_DB_PORT: int = 3306
     EDX_DB_DEBUG: bool = False
+    EDX_QUERY_BATCH_SIZE: int = 1000
 
     # Emails
     EMAIL_HOST: str = "mailcatcher"
