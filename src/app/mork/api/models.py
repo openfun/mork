@@ -4,7 +4,8 @@ from enum import Enum, unique
 
 from pydantic import BaseModel
 
-from mork.celery.tasks import delete_inactive_users, warn_inactive_users
+from mork.celery.deletion_tasks import delete_inactive_users
+from mork.celery.emailing_tasks import warn_inactive_users
 
 
 @unique

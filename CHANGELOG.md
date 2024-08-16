@@ -14,5 +14,6 @@ and this project adheres to
 - Implement tasks endpoints
 - Add connection to edx database to read user table
 - Implement user data deletion method on edx database
+- Add celery task to warn inactive users by email
 
 [unreleased]: https://github.com/openfun/mork
