@@ -1,15 +1,20 @@
 """Module for defining sessions classes."""
 
 from datetime import datetime
+from logging import getLogger
 from typing import Optional
 
 from sqlalchemy import distinct, select
 from sqlalchemy.orm import Session, load_only
 from sqlalchemy.sql.functions import count
 
+from mork.exceptions import UserDeleteError
 
-class UserMixin:
-    """Mixin that adds convenience methods for the User operations."""
+logger = getLogger(__name__)
+
+
+class AuthUserMixin:
+    """Mixin that adds convenience methods for the AuthUser operations."""
 
     @classmethod
     def get_inactive_users_count(
@@ -64,3 +69,35 @@ class UserMixin:
             .limit(limit)
         )
         return session.scalars(query).unique().all()
+
+    @classmethod
+    def get_user(cls, session: Session, email: str, username: str):
+        """Get a user entry based on the provided email and username.
+
+        Parameters:
+        session (Session): SQLAlchemy session object.
+        email (str): The email of the user to get.
+        username (str): The username of the user to get.
+        """
+        query = select(cls).where(cls.email == email, cls.username == username)
+        return session.execute(query).scalar()
+
+    @classmethod
+    def delete_user(cls, session: Session, email: str, username: str) -> None:
+        """Delete a user entry based on the provided email and username.
+
+        Parameters:
+        session (Session): SQLAlchemy session object.
+        email (str): The email of the user to delete.
+        username (str): The username of the user to delete.
+        """
+        user_to_delete = (
+            session.query(cls)
+            .filter(cls.email == email, cls.username == username)
+            .first()
+        )
+        if not user_to_delete:
+            logger.error(f"No user found with {username=} {email=} for deletion")
+            raise UserDeleteError("User to delete does not exist")
+
+        session.delete(user_to_delete)
