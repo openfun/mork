@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 
 from mork.conf import settings
 from mork.edx.database import OpenEdxDB
-from mork.edx.factories import engine, session
-from mork.edx.models import Base as EdxBase
+from mork.edx.factories.base import engine, session
+from mork.edx.models.base import Base as EdxBase
 from mork.models import Base
 
 

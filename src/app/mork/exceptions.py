@@ -7,3 +7,7 @@ class EmailAlreadySent(Exception):
 
 class EmailSendError(Exception):
     """Raised when an error occurs when sending an email."""
+
+
+class UserDeleteError(Exception):
+    """Raised when an error occurs when deleting a user."""

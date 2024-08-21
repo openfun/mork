@@ -13,5 +13,6 @@ and this project adheres to
 - Bootstrap base backend boilerplate
 - Implement tasks endpoints
 - Add connection to edx database to read user table
+- Implement user data deletion method on edx database
 
 [unreleased]: https://github.com/openfun/mork
