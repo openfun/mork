@@ -298,13 +298,15 @@ jobs:
           at: ~/fun
       - run:
           name: List built packages
-          command: ls dist/*
+          command: ls src/app/dist/*
       - run:
           name: Install base requirements (twine)
           command: pip install --user .[ci]
+          working_directory: src/app
       - run:
           name: Upload built packages to PyPI
           command: ~/.local/bin/twine upload dist/*
+          working_directory: src/app
 
   # ---- DockerHub publication job ----
   hub:
