@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mork.fullname" . }}-api
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    app.kubernetes.io/component: api
+    {{- include "mork.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: api
+      {{- include "mork.selectorLabels" . | nindent 6 }}
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/component: api
+        {{- include "mork.labels" . | nindent 8 }}
+    spec:
+      {{- include "mork.imagePullSecrets" . | nindent 6 }}
+      containers:
+        - name: "{{ .Chart.Name }}-api"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /__heartbeat__
+              port: {{ .Values.api.port }}
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /__lbheartbeat__
+              port: {{ .Values.api.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          startupProbe:
+            exec:
+              command:
+                - "alembic"
+                - "-c"
+                - "/app/mork/alembic.ini"
+                - "check"
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 30
+          env:
+            {{- include "mork.envs" . | nindent 12 }}
+          {{- if .Values.api.extraEnvVarsCM }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.api.extraEnvVarsCM }}
+          {{- end }}
+          {{ with .Values.api.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: logging-config
+              mountPath: "/etc/mork"
+      volumes:
+        - name: logging-config
+          configMap:
+            name: {{ include "mork.fullname" . }}-logging-config
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
