@@ -26,13 +26,14 @@ keywords = ["FastAPI", "Celery", "emails", "Open edX"]
 dependencies = [
     "alembic==1.13.3",
     "celery[redis]==5.4.0",
+    "fastapi[standard]==0.115.0",
     "Jinja2==3.1.4",
     "jinja2-simple-tags==0.6.1",
     "psycopg2-binary==2.9.9",
     "pydantic_settings==2.5.2",
     "python-datauri==2.2.0",
-    "fastapi[standard]==0.115.0",
     "pymysql==1.1.1",
+    "redis==5.0.8",
     "sentry-sdk==2.14.0",
     "SQLAlchemy==2.0.35", 
 ]

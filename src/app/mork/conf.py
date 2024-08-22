@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     # Warning task configuration
     WARNING_PERIOD: timedelta = "P3Y30D"
 
+    # Deletion task configuration
+    DELETION_PERIOD: timedelta = "P3Y"
+    DELETE_MAX_RETRIES: int = 3
+
     # API Root path
     # (used at least by everything that is alembic-configuration-related)
     ROOT_PATH: Path = Path(__file__).parent
@@ -59,6 +63,10 @@ class Settings(BaseSettings):
     EDX_DB_PORT: int = 3306
     EDX_DB_DEBUG: bool = False
     EDX_QUERY_BATCH_SIZE: int = 1000
+
+    # Redis configuration
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
 
     # Emails
     EMAIL_HOST: str = "mailcatcher"

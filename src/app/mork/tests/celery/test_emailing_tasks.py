@@ -140,11 +140,11 @@ def test_send_email_task_sending_failure(monkeypatch):
     )
 
     def mock_send(*args):
-        raise EmailSendError("An error occured")
+        raise EmailSendError("An error occurred")
 
     monkeypatch.setattr("mork.celery.emailing_tasks.send_email", mock_send)
 
-    with pytest.raises(EmailSendError, match="An error occured"):
+    with pytest.raises(EmailSendError, match="An error occurred"):
         send_email_task("johndoe@example.com", "JohnDoe")
 
 

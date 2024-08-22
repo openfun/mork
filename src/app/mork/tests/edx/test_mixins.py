@@ -121,7 +121,7 @@ def test_edx_usermixin__get_user_missing(edx_db):
     """Test the `get_user` method with missing user in the database."""
 
     user = AuthUser.get_user(
-        edx_db.session, email="john_doe@example.com", username="john_doe"
+        session=edx_db.session, email="john_doe@example.com", username="john_doe"
     )
     assert user is None
 
@@ -133,7 +133,7 @@ def test_edx_usermixin__get_user(edx_db):
 
     EdxAuthUserFactory.create_batch(1, email=email, username=username)
 
-    user = AuthUser.get_user(edx_db.session, email, username)
+    user = AuthUser.get_user(session=edx_db.session, email=email, username=username)
     assert user.email == email
     assert user.username == username
 
