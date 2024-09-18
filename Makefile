@@ -100,7 +100,7 @@ run-celery: ## run the celery server (development mode)
 	@$(COMPOSE) up -d celery
 	@echo "Waiting for celery to be up and running..."
 	@$(COMPOSE_RUN) dockerize -wait tcp://$(DB_HOST):$(DB_PORT) -timeout 60s
-.PHONY: run-api
+.PHONY: run-celery
 
 run-api: ## run the api server (development mode)
 	@$(COMPOSE) up -d api
@@ -121,16 +121,16 @@ seed-edx-database:  ## seed the edx database with test data
 	@$(COMPOSE_RUN) dockerize -wait tcp://$(EDX_DB_HOST):$(EDX_DB_PORT) -timeout 60s
 	@echo "Seeding the edx database…"
 	@$(COMPOSE) exec -T celery python /opt/src/seed_edx_database.py
-.PHONY: seed-experience-index
+.PHONY: seed-edx-database
 
 # -- Provisioning
-create-test-db: ## create API test database
+create-test-db: ## create test database
 	@$(COMPOSE) exec postgresql bash -c 'psql "postgresql://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@$(DB_HOST):$(DB_PORT)/postgres" -c "create database \"$(MORK_TEST_DB_NAME)\";"' || echo "Duly noted, skipping database creation."
-.PHONY: create-api-test-db
+.PHONY: create-test-db
 
-drop-test-db: ## drop API test database
+drop-test-db: ## drop test database
 	@$(COMPOSE) exec postgresql bash -c 'psql "postgresql://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@$(DB_HOST):$(DB_PORT)/postgres" -c "drop database \"$(MORK_TEST_DB_NAME)\";"' || echo "Duly noted, skipping database deletion."
-.PHONY: drop-api-test-db
+.PHONY: drop-test-db
 
 
 migrate:  ## run alembic database migrations for the mork database
