@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     STATIC_PATH: Path = ROOT_PATH / "static"
 
     # Mork database
-    DB_ENGINE: str = "postgresql+psycopg"
+    DB_ENGINE: str = "postgresql+psycopg2"
     DB_HOST: str = "postgresql"
     DB_NAME: str = "mork-db"
     DB_USER: str = "fun"
