@@ -28,7 +28,7 @@ dependencies = [
     "celery[redis]==5.4.0",
     "Jinja2==3.1.4",
     "jinja2-simple-tags==0.6.1",
-    "psycopg[binary]==3.2.2",
+    "psycopg2-binary==2.9.9",
     "pydantic_settings==2.5.2",
     "python-datauri==2.2.0",
     "fastapi[standard]==0.115.0",
