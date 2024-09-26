@@ -30,6 +30,7 @@ MANIFEST
 # Helm chart
 Chart.lock
 charts/
+*.tgz
 
 # Environments
 .env
