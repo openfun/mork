@@ -8,6 +8,9 @@ and this project adheres to
 
 ## [Unreleased]
 
+
+## [0.1.0] - 2024-10-22
+
 ### Added
 
 - Bootstrap base backend boilerplate
@@ -17,4 +20,5 @@ and this project adheres to
 - Add celery task to warn inactive users by email
 - Add celery task to delete inactive users from edx database
 
-[unreleased]: https://github.com/openfun/mork
+[unreleased]: https://github.com/openfun/mork/compare/v0.1.0...main
+[0.1.0]: https://github.com/openfun/mork/compare/1e60ac8...v0.1.0
