@@ -12,7 +12,7 @@ from .base import Base
 class PaymentUseracceptance(Base):
     """Model for the `payment_useracceptance` table."""
 
-    __tablename__ = "c"
+    __tablename__ = "payment_useracceptance"
     __table_args__ = (
         ForeignKeyConstraint(
             ["user_id"],

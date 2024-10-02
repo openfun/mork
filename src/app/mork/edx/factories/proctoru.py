@@ -1,4 +1,4 @@
-"""Factory classes for generating fake data for testing."""
+"""Factory classes for proctoru models."""
 
 import factory
 
@@ -8,7 +8,7 @@ from .base import session
 
 
 class EdxProctoruProctoruexamFactory(factory.alchemy.SQLAlchemyModelFactory):
-    """Model for the `proctoru_proctoruexam` table."""
+    """Factory for the `proctoru_proctoruexam` table."""
 
     class Meta:
         """Factory configuration."""
@@ -31,7 +31,7 @@ class EdxProctoruProctoruexamFactory(factory.alchemy.SQLAlchemyModelFactory):
 
 
 class EdxProctoruProctoruuserFactory(factory.alchemy.SQLAlchemyModelFactory):
-    """Model for the `proctoru_proctoruuser` table."""
+    """Factory for the `proctoru_proctoruuser` table."""
 
     class Meta:
         """Factory configuration."""

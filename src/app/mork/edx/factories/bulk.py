@@ -1,4 +1,4 @@
-"""Factory classes for generating fake data for testing."""
+"""Factory classes for bulk models."""
 
 import factory
 
