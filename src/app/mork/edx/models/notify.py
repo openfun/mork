@@ -1,4 +1,4 @@
-"""Mork edx models."""
+"""Mork edx notify models."""
 
 from sqlalchemy import ForeignKeyConstraint
 from sqlalchemy.dialects.mysql import INTEGER

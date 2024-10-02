@@ -1,10 +1,10 @@
-"""Mork edx models."""
+"""Mork edx student models."""
 
 import datetime
-from typing import Optional
+from typing import List, Optional
 
 from sqlalchemy import DateTime, ForeignKeyConstraint, Index, String
-from sqlalchemy.dialects.mysql import INTEGER
+from sqlalchemy.dialects.mysql import INTEGER, TEXT
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
@@ -95,6 +95,65 @@ class StudentCourseenrollment(Base):
         "AuthUser", back_populates="student_courseenrollment"
     )
 
+    student_courseenrollmentattribute: Mapped[
+        List["StudentCourseenrollmentattribute"]
+    ] = relationship(
+        "StudentCourseenrollmentattribute",
+        back_populates="enrollment",
+        cascade="all, delete-orphan",
+    )
+    student_manualenrollmentaudit: Mapped[List["StudentManualenrollmentaudit"]] = (
+        relationship(
+            "StudentManualenrollmentaudit",
+            back_populates="enrollment",
+            cascade="all, delete-orphan",
+        )
+    )
+
+
+class StudentCourseenrollmentallowed(Base):
+    """Model for the `student_courseenrollmentallowed` table.
+
+    At the database level, no foreign key is defined.
+    """
+
+    __tablename__ = "student_courseenrollmentallowed"
+    __table_args__ = (
+        Index(
+            "student_courseenrollmentallowed_email_6f3eafd4a6c58591_uniq",
+            "email",
+            "course_id",
+            unique=True,
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(INTEGER(11), primary_key=True)
+    email: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    course_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    created: Mapped[datetime.datetime] = mapped_column(DateTime, index=True)
+    auto_enroll: Mapped[int] = mapped_column(INTEGER(1), nullable=False)
+
+
+class StudentCourseenrollmentattribute(Base):
+    """Model for the `student_courseenrollmentattribute` table."""
+
+    __tablename__ = "student_courseenrollmentattribute"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["enrollment_id"],
+            ["student_courseenrollment.id"],
+        ),
+    )
+    id: Mapped[int] = mapped_column(INTEGER(11), primary_key=True)
+    enrollment_id: Mapped[int] = mapped_column(INTEGER(11), nullable=False, index=True)
+    namespace: Mapped[str] = mapped_column(String(255), nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    value: Mapped[str] = mapped_column(String(255), nullable=False)
+
+    enrollment: Mapped["StudentCourseenrollment"] = relationship(
+        "StudentCourseenrollment", back_populates="student_courseenrollmentattribute"
+    )
+
 
 class StudentHistoricalcourseenrollment(Base):
     """Model for the `student_historicalcourseenrollment` table."""
@@ -136,6 +195,34 @@ class StudentHistoricalcourseenrollment(Base):
     )
 
 
+class StudentLanguageproficiency(Base):
+    """Model for the `student_languageproficiency` table."""
+
+    __tablename__ = "student_languageproficiency"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["user_profile_id"],
+            ["auth_userprofile.id"],
+        ),
+        Index(
+            "student_languageproficiency_code_68e76171684c62e5_uniq",
+            "code",
+            "user_profile_id",
+            unique=True,
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(INTEGER(11), primary_key=True)
+    user_profile_id: Mapped[int] = mapped_column(
+        INTEGER(11), nullable=False, index=True
+    )
+    code: Mapped[str] = mapped_column(String(16), nullable=False)
+
+    user_profile: Mapped["AuthUserprofile"] = relationship(  # noqa: F821
+        "AuthUserprofile", back_populates="student_languageproficiency"
+    )
+
+
 class StudentLoginfailure(Base):
     """Model for the `student_loginfailures` table."""
 
@@ -154,6 +241,37 @@ class StudentLoginfailure(Base):
 
     user: Mapped["AuthUser"] = relationship(  # noqa: F821
         "AuthUser", back_populates="student_loginfailures"
+    )
+
+
+class StudentManualenrollmentaudit(Base):
+    """Model for the `student_manualenrollmentaudit` table."""
+
+    __tablename__ = "student_manualenrollmentaudit"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["enrollment_id"],
+            ["student_courseenrollment.id"],
+        ),
+        ForeignKeyConstraint(
+            ["enrolled_by_id"],
+            ["auth_user.id"],
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(INTEGER(11), primary_key=True)
+    enrollment_id: Mapped[int] = mapped_column(INTEGER(11), index=True)
+    enrolled_by_id: Mapped[int] = mapped_column(INTEGER(11), index=True)
+    enrolled_email: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    time_stamp: Mapped[datetime.datetime] = mapped_column(DateTime)
+    state_transition: Mapped[str] = mapped_column(String(255), nullable=False)
+    reason: Mapped[str] = mapped_column(TEXT)
+
+    enrolled_by: Mapped["AuthUser"] = relationship(  # noqa: F821
+        "AuthUser", back_populates="student_manualenrollmentaudit"
+    )
+    enrollment: Mapped["StudentCourseenrollment"] = relationship(
+        "StudentCourseenrollment", back_populates="student_manualenrollmentaudit"
     )
 
 
