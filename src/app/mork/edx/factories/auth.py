@@ -1,4 +1,4 @@
-"""Factory classes for generating fake data for testing."""
+"""Factory classes for auth models."""
 
 import factory
 
@@ -6,7 +6,8 @@ from mork.edx.models.auth import (
     AuthRegistration,
     AuthtokenToken,
     AuthUser,
-    AuthUserProfile,
+    AuthUserGroups,
+    AuthUserprofile,
 )
 
 from .base import faker, session
@@ -19,6 +20,8 @@ from .contentstore import EdxContentstoreVideouploadconfigFactory
 from .course import (
     EdxCourseActionStateCoursererunstateFactory,
     EdxCourseCreatorsCoursecreatorFactory,
+    EdxCourseGroupsCohortmembershipFactory,
+    EdxCourseGroupsCourseusergroupUsersFactory,
 )
 from .courseware import (
     EdxCoursewareOfflinecomputedgradeFactory,
@@ -27,21 +30,28 @@ from .courseware import (
     EdxCoursewareXmodulestudentprefsfieldFactory,
 )
 from .dark import EdxDarkLangDarklangconfigFactory
+from .django import EdxDjangoCommentClientRoleUsersFactory
 from .instructor import EdxInstructorTaskInstructortaskFactory
 from .notify import EdxNotifySettingFactory
+from .payment import EdxPaymentUseracceptanceFactory
 from .proctoru import EdxProctoruProctoruexamFactory, EdxProctoruProctoruuserFactory
 from .student import (
     EdxStudentAnonymoususeridFactory,
     EdxStudentCourseaccessroleFactory,
-    EdxStudentCourseEnrollmentFactory,
+    EdxStudentCourseenrollmentFactory,
     EdxStudentHistoricalcourseenrollmentFactory,
+    EdxStudentLanguageproficiencyFactory,
     EdxStudentLoginfailureFactory,
+    EdxStudentManualenrollmentauditFactory,
     EdxStudentPendingemailchangeFactory,
     EdxStudentUserstandingFactory,
 )
 from .user import EdxUserApiUserpreferenceFactory
 from .util import EdxUtilRatelimitconfigurationFactory
-from .verify import EdxVerifyStudentHistoricalverificationdeadlineFactory
+from .verify import (
+    EdxVerifyStudentHistoricalverificationdeadlineFactory,
+    EdxVerifyStudentSoftwaresecurephotoverificationFactory,
+)
 
 
 class EdxAuthRegistrationFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -72,13 +82,27 @@ class EdxAuthtokenTokenFactory(factory.alchemy.SQLAlchemyModelFactory):
     created = factory.Faker("date_time")
 
 
-class EdxAuthUserProfileFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxAuthUserGroupsFactory(factory.alchemy.SQLAlchemyModelFactory):
+    """Factory for the `auth_user_groups` table."""
+
+    class Meta:
+        """Factory configuration."""
+
+        model = AuthUserGroups
+        sqlalchemy_session = session
+
+    id = factory.Sequence(lambda n: n + 1)
+    user_id = factory.Sequence(lambda n: n + 1)
+    group_id = factory.Sequence(lambda n: n + 1)
+
+
+class EdxAuthUserprofileFactory(factory.alchemy.SQLAlchemyModelFactory):
     """Factory for the `auth_userprofile` table."""
 
     class Meta:
         """Factory configuration."""
 
-        model = AuthUserProfile
+        model = AuthUserprofile
         sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
@@ -98,6 +122,13 @@ class EdxAuthUserProfileFactory(factory.alchemy.SQLAlchemyModelFactory):
     city = factory.Faker("city")
     bio = factory.Faker("text")
     profile_image_uploaded_at = factory.Faker("date_time")
+
+    student_languageproficiency = factory.RelatedFactoryList(
+        EdxStudentLanguageproficiencyFactory,
+        "user_profile",
+        size=3,
+        user_profile_id=factory.SelfAttribute("..id"),
+    )
 
 
 class EdxAuthUserFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -128,7 +159,10 @@ class EdxAuthUserFactory(factory.alchemy.SQLAlchemyModelFactory):
         EdxAuthtokenTokenFactory, user_id=factory.SelfAttribute("..id")
     )
     auth_userprofile = factory.SubFactory(
-        EdxAuthUserProfileFactory, user_id=factory.SelfAttribute("..id")
+        EdxAuthUserprofileFactory, user_id=factory.SelfAttribute("..id")
+    )
+    auth_user_groups = factory.SubFactory(
+        EdxAuthUserGroupsFactory, user_id=factory.SelfAttribute("..id")
     )
     bulk_email_courseemail = factory.RelatedFactoryList(
         EdxBulkEmailCourseemailFactory,
@@ -172,6 +206,18 @@ class EdxAuthUserFactory(factory.alchemy.SQLAlchemyModelFactory):
         size=3,
         updated_user_id=factory.SelfAttribute("..id"),
     )
+    course_groups_courseusergroup_users = factory.RelatedFactoryList(
+        EdxCourseGroupsCourseusergroupUsersFactory,
+        "user",
+        size=3,
+        user_id=factory.SelfAttribute("..id"),
+    )
+    course_groups_cohortmembership = factory.RelatedFactoryList(
+        EdxCourseGroupsCohortmembershipFactory,
+        "user",
+        size=3,
+        user_id=factory.SelfAttribute("..id"),
+    )
     course_creators_coursecreator = factory.SubFactory(
         EdxCourseCreatorsCoursecreatorFactory, user_id=factory.SelfAttribute("..id")
     )
@@ -205,6 +251,12 @@ class EdxAuthUserFactory(factory.alchemy.SQLAlchemyModelFactory):
         size=3,
         changed_by_id=factory.SelfAttribute("..id"),
     )
+    django_comment_client_role_users = factory.RelatedFactoryList(
+        EdxDjangoCommentClientRoleUsersFactory,
+        "user",
+        size=3,
+        user_id=factory.SelfAttribute("..id"),
+    )
     instructor_task_instructortask = factory.RelatedFactoryList(
         EdxInstructorTaskInstructortaskFactory,
         "requester",
@@ -213,6 +265,12 @@ class EdxAuthUserFactory(factory.alchemy.SQLAlchemyModelFactory):
     )
     notify_settings = factory.RelatedFactoryList(
         EdxNotifySettingFactory,
+        "user",
+        size=3,
+        user_id=factory.SelfAttribute("..id"),
+    )
+    payment_useracceptance = factory.RelatedFactoryList(
+        EdxPaymentUseracceptanceFactory,
         "user",
         size=3,
         user_id=factory.SelfAttribute("..id"),
@@ -239,7 +297,7 @@ class EdxAuthUserFactory(factory.alchemy.SQLAlchemyModelFactory):
         user_id=factory.SelfAttribute("..id"),
     )
     student_courseenrollment = factory.RelatedFactoryList(
-        EdxStudentCourseEnrollmentFactory,
+        EdxStudentCourseenrollmentFactory,
         "user",
         size=3,
         user_id=factory.SelfAttribute("..id"),
@@ -261,6 +319,12 @@ class EdxAuthUserFactory(factory.alchemy.SQLAlchemyModelFactory):
         "user",
         size=3,
         user_id=factory.SelfAttribute("..id"),
+    )
+    student_manualenrollmentaudit = factory.RelatedFactoryList(
+        EdxStudentManualenrollmentauditFactory,
+        "enrolled_by",
+        size=3,
+        enrolled_by_id=factory.SelfAttribute("..id"),
     )
     student_pendingemailchange = factory.SubFactory(
         EdxStudentPendingemailchangeFactory, user_id=factory.SelfAttribute("..id")
@@ -287,4 +351,18 @@ class EdxAuthUserFactory(factory.alchemy.SQLAlchemyModelFactory):
         "history_user",
         size=3,
         history_user_id=factory.SelfAttribute("..id"),
+    )
+    verify_student_softwaresecurephotoverification_reviewing_user = (
+        factory.RelatedFactoryList(
+            EdxVerifyStudentSoftwaresecurephotoverificationFactory,
+            "reviewing_user",
+            size=3,
+            reviewing_user_id=factory.SelfAttribute("..id"),
+        )
+    )
+    verify_student_softwaresecurephotoverification_user = factory.RelatedFactoryList(
+        EdxVerifyStudentSoftwaresecurephotoverificationFactory,
+        "user",
+        size=3,
+        user_id=factory.SelfAttribute("..id"),
     )

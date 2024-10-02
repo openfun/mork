@@ -1,10 +1,11 @@
-"""Factory classes for generating fake data for testing."""
+"""Factory classes for courseware models."""
 
 import factory
 
 from mork.edx.models.courseware import (
     CoursewareOfflinecomputedgrade,
     CoursewareStudentmodule,
+    CoursewareStudentmodulehistory,
     CoursewareXmodulestudentinfofield,
     CoursewareXmodulestudentprefsfield,
 )
@@ -29,6 +30,23 @@ class EdxCoursewareOfflinecomputedgradeFactory(factory.alchemy.SQLAlchemyModelFa
     gradeset = factory.Faker("json")
 
 
+class EdxCoursewareStudentmodulehistoryFactory(factory.alchemy.SQLAlchemyModelFactory):
+    """Factory for the `courseware_studentmodulehistory` table."""
+
+    class Meta:
+        """Factory configuration."""
+
+        model = CoursewareStudentmodulehistory
+        sqlalchemy_session = session
+
+    id = factory.Sequence(lambda n: n + 1)
+    version = factory.Faker("pystr")
+    created = factory.Faker("date_time")
+    state = factory.Faker("json")
+    grade = factory.Faker("pyfloat")
+    max_grade = factory.Faker("pyfloat")
+
+
 class EdxCoursewareStudentmoduleFactory(factory.alchemy.SQLAlchemyModelFactory):
     """Factory for the `courseware_studentmodule` table."""
 
@@ -51,6 +69,13 @@ class EdxCoursewareStudentmoduleFactory(factory.alchemy.SQLAlchemyModelFactory):
     max_grade = factory.Faker("pyfloat")
     done = factory.Faker("pystr", max_chars=8)
     course_id = factory.Sequence(lambda n: f"course-v1:edX+{faker.pystr()}+{n}")
+
+    courseware_studentmodulehistory = factory.RelatedFactoryList(
+        EdxCoursewareStudentmodulehistoryFactory,
+        "student_module",
+        size=3,
+        student_module_id=factory.SelfAttribute("..id"),
+    )
 
 
 class EdxCoursewareXmodulestudentinfofieldFactory(

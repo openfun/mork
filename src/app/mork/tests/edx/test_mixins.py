@@ -11,7 +11,7 @@ from mork.edx.models.base import Base
 from mork.exceptions import UserDeleteError
 
 
-def test_edx_usermixin_get_inactive_users_count(edx_db):
+def test_edx_authusermixin_get_inactive_users_count(edx_db):
     """Test the `get_inactive_users_count` method."""
     # 3 users that did not log in for 3 years
     EdxAuthUserFactory.create_batch(
@@ -30,7 +30,7 @@ def test_edx_usermixin_get_inactive_users_count(edx_db):
     assert users_count == 3
 
 
-def test_edx_usermixin_get_inactive_users_count_empty(edx_db):
+def test_edx_authusermixin_get_inactive_users_count_empty(edx_db):
     """Test the `get_inactive_users_count` method with no inactive users."""
     threshold_date = datetime.now() - timedelta(days=365 * 3)
 
@@ -40,7 +40,7 @@ def test_edx_usermixin_get_inactive_users_count_empty(edx_db):
     assert users_count == 0
 
 
-def test_edx_usermixin_get_inactive_users(edx_db):
+def test_edx_authusermixin_get_inactive_users(edx_db):
     """Test the `get_inactive_users` method."""
 
     # 3 users that did not log in for 3 years
@@ -63,7 +63,7 @@ def test_edx_usermixin_get_inactive_users(edx_db):
     assert users == inactive_users
 
 
-def test_edx_usermixin_get_inactive_users_empty(edx_db):
+def test_edx_authusermixin_get_inactive_users_empty(edx_db):
     """Test the `get_inactive_users` method with no inactive users."""
 
     threshold_date = datetime.now() - timedelta(days=365 * 3)
@@ -75,7 +75,7 @@ def test_edx_usermixin_get_inactive_users_empty(edx_db):
     assert users == []
 
 
-def test_edx_usermixin_get_inactive_users_slice(edx_db):
+def test_edx_authusermixin_get_inactive_users_slice(edx_db):
     """Test the `get_inactive_users` method with a slice."""
     # 3 users that did not log in for 3 years
     inactive_users = EdxAuthUserFactory.create_batch(
@@ -97,7 +97,7 @@ def test_edx_usermixin_get_inactive_users_slice(edx_db):
     assert users == inactive_users[:2]
 
 
-def test_edx_usermixin_get_inactive_users_slice_empty(edx_db):
+def test_edx_authusermixin_get_inactive_users_slice_empty(edx_db):
     """Test the `get_inactive_users` method with an empty slice ."""
     # 3 users that did not log in for 3 years
     EdxAuthUserFactory.create_batch(
@@ -117,7 +117,7 @@ def test_edx_usermixin_get_inactive_users_slice_empty(edx_db):
     assert users == []
 
 
-def test_edx_usermixin__get_user_missing(edx_db):
+def test_edx_authusermixin__get_user_missing(edx_db):
     """Test the `get_user` method with missing user in the database."""
 
     user = AuthUser.get_user(
@@ -126,7 +126,7 @@ def test_edx_usermixin__get_user_missing(edx_db):
     assert user is None
 
 
-def test_edx_usermixin__get_user(edx_db):
+def test_edx_authusermixin__get_user(edx_db):
     """Test the `get_user` method."""
     email = "john_doe@example.com"
     username = "john_doe"
@@ -138,7 +138,7 @@ def test_edx_usermixin__get_user(edx_db):
     assert user.username == username
 
 
-def test_edx_usermixin__delete_user_missing(edx_db):
+def test_edx_authusermixin__delete_user_missing(edx_db):
     """Test the `delete_user` method with missing user in the database."""
 
     with pytest.raises(UserDeleteError, match="User to delete does not exist"):
@@ -147,7 +147,7 @@ def test_edx_usermixin__delete_user_missing(edx_db):
         )
 
 
-def test_edx_usermixin_delete_user(edx_db):
+def test_edx_authusermixin_delete_user(edx_db):
     """Test the `delete_user` method."""
     EdxAuthUserFactory.create_batch(
         1, email="john_doe@example.com", username="john_doe"
@@ -155,8 +155,8 @@ def test_edx_usermixin_delete_user(edx_db):
 
     # Get all related tables that have foreign key constraints on the parent table
     related_tables = [
-        "course_action_state_coursererunstate",
         "auth_userprofile",
+        "auth_user_groups",
         "authtoken_token",
         "auth_registration",
         "bulk_email_courseemail",
@@ -164,26 +164,36 @@ def test_edx_usermixin_delete_user(edx_db):
         "certificates_certificatehtmlviewconfiguration",
         "certificates_generatedcertificate",
         "contentstore_videouploadconfig",
+        "course_action_state_coursererunstate",
         "course_creators_coursecreator",
+        "course_groups_courseusergroup_users",
+        "course_groups_cohortmembership",
         "courseware_offlinecomputedgrade",
         "courseware_studentmodule",
+        "courseware_studentmodulehistory",
         "courseware_xmodulestudentinfofield",
         "courseware_xmodulestudentprefsfield",
         "dark_lang_darklangconfig",
+        "django_comment_client_role_users",
         "instructor_task_instructortask",
         "notify_settings",
+        "payment_useracceptance",
         "proctoru_proctoruexam",
         "proctoru_proctoruuser",
         "student_anonymoususerid",
         "student_courseaccessrole",
         "student_courseenrollment",
+        "student_courseenrollmentattribute",
         "student_historicalcourseenrollment",
+        "student_languageproficiency",
         "student_loginfailures",
+        "student_manualenrollmentaudit",
         "student_pendingemailchange",
         "student_userstanding",
         "user_api_userpreference",
         "util_ratelimitconfiguration",
         "verify_student_historicalverificationdeadline",
+        "verify_student_softwaresecurephotoverification",
     ]
 
     for table_name in related_tables:

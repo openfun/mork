@@ -1,8 +1,8 @@
 """Tests of the edx models."""
 
-from mork.edx.factories.auth import EdxAuthUserFactory, EdxAuthUserProfileFactory
+from mork.edx.factories.auth import EdxAuthUserFactory, EdxAuthUserprofileFactory
 from mork.edx.factories.certificates import EdxCertificatesGeneratedCertificateFactory
-from mork.edx.factories.student import EdxStudentCourseEnrollmentFactory
+from mork.edx.factories.student import EdxStudentCourseenrollmentFactory
 from mork.edx.factories.user import EdxUserApiUserpreferenceFactory
 
 
@@ -26,8 +26,8 @@ def test_edx_models_auth_user_safe_dict(edx_db):
 
 
 def test_edx_models_auth_user_profile_safe_dict(edx_db):
-    """Test the `safe_dict` method for the AuthUserProfile model."""
-    edx_auth_user_profile = EdxAuthUserProfileFactory()
+    """Test the `safe_dict` method for the AuthUserprofile model."""
+    edx_auth_user_profile = EdxAuthUserprofileFactory()
 
     assert edx_auth_user_profile.safe_dict() == {
         "id": edx_auth_user_profile.id,
@@ -64,7 +64,7 @@ def test_edx_models_user_api_user_preference_safe_dict(edx_db):
 
 def test_edx_models_student_course_enrollment_safe_dict(edx_db):
     """Test the `safe_dict` method for the StudentCourseEnrollment model."""
-    edx_student_course_enrollment = EdxStudentCourseEnrollmentFactory()
+    edx_student_course_enrollment = EdxStudentCourseenrollmentFactory()
 
     assert edx_student_course_enrollment.safe_dict() == {
         "id": edx_student_course_enrollment.id,
