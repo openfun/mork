@@ -1,4 +1,4 @@
-"""Mork edx models."""
+"""Mork edx course models."""
 
 import datetime
 
@@ -77,4 +77,56 @@ class CourseCreatorsCoursecreator(Base):
 
     user: Mapped["AuthUser"] = relationship(  # noqa: F821
         "AuthUser", back_populates="course_creators_coursecreator"
+    )
+
+
+class CourseGroupsCourseusergroupUsers(Base):
+    """Model for the `course_groups_courseusergroup_users` table."""
+
+    __tablename__ = "course_groups_courseusergroup_users"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["user_id"],
+            ["auth_user.id"],
+        ),
+        Index("courseusergroup_id", "courseusergroup_id", "user_id", unique=True),
+    )
+
+    id: Mapped[int] = mapped_column(INTEGER(11), primary_key=True)
+    courseusergroup_id: Mapped[int] = mapped_column(
+        INTEGER(11), nullable=False, index=True
+    )
+    user_id: Mapped[int] = mapped_column(INTEGER(11), nullable=False, index=True)
+
+    user: Mapped["AuthUser"] = relationship(  # noqa: F821
+        "AuthUser", back_populates="course_groups_courseusergroup_users"
+    )
+
+
+class CourseGroupsCohortmembership(Base):
+    """Model for the `course_groups_cohortmembership` table."""
+
+    __tablename__ = "course_groups_cohortmembership"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["user_id"],
+            ["auth_user.id"],
+        ),
+        Index(
+            "course_groups_cohortmembership_user_id_395bddd0389ed7da_uniq",
+            "user_id",
+            "course_id",
+            unique=True,
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(INTEGER(11), primary_key=True)
+    course_user_group_id: Mapped[int] = mapped_column(
+        INTEGER(11), nullable=False, index=True
+    )
+    user_id: Mapped[int] = mapped_column(INTEGER(11), nullable=False, index=True)
+    course_id: Mapped[str] = mapped_column(String(255), nullable=False)
+
+    user: Mapped["AuthUser"] = relationship(  # noqa: F821
+        "AuthUser", back_populates="course_groups_cohortmembership"
     )

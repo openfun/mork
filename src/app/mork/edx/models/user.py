@@ -1,4 +1,4 @@
-"""Mork edx models."""
+"""Mork edx user models."""
 
 from sqlalchemy import ForeignKeyConstraint, Index, String
 from sqlalchemy.dialects.mysql import INTEGER, TEXT

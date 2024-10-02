@@ -1,4 +1,4 @@
-"""Mork edx models."""
+"""Mork edx auth models."""
 
 import datetime
 from typing import List, Optional
@@ -18,6 +18,8 @@ from .contentstore import ContentstoreVideouploadconfig
 from .course import (
     CourseActionStateCoursererunstate,
     CourseCreatorsCoursecreator,
+    CourseGroupsCohortmembership,
+    CourseGroupsCourseusergroupUsers,
 )
 from .courseware import (
     CoursewareOfflinecomputedgrade,
@@ -26,21 +28,28 @@ from .courseware import (
     CoursewareXmodulestudentprefsfield,
 )
 from .dark import DarkLangDarklangconfig
+from .django import DjangoCommentClientRoleUsers
 from .instructor import InstructorTaskInstructortask
 from .notify import NotifySetting
+from .payment import PaymentUseracceptance
 from .proctoru import ProctoruProctoruexam, ProctoruProctoruuser
 from .student import (
     StudentAnonymoususerid,
     StudentCourseaccessrole,
     StudentCourseenrollment,
     StudentHistoricalcourseenrollment,
+    StudentLanguageproficiency,
     StudentLoginfailure,
+    StudentManualenrollmentaudit,
     StudentPendingemailchange,
     StudentUserstanding,
 )
 from .user import UserApiUserpreference
 from .util import UtilRatelimitconfiguration
-from .verify import VerifyStudentHistoricalverificationdeadline
+from .verify import (
+    VerifyStudentHistoricalverificationdeadline,
+    VerifyStudentSoftwaresecurephotoverification,
+)
 
 
 class AuthUser(AuthUserMixin, Base):
@@ -74,8 +83,13 @@ class AuthUser(AuthUserMixin, Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
-    auth_userprofile: Mapped["AuthUserProfile"] = relationship(
-        "AuthUserProfile",
+    auth_userprofile: Mapped["AuthUserprofile"] = relationship(
+        "AuthUserprofile",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    auth_user_groups: Mapped["AuthUserGroups"] = relationship(
+        "AuthUserGroups",
         back_populates="user",
         cascade="all, delete-orphan",
     )
@@ -126,6 +140,20 @@ class AuthUser(AuthUserMixin, Base):
         cascade="all, delete-orphan",
         foreign_keys=[CourseActionStateCoursererunstate.updated_user_id],
     )
+    course_groups_courseusergroup_users: Mapped[
+        List["CourseGroupsCourseusergroupUsers"]
+    ] = relationship(
+        "CourseGroupsCourseusergroupUsers",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    course_groups_cohortmembership: Mapped[List["CourseGroupsCohortmembership"]] = (
+        relationship(
+            "CourseGroupsCohortmembership",
+            back_populates="user",
+            cascade="all, delete-orphan",
+        )
+    )
     course_creators_coursecreator: Mapped["CourseCreatorsCoursecreator"] = relationship(
         "CourseCreatorsCoursecreator",
         back_populates="user",
@@ -157,6 +185,13 @@ class AuthUser(AuthUserMixin, Base):
         back_populates="student",
         cascade="all, delete-orphan",
     )
+    django_comment_client_role_users: Mapped[List["DjangoCommentClientRoleUsers"]] = (
+        relationship(
+            "DjangoCommentClientRoleUsers",
+            back_populates="user",
+            cascade="all, delete-orphan",
+        )
+    )
     dark_lang_darklangconfig: Mapped[List["DarkLangDarklangconfig"]] = relationship(
         "DarkLangDarklangconfig",
         back_populates="changed_by",
@@ -171,6 +206,11 @@ class AuthUser(AuthUserMixin, Base):
     )
     notify_settings: Mapped[List["NotifySetting"]] = relationship(
         "NotifySetting",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    payment_useracceptance: Mapped[List["PaymentUseracceptance"]] = relationship(
+        "PaymentUseracceptance",
         back_populates="user",
         cascade="all, delete-orphan",
     )
@@ -220,6 +260,13 @@ class AuthUser(AuthUserMixin, Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+    student_manualenrollmentaudit: Mapped[List["StudentManualenrollmentaudit"]] = (
+        relationship(
+            "StudentManualenrollmentaudit",
+            back_populates="enrolled_by",
+            cascade="all, delete-orphan",
+        )
+    )
     student_pendingemailchange: Mapped["StudentPendingemailchange"] = relationship(
         "StudentPendingemailchange",
         back_populates="user",
@@ -257,6 +304,45 @@ class AuthUser(AuthUserMixin, Base):
         "VerifyStudentHistoricalverificationdeadline",
         back_populates="history_user",
         cascade="all, delete-orphan",
+    )
+    verify_student_softwaresecurephotoverification_reviewing_user: Mapped[
+        List["VerifyStudentSoftwaresecurephotoverification"]
+    ] = relationship(
+        "VerifyStudentSoftwaresecurephotoverification",
+        foreign_keys=[VerifyStudentSoftwaresecurephotoverification.reviewing_user_id],
+        primaryjoin="VerifyStudentSoftwaresecurephotoverification.reviewing_user_id == AuthUser.id",  # noqa: E501
+        back_populates="reviewing_user",
+        cascade="all, delete-orphan",
+    )
+    verify_student_softwaresecurephotoverification_user: Mapped[
+        List["VerifyStudentSoftwaresecurephotoverification"]
+    ] = relationship(
+        "VerifyStudentSoftwaresecurephotoverification",
+        foreign_keys=[VerifyStudentSoftwaresecurephotoverification.user_id],
+        primaryjoin="VerifyStudentSoftwaresecurephotoverification.user_id == AuthUser.id",  # noqa: E501
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+
+
+class AuthUserGroups(Base):
+    """Model for the `auth_user_groups`table."""
+
+    __tablename__ = "auth_user_groups"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["user_id"],
+            ["auth_user.id"],
+        ),
+        Index("user_id_auth_user_groups", "user_id", "group_id", unique=True),
+    )
+
+    id: Mapped[int] = mapped_column(INTEGER(11), primary_key=True)
+    user_id: Mapped["AuthUser"] = mapped_column(INTEGER(11), nullable=False, index=True)
+    group_id: Mapped[int] = mapped_column(INTEGER(11), nullable=False, index=True)
+
+    user: Mapped["AuthUser"] = relationship(
+        "AuthUser", back_populates="auth_user_groups"
     )
 
 
@@ -298,7 +384,7 @@ class AuthtokenToken(Base):
     )
 
 
-class AuthUserProfile(Base):
+class AuthUserprofile(Base):
     """Model for the `auth_userprofile` table."""
 
     __tablename__ = "auth_userprofile"
@@ -339,4 +425,12 @@ class AuthUserProfile(Base):
 
     user: Mapped["AuthUser"] = relationship(
         "AuthUser", back_populates="auth_userprofile"
+    )
+
+    student_languageproficiency: Mapped[List["StudentLanguageproficiency"]] = (
+        relationship(
+            "StudentLanguageproficiency",
+            back_populates="user_profile",
+            cascade="all, delete-orphan",
+        )
     )

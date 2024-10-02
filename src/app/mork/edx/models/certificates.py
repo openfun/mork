@@ -1,4 +1,4 @@
-"""Mork edx models."""
+"""Mork edx certificates models."""
 
 import datetime
 

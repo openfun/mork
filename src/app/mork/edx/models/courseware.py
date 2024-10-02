@@ -1,6 +1,7 @@
-"""Mork edx models."""
+"""Mork edx courseware models."""
 
 import datetime
+from typing import List
 
 from sqlalchemy import DateTime, Float, ForeignKeyConstraint, Index, String
 from sqlalchemy.dialects.mysql import INTEGER, TEXT
@@ -77,6 +78,42 @@ class CoursewareStudentmodule(Base):
 
     student: Mapped["AuthUser"] = relationship(  # noqa: F821
         "AuthUser", back_populates="courseware_studentmodule"
+    )
+
+    courseware_studentmodulehistory: Mapped[List["CoursewareStudentmodulehistory"]] = (
+        relationship(
+            "CoursewareStudentmodulehistory",
+            back_populates="student_module",
+            cascade="all, delete-orphan",
+        )
+    )
+
+
+class CoursewareStudentmodulehistory(Base):
+    """Model for the `courseware_studentmodulehistory` table."""
+
+    __tablename__ = "courseware_studentmodulehistory"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["student_module_id"],
+            ["courseware_studentmodule.id"],
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(INTEGER(11), primary_key=True)
+    student_module_id: Mapped["CoursewareStudentmodule"] = mapped_column(
+        INTEGER(11), nullable=False, index=True
+    )
+    version: Mapped[str] = mapped_column(String(255), index=True)
+    created: Mapped[datetime.datetime] = mapped_column(
+        DateTime, nullable=False, index=True
+    )
+    state: Mapped[str] = mapped_column(TEXT)
+    grade: Mapped[float] = mapped_column(Float(asdecimal=True))
+    max_grade: Mapped[float] = mapped_column(Float(asdecimal=True))
+
+    student_module: Mapped["CoursewareStudentmodule"] = relationship(
+        "CoursewareStudentmodule", back_populates="courseware_studentmodulehistory"
     )
 
 
