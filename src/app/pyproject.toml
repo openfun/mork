@@ -136,4 +136,4 @@ python_files = [
     "test_*.py",
     "tests.py",
 ]
-testpaths = "tests"
+testpaths = "**/tests"
