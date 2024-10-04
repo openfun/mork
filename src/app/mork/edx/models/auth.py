@@ -7,7 +7,6 @@ from sqlalchemy import DateTime, ForeignKeyConstraint, Index, String
 from sqlalchemy.dialects.mysql import INTEGER, TEXT
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from ..mixins import AuthUserMixin
 from .base import Base
 from .bulk import BulkEmailCourseemail, BulkEmailOptout
 from .certificates import (
@@ -52,7 +51,7 @@ from .verify import (
 )
 
 
-class AuthUser(AuthUserMixin, Base):
+class AuthUser(Base):
     """Model for the `auth_user` table."""
 
     __tablename__ = "auth_user"
