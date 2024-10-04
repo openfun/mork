@@ -140,6 +140,61 @@ class EdxAuthUserFactory(factory.alchemy.SQLAlchemyModelFactory):
         model = AuthUser
         sqlalchemy_session = session
 
+    class Params:
+        """Factory parameter to toggle generation of protected tables on or off."""
+
+        with_protected_tables = factory.Trait(
+            authtoken_token=factory.SubFactory(
+                EdxAuthtokenTokenFactory, user_id=factory.SelfAttribute("..id")
+            ),
+            certificates_certificatehtmlviewconfiguration=factory.RelatedFactoryList(
+                EdxCertificatesCertificatehtmlviewconfigurationFactory,
+                "changed_by",
+                size=3,
+                changed_by_id=factory.SelfAttribute("..id"),
+            ),
+            contentstore_videouploadconfig=factory.RelatedFactoryList(
+                EdxContentstoreVideouploadconfigFactory,
+                "changed_by",
+                size=3,
+                changed_by_id=factory.SelfAttribute("..id"),
+            ),
+            course_action_state_coursererunstate_created_user=factory.RelatedFactoryList(
+                EdxCourseActionStateCoursererunstateFactory,
+                "created_user",
+                size=3,
+                created_user_id=factory.SelfAttribute("..id"),
+            ),
+            course_action_state_coursererunstate_updated_user=factory.RelatedFactoryList(
+                EdxCourseActionStateCoursererunstateFactory,
+                "updated_user",
+                size=3,
+                updated_user_id=factory.SelfAttribute("..id"),
+            ),
+            course_creators_coursecreator=factory.SubFactory(
+                EdxCourseCreatorsCoursecreatorFactory,
+                user_id=factory.SelfAttribute("..id"),
+            ),
+            dark_lang_darklangconfig=factory.RelatedFactoryList(
+                EdxDarkLangDarklangconfigFactory,
+                "changed_by",
+                size=3,
+                changed_by_id=factory.SelfAttribute("..id"),
+            ),
+            util_ratelimitconfiguration=factory.RelatedFactoryList(
+                EdxUtilRatelimitconfigurationFactory,
+                "changed_by",
+                size=3,
+                changed_by_id=factory.SelfAttribute("..id"),
+            ),
+            verify_student_historicalverificationdeadline=factory.RelatedFactoryList(
+                EdxVerifyStudentHistoricalverificationdeadlineFactory,
+                "history_user",
+                size=3,
+                history_user_id=factory.SelfAttribute("..id"),
+            ),
+        )
+
     id = factory.Sequence(lambda n: n + 1)
     username = factory.Sequence(lambda n: f"{faker.user_name()}{n}")
     first_name = factory.Faker("first_name")
@@ -154,9 +209,6 @@ class EdxAuthUserFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     auth_registration = factory.SubFactory(
         EdxAuthRegistrationFactory, user_id=factory.SelfAttribute("..id")
-    )
-    authtoken_token = factory.SubFactory(
-        EdxAuthtokenTokenFactory, user_id=factory.SelfAttribute("..id")
     )
     auth_userprofile = factory.SubFactory(
         EdxAuthUserprofileFactory, user_id=factory.SelfAttribute("..id")
@@ -176,35 +228,11 @@ class EdxAuthUserFactory(factory.alchemy.SQLAlchemyModelFactory):
         size=3,
         user_id=factory.SelfAttribute("..id"),
     )
-    certificates_certificatehtmlviewconfiguration = factory.RelatedFactoryList(
-        EdxCertificatesCertificatehtmlviewconfigurationFactory,
-        "changed_by",
-        size=3,
-        changed_by_id=factory.SelfAttribute("..id"),
-    )
     certificates_generatedcertificate = factory.RelatedFactoryList(
         EdxCertificatesGeneratedCertificateFactory,
         "user",
         size=3,
         user_id=factory.SelfAttribute("..id"),
-    )
-    contentstore_videouploadconfig = factory.RelatedFactoryList(
-        EdxContentstoreVideouploadconfigFactory,
-        "changed_by",
-        size=3,
-        changed_by_id=factory.SelfAttribute("..id"),
-    )
-    course_action_state_coursererunstate_created_user = factory.RelatedFactoryList(
-        EdxCourseActionStateCoursererunstateFactory,
-        "created_user",
-        size=3,
-        created_user_id=factory.SelfAttribute("..id"),
-    )
-    course_action_state_coursererunstate_updated_user = factory.RelatedFactoryList(
-        EdxCourseActionStateCoursererunstateFactory,
-        "updated_user",
-        size=3,
-        updated_user_id=factory.SelfAttribute("..id"),
     )
     course_groups_courseusergroup_users = factory.RelatedFactoryList(
         EdxCourseGroupsCourseusergroupUsersFactory,
@@ -217,9 +245,6 @@ class EdxAuthUserFactory(factory.alchemy.SQLAlchemyModelFactory):
         "user",
         size=3,
         user_id=factory.SelfAttribute("..id"),
-    )
-    course_creators_coursecreator = factory.SubFactory(
-        EdxCourseCreatorsCoursecreatorFactory, user_id=factory.SelfAttribute("..id")
     )
     courseware_offlinecomputedgrade = factory.RelatedFactoryList(
         EdxCoursewareOfflinecomputedgradeFactory,
@@ -244,12 +269,6 @@ class EdxAuthUserFactory(factory.alchemy.SQLAlchemyModelFactory):
         "student",
         size=3,
         student_id=factory.SelfAttribute("..id"),
-    )
-    dark_lang_darklangconfig = factory.RelatedFactoryList(
-        EdxDarkLangDarklangconfigFactory,
-        "changed_by",
-        size=3,
-        changed_by_id=factory.SelfAttribute("..id"),
     )
     django_comment_client_role_users = factory.RelatedFactoryList(
         EdxDjangoCommentClientRoleUsersFactory,
@@ -339,18 +358,6 @@ class EdxAuthUserFactory(factory.alchemy.SQLAlchemyModelFactory):
         "user",
         size=3,
         user_id=factory.SelfAttribute("..id"),
-    )
-    util_ratelimitconfiguration = factory.RelatedFactoryList(
-        EdxUtilRatelimitconfigurationFactory,
-        "changed_by",
-        size=3,
-        changed_by_id=factory.SelfAttribute("..id"),
-    )
-    verify_student_historicalverificationdeadline = factory.RelatedFactoryList(
-        EdxVerifyStudentHistoricalverificationdeadlineFactory,
-        "history_user",
-        size=3,
-        history_user_id=factory.SelfAttribute("..id"),
     )
     verify_student_softwaresecurephotoverification_reviewing_user = (
         factory.RelatedFactoryList(

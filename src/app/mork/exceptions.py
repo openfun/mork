@@ -11,3 +11,7 @@ class EmailSendError(Exception):
 
 class UserDeleteError(Exception):
     """Raised when an error occurs when deleting a user."""
+
+
+class UserProtectedDeleteError(Exception):
+    """Raised when a user is associated with an entry in a protected table."""
