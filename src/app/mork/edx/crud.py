@@ -4,12 +4,23 @@ from datetime import datetime
 from logging import getLogger
 from typing import Optional
 
-from sqlalchemy import distinct, select
+from sqlalchemy import distinct, select, union_all
 from sqlalchemy.orm import Session, load_only
 from sqlalchemy.sql.functions import count
 
-from mork.edx.models.auth import AuthUser
-from mork.exceptions import UserDeleteError
+from mork.edx.models.auth import AuthtokenToken, AuthUser
+from mork.edx.models.certificates import (
+    CertificatesCertificatehtmlviewconfiguration,
+)
+from mork.edx.models.contentstore import ContentstoreVideouploadconfig
+from mork.edx.models.course import (
+    CourseActionStateCoursererunstate,
+    CourseCreatorsCoursecreator,
+)
+from mork.edx.models.dark import DarkLangDarklangconfig
+from mork.edx.models.util import UtilRatelimitconfiguration
+from mork.edx.models.verify import VerifyStudentHistoricalverificationdeadline
+from mork.exceptions import UserDeleteError, UserProtectedDeleteError
 
 logger = getLogger(__name__)
 
@@ -80,6 +91,29 @@ def get_user(session: Session, email: str, username: str):
     return session.execute(query).scalar()
 
 
+def _has_protected_children(session: Session, user_id) -> bool:
+    """Check if user has an entry in a protected children table."""
+    union_statement = union_all(
+        select(1).where(AuthtokenToken.user_id == user_id),
+        select(1).where(
+            CertificatesCertificatehtmlviewconfiguration.changed_by_id == user_id
+        ),
+        select(1).where(ContentstoreVideouploadconfig.changed_by_id == user_id),
+        select(1).where(CourseActionStateCoursererunstate.created_user_id == user_id),
+        select(1).where(CourseActionStateCoursererunstate.updated_user_id == user_id),
+        select(1).where(CourseCreatorsCoursecreator.user_id == user_id),
+        select(1).where(DarkLangDarklangconfig.changed_by_id == user_id),
+        select(1).where(UtilRatelimitconfiguration.changed_by_id == user_id),
+        select(1).where(
+            VerifyStudentHistoricalverificationdeadline.history_user_id == user_id
+        ),
+    )
+
+    # Execute the union query and check if any results exist
+    result = session.execute(union_statement).scalars().first()
+    return bool(result)
+
+
 def delete_user(session: Session, email: str, username: str) -> None:
     """Delete a user entry based on the provided email and username.
 
@@ -96,5 +130,10 @@ def delete_user(session: Session, email: str, username: str) -> None:
     if not user_to_delete:
         logger.error(f"No user found with {username=} {email=} for deletion")
         raise UserDeleteError("User to delete does not exist")
+
+    if _has_protected_children(session, user_to_delete.id):
+        raise UserProtectedDeleteError(
+            "User is linked to a protected table and cannot be deleted"
+        )
 
     session.delete(user_to_delete)
