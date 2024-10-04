@@ -9,8 +9,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from mork.celery.celery_app import app
 from mork.conf import settings
 from mork.database import MorkDB
+from mork.edx import crud
 from mork.edx.database import OpenEdxDB
-from mork.edx.models.auth import AuthUser
 from mork.exceptions import UserDeleteError
 from mork.models import EmailStatus
 
@@ -23,9 +23,9 @@ def delete_inactive_users():
     db = OpenEdxDB()
     threshold_date = datetime.now() - settings.DELETION_PERIOD
 
-    total = AuthUser.get_inactive_users_count(db.session, threshold_date)
+    total = crud.get_inactive_users_count(db.session, threshold_date)
     for batch_offset in range(0, total, settings.EDX_QUERY_BATCH_SIZE):
-        inactive_users = AuthUser.get_inactive_users(
+        inactive_users = crud.get_inactive_users(
             db.session,
             threshold_date,
             offset=batch_offset,
@@ -58,7 +58,7 @@ def delete_user(email, username):
     db = OpenEdxDB()
 
     # Delete user from edX database
-    AuthUser.delete_user(db.session, email=email, username=username)
+    crud.delete_user(db.session, email=email, username=username)
     try:
         db.session.commit()
     except SQLAlchemyError as exc:

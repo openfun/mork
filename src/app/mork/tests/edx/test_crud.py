@@ -1,17 +1,18 @@
-"""Tests of the mixins class."""
+"""Tests of the CRUD functions."""
 
 from datetime import datetime, timedelta
 
 import pytest
 from faker import Faker
 
+from mork.edx import crud
 from mork.edx.factories.auth import EdxAuthUserFactory
 from mork.edx.models.auth import AuthUser
 from mork.edx.models.base import Base
 from mork.exceptions import UserDeleteError
 
 
-def test_edx_authusermixin_get_inactive_users_count(edx_db):
+def test_edx_get_inactive_users_count(edx_db):
     """Test the `get_inactive_users_count` method."""
     # 3 users that did not log in for 3 years
     EdxAuthUserFactory.create_batch(
@@ -25,22 +26,22 @@ def test_edx_authusermixin_get_inactive_users_count(edx_db):
     threshold_date = datetime.now() - timedelta(days=365 * 3)
 
     # Get count of users inactive for more than 3 years
-    users_count = AuthUser.get_inactive_users_count(edx_db.session, threshold_date)
+    users_count = crud.get_inactive_users_count(edx_db.session, threshold_date)
 
     assert users_count == 3
 
 
-def test_edx_authusermixin_get_inactive_users_count_empty(edx_db):
+def test_edx_get_inactive_users_count_empty(edx_db):
     """Test the `get_inactive_users_count` method with no inactive users."""
     threshold_date = datetime.now() - timedelta(days=365 * 3)
 
     # Get count of users inactive for more than 3 years
-    users_count = AuthUser.get_inactive_users_count(edx_db.session, threshold_date)
+    users_count = crud.get_inactive_users_count(edx_db.session, threshold_date)
 
     assert users_count == 0
 
 
-def test_edx_authusermixin_get_inactive_users(edx_db):
+def test_edx_get_inactive_users(edx_db):
     """Test the `get_inactive_users` method."""
 
     # 3 users that did not log in for 3 years
@@ -55,27 +56,23 @@ def test_edx_authusermixin_get_inactive_users(edx_db):
     threshold_date = datetime.now() - timedelta(days=365 * 3)
 
     # Get all users inactive for more than 3 years
-    users = AuthUser.get_inactive_users(
-        edx_db.session, threshold_date, offset=0, limit=9
-    )
+    users = crud.get_inactive_users(edx_db.session, threshold_date, offset=0, limit=9)
 
     assert len(users) == 3
     assert users == inactive_users
 
 
-def test_edx_authusermixin_get_inactive_users_empty(edx_db):
+def test_edx_get_inactive_users_empty(edx_db):
     """Test the `get_inactive_users` method with no inactive users."""
 
     threshold_date = datetime.now() - timedelta(days=365 * 3)
 
-    users = AuthUser.get_inactive_users(
-        edx_db.session, threshold_date, offset=0, limit=9
-    )
+    users = crud.get_inactive_users(edx_db.session, threshold_date, offset=0, limit=9)
 
     assert users == []
 
 
-def test_edx_authusermixin_get_inactive_users_slice(edx_db):
+def test_edx_get_inactive_users_slice(edx_db):
     """Test the `get_inactive_users` method with a slice."""
     # 3 users that did not log in for 3 years
     inactive_users = EdxAuthUserFactory.create_batch(
@@ -89,15 +86,13 @@ def test_edx_authusermixin_get_inactive_users_slice(edx_db):
     threshold_date = datetime.now() - timedelta(days=365 * 3)
 
     # Get two users inactive for more than 3 years
-    users = AuthUser.get_inactive_users(
-        edx_db.session, threshold_date, offset=0, limit=2
-    )
+    users = crud.get_inactive_users(edx_db.session, threshold_date, offset=0, limit=2)
 
     assert len(users) == 2
     assert users == inactive_users[:2]
 
 
-def test_edx_authusermixin_get_inactive_users_slice_empty(edx_db):
+def test_edx_get_inactive_users_slice_empty(edx_db):
     """Test the `get_inactive_users` method with an empty slice ."""
     # 3 users that did not log in for 3 years
     EdxAuthUserFactory.create_batch(
@@ -110,44 +105,42 @@ def test_edx_authusermixin_get_inactive_users_slice_empty(edx_db):
 
     threshold_date = datetime.now() - timedelta(days=365 * 3)
 
-    users = AuthUser.get_inactive_users(
-        edx_db.session, threshold_date, offset=4, limit=9
-    )
+    users = crud.get_inactive_users(edx_db.session, threshold_date, offset=4, limit=9)
 
     assert users == []
 
 
-def test_edx_authusermixin__get_user_missing(edx_db):
+def test_edx_get_user_missing(edx_db):
     """Test the `get_user` method with missing user in the database."""
 
-    user = AuthUser.get_user(
+    user = crud.get_user(
         session=edx_db.session, email="john_doe@example.com", username="john_doe"
     )
     assert user is None
 
 
-def test_edx_authusermixin__get_user(edx_db):
+def test_edx_get_user(edx_db):
     """Test the `get_user` method."""
     email = "john_doe@example.com"
     username = "john_doe"
 
     EdxAuthUserFactory.create_batch(1, email=email, username=username)
 
-    user = AuthUser.get_user(session=edx_db.session, email=email, username=username)
+    user = crud.get_user(session=edx_db.session, email=email, username=username)
     assert user.email == email
     assert user.username == username
 
 
-def test_edx_authusermixin__delete_user_missing(edx_db):
+def test_edx_delete_user_missing(edx_db):
     """Test the `delete_user` method with missing user in the database."""
 
     with pytest.raises(UserDeleteError, match="User to delete does not exist"):
-        AuthUser.delete_user(
+        crud.delete_user(
             edx_db.session, email="john_doe@example.com", username="john_doe"
         )
 
 
-def test_edx_authusermixin_delete_user(edx_db):
+def test_edx_delete_user(edx_db):
     """Test the `delete_user` method."""
     EdxAuthUserFactory.create_batch(
         1, email="john_doe@example.com", username="john_doe"
@@ -200,9 +193,7 @@ def test_edx_authusermixin_delete_user(edx_db):
         table = Base.metadata.tables[table_name]
         assert edx_db.session.query(table).count() > 0
 
-    AuthUser.delete_user(
-        edx_db.session, email="john_doe@example.com", username="john_doe"
-    )
+    crud.delete_user(edx_db.session, email="john_doe@example.com", username="john_doe")
 
     # Ensure the parent table is empty
     assert edx_db.session.query(AuthUser).count() == 0
