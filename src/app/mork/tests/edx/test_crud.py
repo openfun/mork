@@ -16,6 +16,9 @@ from mork.edx.factories.course import (
     EdxCourseCreatorsCoursecreatorFactory,
 )
 from mork.edx.factories.dark import EdxDarkLangDarklangconfigFactory
+from mork.edx.factories.student import (
+    EdxStudentCourseenrollmentallowedFactory,
+)
 from mork.edx.factories.util import EdxUtilRatelimitconfigurationFactory
 from mork.edx.factories.verify import (
     EdxVerifyStudentHistoricalverificationdeadlineFactory,
@@ -155,9 +158,10 @@ def test_edx_crud_delete_user_missing(edx_db):
 
 def test_edx_crud_delete_user(edx_db):
     """Test the `delete_user` method."""
-    EdxAuthUserFactory.create_batch(
-        1, email="john_doe@example.com", username="john_doe"
-    )
+    email = "john_doe@example.com"
+    username = "john_doe"
+    EdxAuthUserFactory.create_batch(1, email=email, username=username)
+    EdxStudentCourseenrollmentallowedFactory.create_batch(3, email=email)
 
     # Get all related tables that have foreign key constraints on the parent table
     related_tables = [
@@ -183,6 +187,7 @@ def test_edx_crud_delete_user(edx_db):
         "student_anonymoususerid",
         "student_courseaccessrole",
         "student_courseenrollment",
+        "student_courseenrollmentallowed",
         "student_courseenrollmentattribute",
         "student_historicalcourseenrollment",
         "student_languageproficiency",
