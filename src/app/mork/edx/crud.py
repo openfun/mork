@@ -4,7 +4,7 @@ from datetime import datetime
 from logging import getLogger
 from typing import Optional
 
-from sqlalchemy import distinct, select, union_all
+from sqlalchemy import delete, distinct, select, union_all
 from sqlalchemy.orm import Session, load_only
 from sqlalchemy.sql.functions import count
 
@@ -18,6 +18,7 @@ from mork.edx.models.course import (
     CourseCreatorsCoursecreator,
 )
 from mork.edx.models.dark import DarkLangDarklangconfig
+from mork.edx.models.student import StudentCourseenrollmentallowed
 from mork.edx.models.util import UtilRatelimitconfiguration
 from mork.edx.models.verify import VerifyStudentHistoricalverificationdeadline
 from mork.exceptions import UserDeleteError, UserProtectedDeleteError
@@ -136,4 +137,14 @@ def delete_user(session: Session, email: str, username: str) -> None:
             "User is linked to a protected table and cannot be deleted"
         )
 
+    # Delete entries in student_courseenrollmentallowed table containing user email
+    session.execute(
+        delete(StudentCourseenrollmentallowed).where(
+            StudentCourseenrollmentallowed.email == email
+        )
+    )
+
+    # Delete user from auth_user table and all its children
     session.delete(user_to_delete)
+
+    logger.info(f"Deleting user {username=} {email=}")
