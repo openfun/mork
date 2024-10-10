@@ -9,8 +9,8 @@ from sqlalchemy import select
 from mork.celery.celery_app import app
 from mork.conf import settings
 from mork.database import MorkDB
+from mork.edx import crud
 from mork.edx.database import OpenEdxDB
-from mork.edx.models.auth import AuthUser
 from mork.exceptions import EmailAlreadySent, EmailSendError
 from mork.mail import send_email
 from mork.models import EmailStatus
@@ -25,9 +25,9 @@ def warn_inactive_users():
 
     threshold_date = datetime.now() - settings.WARNING_PERIOD
 
-    total = AuthUser.get_inactive_users_count(db.session, threshold_date)
+    total = crud.get_inactive_users_count(db.session, threshold_date)
     for batch_offset in range(0, total, settings.EDX_QUERY_BATCH_SIZE):
-        inactive_users = AuthUser.get_inactive_users(
+        inactive_users = crud.get_inactive_users(
             db.session,
             threshold_date,
             offset=batch_offset,

@@ -14,8 +14,8 @@ from mork.celery.deletion_tasks import (
     delete_user,
     deletion_task,
 )
+from mork.edx import crud
 from mork.edx.factories.auth import EdxAuthUserFactory
-from mork.edx.models.auth import AuthUser
 from mork.exceptions import UserDeleteError
 from mork.factories import EmailStatusFactory
 from mork.models import EmailStatus
@@ -147,12 +147,12 @@ def test_delete_user(edx_db, monkeypatch):
 
     monkeypatch.setattr("mork.celery.deletion_tasks.OpenEdxDB", lambda *args: edx_db)
 
-    assert AuthUser.get_user(
+    assert crud.get_user(
         edx_db.session,
         username="JohnDoe1",
         email="johndoe1@example.com",
     )
-    assert AuthUser.get_user(
+    assert crud.get_user(
         edx_db.session,
         username="JohnDoe2",
         email="johndoe2@example.com",
@@ -160,12 +160,12 @@ def test_delete_user(edx_db, monkeypatch):
 
     delete_user(email="johndoe1@example.com", username="JohnDoe1")
 
-    assert not AuthUser.get_user(
+    assert not crud.get_user(
         edx_db.session,
         username="JohnDoe1",
         email="johndoe1@example.com",
     )
-    assert AuthUser.get_user(
+    assert crud.get_user(
         edx_db.session,
         username="JohnDoe2",
         email="johndoe2@example.com",
