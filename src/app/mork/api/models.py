@@ -4,8 +4,8 @@ from enum import Enum, unique
 
 from pydantic import BaseModel
 
-from mork.celery.deletion_tasks import delete_inactive_users
-from mork.celery.emailing_tasks import warn_inactive_users
+from mork.celery.tasks.deletion import delete_inactive_users
+from mork.celery.tasks.emailing import warn_inactive_users
 
 
 @unique
@@ -25,8 +25,8 @@ class TaskStatus(str, Enum):
 class TaskType(str, Enum):
     """Possible task types."""
 
-    EMAILING = "emailing"
-    DELETION = "deletion"
+    EMAIL_INACTIVE_USERS = "email_inactive_users"
+    DELETE_INACTIVE_USERS = "delete_inactive_users"
 
 
 class TaskCreate(BaseModel):
@@ -43,6 +43,6 @@ class TaskResponse(BaseModel):
 
 
 TASK_TYPE_TO_FUNC = {
-    TaskType.EMAILING: warn_inactive_users,
-    TaskType.DELETION: delete_inactive_users,
+    TaskType.EMAIL_INACTIVE_USERS: warn_inactive_users,
+    TaskType.DELETE_INACTIVE_USERS: delete_inactive_users,
 }

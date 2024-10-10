@@ -31,7 +31,7 @@ def delete_inactive_users():
             offset=batch_offset,
             limit=settings.EDX_QUERY_BATCH_SIZE,
         )
-        delete_group = group([deletion_task.s(user.email) for user in inactive_users])
+        delete_group = group([delete_user.s(user.email) for user in inactive_users])
         delete_group.delay()
 
 
@@ -39,10 +39,10 @@ def delete_inactive_users():
     bind=True,
     retry_kwargs={"max_retries": settings.DELETE_MAX_RETRIES},
 )
-def deletion_task(self, email: str):
+def delete_user(self, email: str):
     """Celery task that delete a specified user."""
     try:
-        delete_user(email)
+        delete_user_from_db(email)
     except UserDeleteError as exc:
         logger.exception(exc)
         raise self.retry(exc=exc) from exc
@@ -51,7 +51,7 @@ def deletion_task(self, email: str):
     delete_email_status(email)
 
 
-def delete_user(email):
+def delete_user_from_db(email):
     """Delete user from edX database."""
     db = OpenEdxDB()
 

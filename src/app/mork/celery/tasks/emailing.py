@@ -34,7 +34,7 @@ def warn_inactive_users():
             limit=settings.EDX_QUERY_BATCH_SIZE,
         )
         send_email_group = group(
-            [send_email_task.s(user.email, user.username) for user in inactive_users]
+            [warn_user.s(user.email, user.username) for user in inactive_users]
         )
         send_email_group.delay()
 
@@ -44,8 +44,8 @@ def warn_inactive_users():
     rate_limit=settings.EMAIL_RATE_LIMIT,
     retry_kwargs={"max_retries": settings.EMAIL_MAX_RETRIES},
 )
-def send_email_task(self, email_address: str, username: str):
-    """Celery task that sends an email to the specified user."""
+def warn_user(self, email_address: str, username: str):
+    """Celery task that warns the specified user by sending an email."""
     # Check that user has not already received a warning email
     if check_email_already_sent(email_address):
         raise EmailAlreadySent("An email has already been sent to this user")
