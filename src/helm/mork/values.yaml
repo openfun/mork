@@ -1,0 +1,193 @@
+# Default values for mork.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  repository: fundocker/mork
+  pullPolicy: IfNotPresent
+  tag: "0.1.0"
+
+replicaCount: 1
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+service:
+  type: ClusterIP
+  port: 8100
+
+ingress:
+  enabled: true
+  class_name: "nginx"
+  host: ""
+  annotations: {}
+  tls:
+    enabled: false
+    certificateSecretName: mork-certificate
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: deployment
+                operator: In
+                values:
+                  - "mork"
+          topologyKey: kubernetes.io/hostname
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+jobs:
+  dbMigrate:
+    name: "mork-db-migrate"
+    command:
+      - "alembic"
+      - "-c"
+      - "/app/mork/alembic.ini"
+      - "upgrade"
+      - "head"
+      
+    restartPolicy: Never
+
+# Additional volumes on the output Deployment definition.
+volumes:
+  - name: logging-config
+    configMap:
+      name: logging-config
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts:
+  - name: logging-config
+    mountPath: "/etc/mork"
+    readOnly: true
+
+# API configuration
+api:
+  port: 8100
+  command:
+    - "uvicorn"
+    - "mork.api:app"
+    - "--proxy-headers"
+    - "--log-config"
+    - "/etc/mork/logging-config.yaml"
+    - "--host"
+    - "0.0.0.0"
+    - "--port"
+    - "8100"
+
+  jobs:
+  - name: dbmigrate
+    command: 
+      - "alembic"
+      - "-c"
+      - "/app/mork/alembic.ini"
+      - "upgrade"
+      - "head"
+
+  cronjobs: []
+  
+  resources: {}
+
+# Mork database configuration
+db:
+  engine: "postgresql+psycopg2"
+  host: "mork-postgresql"
+  name: "mork"
+  user: "mork"
+  port: 5432
+  debug: false
+
+# edx database configuration
+edx:
+  db:
+    engine: "mysql+pymysql"
+    host: "mysql"
+    name: "edxapp"
+    user: "edxapp"
+    port: 3306
+    debug: false
+
+# Celery configuration
+celery:
+  command:
+    - "celery"
+    - "-A"
+    - "mork.celery.celery_app"
+    - "worker"
+    - "-l"
+    - "INFO"
+    - "-n"
+    - "mork@%"
+  brokerUrl: "redis://redis:6379/0"
+  resultBackend: "redis://redis:6379/0"
+  brokerTransportOptions: '{"master_name": "mymaster"}'
+  taskDefaultQueue: "celery"
+
+# Email sending configuration
+email:
+  host: "mailcatcher"
+  user: ""
+  port: 1025
+  useTls: false
+  from: "from@fun-mooc.fr"
+  rateLimit: "100/m"
+  maxRetries: 3
+  siteName: "France Université Numérique"
+  siteBaseUrl: "https://fun-mooc.fr"
+  siteLoginUrl: "https://lms.fun-mooc.fr/login"
+
+
+loggingConfig:
+  version: 1
+  disable_existing_loggers: false
+  formatters:
+    default:
+      "()": uvicorn.logging.DefaultFormatter
+      fmt: "%(levelprefix)s %(message)s"
+      use_colors:
+    access:
+      "()": uvicorn.logging.AccessFormatter
+      fmt: '%(levelprefix)s %(client_addr)s - "%(request_line)s" %(status_code)s'
+  handlers:
+    default:
+      formatter: default
+      class: logging.StreamHandler
+      stream: ext://sys.stderr
+    access:
+      formatter: access
+      class: logging.StreamHandler
+      stream: ext://sys.stdout
+  loggers:
+    uvicorn:
+      handlers:
+        - default
+      level: INFO
+      propagate: false
+    uvicorn.error:
+      level: INFO
+    uvicorn.access:
+      handlers:
+        - access
+      level: INFO
+      propagate: false
+    mork.api:
+      handlers:
+        - default
+      level: INFO
+      propagate: false
+
+env:
+  secret: []
