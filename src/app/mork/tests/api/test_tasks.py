@@ -17,7 +17,7 @@ async def test_tasks_auth(http_client: AsyncClient):
 
 
 @pytest.mark.anyio
-@pytest.mark.parametrize("task_type", ["emailing", "deletion"])
+@pytest.mark.parametrize("task_type", ["email_inactive_users", "delete_inactive_users"])
 async def test_create_task(
     http_client: AsyncClient, auth_headers: dict, task_type: str
 ):
@@ -74,7 +74,10 @@ async def test_get_available_tasks(http_client: AsyncClient, auth_headers: dict)
     response_data = response.json()
     assert response.status_code == 200
     assert response.headers["allow"] == "POST"
-    assert sorted(response_data.get("task_types")) == ["deletion", "emailing"]
+    assert sorted(response_data.get("task_types")) == [
+        "delete_inactive_users",
+        "email_inactive_users",
+    ]
 
 
 @pytest.mark.anyio
