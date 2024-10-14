@@ -1,14 +1,17 @@
 """API routes related to tasks."""
 
 import logging
+from typing import Union
 
 from celery.result import AsyncResult
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Body, Depends, Response, status
 
 from mork.api.auth import authenticate_api_key
 from mork.api.models import (
     TASK_TYPE_TO_FUNC,
-    TaskCreate,
+    DeleteInactiveUsers,
+    DeleteUser,
+    EmailInactiveUsers,
     TaskResponse,
     TaskStatus,
     TaskType,
@@ -20,16 +23,23 @@ router = APIRouter(prefix="/tasks", dependencies=[Depends(authenticate_api_key)]
 
 
 @router.post("/", status_code=status.HTTP_202_ACCEPTED)
-async def create_task(task_in: TaskCreate, response: Response) -> TaskResponse:
+async def create_task(
+    response: Response,
+    task: Union[DeleteInactiveUsers, EmailInactiveUsers, DeleteUser] = Body(
+        discriminator="type"
+    ),
+) -> TaskResponse:
     """Create a new task."""
-    celery_task = TASK_TYPE_TO_FUNC[task_in.type]
-    result = celery_task.delay()
+    celery_task = TASK_TYPE_TO_FUNC[task.type]
+    celery_params = task.model_dump(exclude="type")
 
-    task = TaskResponse(id=result.task_id, status=TaskStatus.PENDING)
+    result = celery_task.delay(**celery_params)
+
+    task_response = TaskResponse(id=result.task_id, status=TaskStatus.PENDING)
     response.headers["location"] = router.url_path_for(
-        "get_task_status", **{"task_id": task.id}
+        "get_task_status", **{"task_id": task_response.id}
     )
-    return task
+    return task_response
 
 
 @router.options("/")
