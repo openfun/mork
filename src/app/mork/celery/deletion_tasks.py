@@ -31,9 +31,7 @@ def delete_inactive_users():
             offset=batch_offset,
             limit=settings.EDX_QUERY_BATCH_SIZE,
         )
-        delete_group = group(
-            [deletion_task.s(user.email, user.username) for user in inactive_users]
-        )
+        delete_group = group([deletion_task.s(user.email) for user in inactive_users])
         delete_group.delay()
 
 
@@ -41,10 +39,10 @@ def delete_inactive_users():
     bind=True,
     retry_kwargs={"max_retries": settings.DELETE_MAX_RETRIES},
 )
-def deletion_task(self, email: str, username: str):
+def deletion_task(self, email: str):
     """Celery task that delete a specified user."""
     try:
-        delete_user(email, username)
+        delete_user(email)
     except UserDeleteError as exc:
         logger.exception(exc)
         raise self.retry(exc=exc) from exc
@@ -53,17 +51,17 @@ def deletion_task(self, email: str, username: str):
     delete_email_status(email)
 
 
-def delete_user(email, username):
+def delete_user(email):
     """Delete user from edX database."""
     db = OpenEdxDB()
 
     # Delete user from edX database
-    crud.delete_user(db.session, email=email, username=username)
+    crud.delete_user(db.session, email=email)
     try:
         db.session.commit()
     except SQLAlchemyError as exc:
         db.session.rollback()
-        logger.error(f"Failed to delete user {username} with {email=}: {exc}")
+        logger.error(f"Failed to delete user with {email=}: {exc}")
         raise UserDeleteError("Failed to delete user.") from exc
     finally:
         db.session.close()
