@@ -26,23 +26,19 @@ def test_delete_inactive_users(edx_db, monkeypatch):
     # 2 users that did not log in for 3 years
     EdxAuthUserFactory.create(
         last_login=Faker().date_time_between(end_date="-3y"),
-        username="JohnDoe1",
         email="johndoe1@example.com",
     )
     EdxAuthUserFactory.create(
         last_login=Faker().date_time_between(end_date="-3y"),
-        username="JohnDoe2",
         email="johndoe2@example.com",
     )
     # 2 users that logged in recently
     EdxAuthUserFactory.create(
         last_login=Faker().date_time_between(start_date="-3y"),
-        username="JaneDah1",
         email="janedah1@example.com",
     )
     EdxAuthUserFactory.create(
         last_login=Faker().date_time_between(start_date="-3y"),
-        username="JaneDah2",
         email="janedah2@example.com",
     )
 
@@ -57,8 +53,8 @@ def test_delete_inactive_users(edx_db, monkeypatch):
 
     mock_group.assert_called_once_with(
         [
-            mock_deletion_task.s(email="johndoe1@example.com", username="JohnDoe1"),
-            mock_deletion_task.s(email="johndoe2@example.com", username="JohnDoe2"),
+            mock_deletion_task.s(email="johndoe1@example.com"),
+            mock_deletion_task.s(email="johndoe2@example.com"),
         ]
     )
 
@@ -68,12 +64,10 @@ def test_delete_inactive_users_with_batch_size(edx_db, monkeypatch):
     # 2 users that did not log in for 3 years
     EdxAuthUserFactory.create(
         last_login=Faker().date_time_between(end_date="-3y"),
-        username="JohnDoe1",
         email="johndoe1@example.com",
     )
     EdxAuthUserFactory.create(
         last_login=Faker().date_time_between(end_date="-3y"),
-        username="JohnDoe2",
         email="johndoe2@example.com",
     )
 
@@ -93,17 +87,13 @@ def test_delete_inactive_users_with_batch_size(edx_db, monkeypatch):
         [
             call(
                 [
-                    mock_deletion_task.s(
-                        email="johndoe1@example.com", username="JohnDoe1"
-                    ),
+                    mock_deletion_task.s(email="johndoe1@example.com"),
                 ]
             ),
             call().delay(),
             call(
                 [
-                    mock_deletion_task.s(
-                        email="johndoe2@example.com", username="JohnDoe2"
-                    ),
+                    mock_deletion_task.s(email="johndoe2@example.com"),
                 ]
             ),
             call().delay(),
@@ -120,10 +110,9 @@ def test_deletion_task(monkeypatch):
         "mork.celery.deletion_tasks.delete_email_status", mock_delete_email_status
     )
     email = "johndoe@example.com"
-    username = "JohnDoe"
-    deletion_task(email, username)
+    deletion_task(email)
 
-    mock_delete_user.assert_called_once_with(email, username)
+    mock_delete_user.assert_called_once_with(email)
     mock_delete_email_status.assert_called_once_with(email)
 
 
@@ -136,38 +125,34 @@ def test_deletion_task_delete_failure(monkeypatch):
     monkeypatch.setattr("mork.celery.deletion_tasks.delete_user", mock_delete)
 
     with pytest.raises(UserDeleteError, match="An error occurred"):
-        deletion_task("johndoe@example.com", "JohnDoe")
+        deletion_task("johndoe@example.com")
 
 
 def test_delete_user(edx_db, monkeypatch):
     """Test the `delete_user` function."""
     EdxAuthUserFactory._meta.sqlalchemy_session = edx_db.session
-    EdxAuthUserFactory.create(username="JohnDoe1", email="johndoe1@example.com")
-    EdxAuthUserFactory.create(username="JohnDoe2", email="johndoe2@example.com")
+    EdxAuthUserFactory.create(email="johndoe1@example.com")
+    EdxAuthUserFactory.create(email="johndoe2@example.com")
 
     monkeypatch.setattr("mork.celery.deletion_tasks.OpenEdxDB", lambda *args: edx_db)
 
     assert crud.get_user(
         edx_db.session,
-        username="JohnDoe1",
         email="johndoe1@example.com",
     )
     assert crud.get_user(
         edx_db.session,
-        username="JohnDoe2",
         email="johndoe2@example.com",
     )
 
-    delete_user(email="johndoe1@example.com", username="JohnDoe1")
+    delete_user(email="johndoe1@example.com")
 
     assert not crud.get_user(
         edx_db.session,
-        username="JohnDoe1",
         email="johndoe1@example.com",
     )
     assert crud.get_user(
         edx_db.session,
-        username="JohnDoe2",
         email="johndoe2@example.com",
     )
 
@@ -175,7 +160,7 @@ def test_delete_user(edx_db, monkeypatch):
 def test_delete_user_with_failure(edx_db, monkeypatch):
     """Test the `delete_user` function with a commit failure."""
     EdxAuthUserFactory._meta.sqlalchemy_session = edx_db.session
-    EdxAuthUserFactory.create(username="JohnDoe1", email="johndoe1@example.com")
+    EdxAuthUserFactory.create(email="johndoe1@example.com")
 
     def mock_session_commit():
         raise SQLAlchemyError("An error occurred")
@@ -184,7 +169,7 @@ def test_delete_user_with_failure(edx_db, monkeypatch):
     monkeypatch.setattr("mork.celery.deletion_tasks.OpenEdxDB", lambda *args: edx_db)
 
     with pytest.raises(UserDeleteError, match="Failed to delete user."):
-        delete_user(email="johndoe1@example.com", username="JohnDoe1")
+        delete_user(email="johndoe1@example.com")
 
 
 def test_delete_email_status(db_session, monkeypatch):

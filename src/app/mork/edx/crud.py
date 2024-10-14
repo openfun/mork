@@ -78,17 +78,14 @@ def get_inactive_users(
     return session.scalars(query).unique().all()
 
 
-def get_user(session: Session, email: str, username: str):
-    """Get a user entry based on the provided email and username.
+def get_user(session: Session, email: str):
+    """Get a user entry based on the provided email.
 
     Parameters:
     session (Session): SQLAlchemy session object.
     email (str): The email of the user to get.
-    username (str): The username of the user to get.
     """
-    query = select(AuthUser).where(
-        AuthUser.email == email, AuthUser.username == username
-    )
+    query = select(AuthUser).where(AuthUser.email == email)
     return session.execute(query).scalar()
 
 
@@ -115,21 +112,16 @@ def _has_protected_children(session: Session, user_id) -> bool:
     return bool(result)
 
 
-def delete_user(session: Session, email: str, username: str) -> None:
+def delete_user(session: Session, email: str) -> None:
     """Delete a user entry based on the provided email and username.
 
     Parameters:
     session (Session): SQLAlchemy session object.
     email (str): The email of the user to delete.
-    username (str): The username of the user to delete.
     """
-    user_to_delete = (
-        session.query(AuthUser)
-        .filter(AuthUser.email == email, AuthUser.username == username)
-        .first()
-    )
+    user_to_delete = session.query(AuthUser).filter(AuthUser.email == email).first()
     if not user_to_delete:
-        logger.error(f"No user found with {username=} {email=} for deletion")
+        logger.error(f"No user found with {email=} for deletion")
         raise UserDeleteError("User to delete does not exist")
 
     if _has_protected_children(session, user_to_delete.id):
@@ -147,4 +139,4 @@ def delete_user(session: Session, email: str, username: str) -> None:
     # Delete user from auth_user table and all its children
     session.delete(user_to_delete)
 
-    logger.info(f"Deleting user {username=} {email=}")
+    logger.info(f"Deleting user {email=}")

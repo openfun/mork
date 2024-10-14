@@ -129,38 +129,31 @@ def test_edx_crud_get_inactive_users_slice_empty(edx_db):
 def test_edx_crud_get_user_missing(edx_db):
     """Test the `get_user` method with missing user in the database."""
 
-    user = crud.get_user(
-        session=edx_db.session, email="john_doe@example.com", username="john_doe"
-    )
+    user = crud.get_user(session=edx_db.session, email="john_doe@example.com")
     assert user is None
 
 
 def test_edx_crud_get_user(edx_db):
     """Test the `get_user` method."""
     email = "john_doe@example.com"
-    username = "john_doe"
 
-    EdxAuthUserFactory.create_batch(1, email=email, username=username)
+    EdxAuthUserFactory.create_batch(1, email=email)
 
-    user = crud.get_user(session=edx_db.session, email=email, username=username)
+    user = crud.get_user(session=edx_db.session, email=email)
     assert user.email == email
-    assert user.username == username
 
 
 def test_edx_crud_delete_user_missing(edx_db):
     """Test the `delete_user` method with missing user in the database."""
 
     with pytest.raises(UserDeleteError, match="User to delete does not exist"):
-        crud.delete_user(
-            edx_db.session, email="john_doe@example.com", username="john_doe"
-        )
+        crud.delete_user(edx_db.session, email="john_doe@example.com")
 
 
 def test_edx_crud_delete_user(edx_db):
     """Test the `delete_user` method."""
     email = "john_doe@example.com"
-    username = "john_doe"
-    EdxAuthUserFactory.create_batch(1, email=email, username=username)
+    EdxAuthUserFactory.create_batch(1, email=email)
     EdxStudentCourseenrollmentallowedFactory.create_batch(3, email=email)
 
     # Get all related tables that have foreign key constraints on the parent table
@@ -203,7 +196,7 @@ def test_edx_crud_delete_user(edx_db):
         table = Base.metadata.tables[table_name]
         assert edx_db.session.query(table).count() > 0
 
-    crud.delete_user(edx_db.session, email="john_doe@example.com", username="john_doe")
+    crud.delete_user(edx_db.session, email="john_doe@example.com")
 
     # Ensure the parent table is empty
     assert edx_db.session.query(AuthUser).count() == 0
@@ -219,7 +212,6 @@ def test_edx_crud_delete_user_protected_table(edx_db):
     EdxAuthUserFactory.create_batch(
         1,
         email="john_doe@example.com",
-        username="john_doe",
         with_protected_tables=True,
     )
 
@@ -243,9 +235,7 @@ def test_edx_crud_delete_user_protected_table(edx_db):
         UserProtectedDeleteError,
         match="User is linked to a protected table and cannot be deleted",
     ):
-        crud.delete_user(
-            edx_db.session, email="john_doe@example.com", username="john_doe"
-        )
+        crud.delete_user(edx_db.session, email="john_doe@example.com")
 
     # Ensure the parent table is empty
     assert edx_db.session.query(AuthUser).count() > 0
