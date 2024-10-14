@@ -26,7 +26,7 @@ keywords = ["FastAPI", "Celery", "emails", "Open edX"]
 dependencies = [
     "alembic==1.13.3",
     "celery[redis]==5.4.0",
-    "fastapi[standard]==0.115.0",
+    "fastapi[standard]==0.115.2",
     "Jinja2==3.1.4",
     "jinja2-simple-tags==0.6.1",
     "psycopg2-binary==2.9.9",
@@ -35,7 +35,7 @@ dependencies = [
     "python-datauri==2.2.0",
     "pymysql==1.1.1",
     "redis==5.1.1",
-    "sentry-sdk==2.15.0",
+    "sentry-sdk==2.16.0",
     "SQLAlchemy==2.0.35", 
 ]
 dynamic = ["version"]
@@ -51,7 +51,7 @@ ci = [
     "twine==5.1.1",
 ]
 dev = [
-    "black==24.8.0",
+    "black==24.10.0",
     "build==1.2.2.post1",
     "factory_boy==3.3.1",
     "flower==2.0.1",
