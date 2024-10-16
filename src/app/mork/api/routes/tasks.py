@@ -11,7 +11,7 @@ from mork.api.models import (
     TASK_TYPE_TO_FUNC,
     DeleteInactiveUsers,
     DeleteUser,
-    EmailInactiveeUsers,
+    EmailInactiveUsers,
     TaskResponse,
     TaskStatus,
     TaskType,
@@ -25,21 +25,21 @@ router = APIRouter(prefix="/tasks", dependencies=[Depends(authenticate_api_key)]
 @router.post("/", status_code=status.HTTP_202_ACCEPTED)
 async def create_task(
     response: Response,
-    task_in: Union[DeleteInactiveUsers, EmailInactiveeUsers, DeleteUser] = Body(
+    task: Union[DeleteInactiveUsers, EmailInactiveUsers, DeleteUser] = Body(
         discriminator="type"
     ),
 ) -> TaskResponse:
     """Create a new task."""
-    celery_task = TASK_TYPE_TO_FUNC[task_in.type]
-    celery_params = task_in.model_dump(exclude="type")
+    celery_task = TASK_TYPE_TO_FUNC[task.type]
+    celery_params = task.model_dump(exclude="type")
 
     result = celery_task.delay(**celery_params)
 
-    task = TaskResponse(id=result.task_id, status=TaskStatus.PENDING)
+    task_response = TaskResponse(id=result.task_id, status=TaskStatus.PENDING)
     response.headers["location"] = router.url_path_for(
-        "get_task_status", **{"task_id": task.id}
+        "get_task_status", **{"task_id": task_response.id}
     )
-    return task
+    return task_response
 
 
 @router.options("/")

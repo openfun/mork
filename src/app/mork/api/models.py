@@ -43,7 +43,7 @@ class DeleteInactiveUsers(TaskCreateBase):
     type: Literal[TaskType.DELETE_INACTIVE_USERS]
 
 
-class EmailInactiveeUsers(TaskCreateBase):
+class EmailInactiveUsers(TaskCreateBase):
     """Model for creating a task to email all inactive users."""
 
     type: Literal[TaskType.EMAIL_INACTIVE_USERS]
