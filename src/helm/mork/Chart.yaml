@@ -1,0 +1,7 @@
+apiVersion: v2
+
+name: mork
+description: Mork, to warn and manage FUN inactive users 
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

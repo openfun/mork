@@ -1,0 +1,36 @@
+{{- range .Values.api.jobs }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "mork.fullname" $ }}-{{ .name }}
+  namespace: {{ $.Release.Namespace | quote }}
+  labels: {{- include "mork.labels" $ | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-upgrade,post-install
+    "helm.sh/hook-weight": "0"
+spec:
+  template:
+    metadata:
+      labels: {{- include "mork.selectorLabels" $ | nindent 8 }}
+    spec:
+      {{- include "mork.imagePullSecrets" $ | nindent 6 }}
+      containers:
+        - name: "{{ $.Chart.Name }}-{{ .name }}"
+          image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          env:
+            {{- include "mork.envs" $ | nindent 12 }}
+          command: {{ .command | toJson }}
+          {{- if $.Values.resources }}
+          resources: {{ toYaml $.Values.resources | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: logging-config
+              mountPath: "/etc/mork"
+      volumes:
+        - name: logging-config
+          configMap:
+            name: {{ include "mork.fullname" $ }}-logging-config
+      restartPolicy: Never
+{{- end }}

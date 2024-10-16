@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mork.fullname" . }}-celery
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    app.kubernetes.io/component: celery
+    {{- include "mork.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "mork.selectorLabels" . | nindent 6 }}
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "mork.labels" . | nindent 8 }}
+    spec:
+      {{- include "mork.imagePullSecrets" . | nindent 6 }}
+      containers:
+        - name: "{{ .Chart.Name }}-celery"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          livenessProbe:
+            exec:
+              command:
+              - "bash"
+              - "-c"
+              - "celery -A mork.celery.celery_app inspect ping -d mork@$HOSTNAME"
+            failureThreshold: 3
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+              - "bash"                                                                           
+              - "-c"                                                                                  
+              - "celery -A mork.celery.celery_app inspect ping -d mork@$HOSTNAME"
+            failureThreshold: 3
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          env:
+            {{- include "mork.envs" . | nindent 12 }}
+          {{- if .Values.celery.extraEnvVarsCM }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.celery.extraEnvVarsCM }}
+          {{- end }}
+          {{ with .Values.celery.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
