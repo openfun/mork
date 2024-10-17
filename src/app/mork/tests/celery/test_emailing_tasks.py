@@ -5,11 +5,11 @@ from unittest.mock import Mock, call
 import pytest
 from faker import Faker
 
-from mork.celery.emailing_tasks import (
+from mork.celery.tasks.emailing import (
     check_email_already_sent,
     mark_email_status,
-    send_email_task,
     warn_inactive_users,
+    warn_user,
 )
 from mork.edx.factories.auth import EdxAuthUserFactory
 from mork.exceptions import EmailAlreadySent, EmailSendError
@@ -41,21 +41,19 @@ def test_warn_inactive_users(edx_db, monkeypatch):
         email="janedah2@example.com",
     )
 
-    monkeypatch.setattr("mork.celery.emailing_tasks.OpenEdxDB", lambda *args: edx_db)
+    monkeypatch.setattr("mork.celery.tasks.emailing.OpenEdxDB", lambda *args: edx_db)
 
     mock_group = Mock()
-    monkeypatch.setattr("mork.celery.emailing_tasks.group", mock_group)
-    mock_send_email_task = Mock()
-    monkeypatch.setattr(
-        "mork.celery.emailing_tasks.send_email_task", mock_send_email_task
-    )
+    monkeypatch.setattr("mork.celery.tasks.emailing.group", mock_group)
+    mock_warn_user = Mock()
+    monkeypatch.setattr("mork.celery.tasks.emailing.warn_user", mock_warn_user)
 
     warn_inactive_users()
 
     mock_group.assert_called_once_with(
         [
-            mock_send_email_task.s(email="johndoe1@example.com", username="JohnDoe1"),
-            mock_send_email_task.s(email="johndoe2@example.com", username="JohnDoe2"),
+            mock_warn_user.s(email="johndoe1@example.com", username="JohnDoe1"),
+            mock_warn_user.s(email="johndoe2@example.com", username="JohnDoe2"),
         ]
     )
 
@@ -74,17 +72,15 @@ def test_warn_inactive_users_with_batch_size(edx_db, monkeypatch):
         email="johndoe2@example.com",
     )
 
-    monkeypatch.setattr("mork.celery.emailing_tasks.OpenEdxDB", lambda *args: edx_db)
+    monkeypatch.setattr("mork.celery.tasks.emailing.OpenEdxDB", lambda *args: edx_db)
 
     mock_group = Mock()
-    monkeypatch.setattr("mork.celery.emailing_tasks.group", mock_group)
-    mock_send_email_task = Mock()
-    monkeypatch.setattr(
-        "mork.celery.emailing_tasks.send_email_task", mock_send_email_task
-    )
+    monkeypatch.setattr("mork.celery.tasks.emailing.group", mock_group)
+    mock_warn_user = Mock()
+    monkeypatch.setattr("mork.celery.tasks.emailing.warn_user", mock_warn_user)
 
     # Set batch size to 1
-    monkeypatch.setattr("mork.celery.emailing_tasks.settings.EDX_QUERY_BATCH_SIZE", 1)
+    monkeypatch.setattr("mork.celery.tasks.emailing.settings.EDX_QUERY_BATCH_SIZE", 1)
 
     warn_inactive_users()
 
@@ -92,17 +88,13 @@ def test_warn_inactive_users_with_batch_size(edx_db, monkeypatch):
         [
             call(
                 [
-                    mock_send_email_task.s(
-                        email="johndoe1@example.com", username="JohnDoe1"
-                    ),
+                    mock_warn_user.s(email="johndoe1@example.com", username="JohnDoe1"),
                 ]
             ),
             call().delay(),
             call(
                 [
-                    mock_send_email_task.s(
-                        email="johndoe2@example.com", username="JohnDoe2"
-                    ),
+                    mock_warn_user.s(email="johndoe2@example.com", username="JohnDoe2"),
                 ]
             ),
             call().delay(),
@@ -110,42 +102,42 @@ def test_warn_inactive_users_with_batch_size(edx_db, monkeypatch):
     )
 
 
-def test_send_email_task(monkeypatch):
-    """Test the `send_email_task` function."""
+def test_warn_user(monkeypatch):
+    """Test the `warn_user` function."""
     monkeypatch.setattr(
-        "mork.celery.emailing_tasks.check_email_already_sent", lambda x: False
+        "mork.celery.tasks.emailing.check_email_already_sent", lambda x: False
     )
-    monkeypatch.setattr("mork.celery.emailing_tasks.send_email", lambda *args: None)
-    monkeypatch.setattr("mork.celery.emailing_tasks.mark_email_status", lambda x: None)
+    monkeypatch.setattr("mork.celery.tasks.emailing.send_email", lambda *args: None)
+    monkeypatch.setattr("mork.celery.tasks.emailing.mark_email_status", lambda x: None)
 
-    send_email_task("johndoe@example.com", "JohnDoe")
+    warn_user("johndoe@example.com", "JohnDoe")
 
 
-def test_send_email_task_already_sent(monkeypatch):
-    """Test the `send_email_task` function when email has already been sent."""
+def test_warn_user_already_sent(monkeypatch):
+    """Test the `warn_user` function when email has already been sent."""
     monkeypatch.setattr(
-        "mork.celery.emailing_tasks.check_email_already_sent", lambda x: True
+        "mork.celery.tasks.emailing.check_email_already_sent", lambda x: True
     )
 
     with pytest.raises(
         EmailAlreadySent, match="An email has already been sent to this user"
     ):
-        send_email_task("johndoe@example.com", "JohnDoe")
+        warn_user("johndoe@example.com", "JohnDoe")
 
 
-def test_send_email_task_sending_failure(monkeypatch):
-    """Test the `send_email_task` function with email sending failure."""
+def test_warn_user_sending_failure(monkeypatch):
+    """Test the `warn_user` function with email sending failure."""
     monkeypatch.setattr(
-        "mork.celery.emailing_tasks.check_email_already_sent", lambda x: False
+        "mork.celery.tasks.emailing.check_email_already_sent", lambda x: False
     )
 
     def mock_send(*args):
         raise EmailSendError("An error occurred")
 
-    monkeypatch.setattr("mork.celery.emailing_tasks.send_email", mock_send)
+    monkeypatch.setattr("mork.celery.tasks.emailing.send_email", mock_send)
 
     with pytest.raises(EmailSendError, match="An error occurred"):
-        send_email_task("johndoe@example.com", "JohnDoe")
+        warn_user("johndoe@example.com", "JohnDoe")
 
 
 def test_check_email_already_sent(monkeypatch, db_session):
@@ -156,7 +148,7 @@ def test_check_email_already_sent(monkeypatch, db_session):
         session = db_session
 
     EmailStatusFactory._meta.sqlalchemy_session = db_session
-    monkeypatch.setattr("mork.celery.emailing_tasks.MorkDB", MockMorkDB)
+    monkeypatch.setattr("mork.celery.tasks.emailing.MorkDB", MockMorkDB)
     EmailStatusFactory.create_batch(3)
 
     assert not check_email_already_sent(email_address)
@@ -172,7 +164,7 @@ def test_mark_email_status(monkeypatch, db_session):
         session = db_session
 
     EmailStatusFactory._meta.sqlalchemy_session = db_session
-    monkeypatch.setattr("mork.celery.emailing_tasks.MorkDB", MockMorkDB)
+    monkeypatch.setattr("mork.celery.tasks.emailing.MorkDB", MockMorkDB)
 
     # Write new email status entry
     new_email = "test_email@example.com"
