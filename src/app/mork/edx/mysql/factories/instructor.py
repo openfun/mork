@@ -2,7 +2,7 @@
 
 import factory
 
-from mork.edx.models.instructor import InstructorTaskInstructortask
+from mork.edx.mysql.models.instructor import InstructorTaskInstructortask
 
 from .base import BaseSQLAlchemyModelFactory, faker
 

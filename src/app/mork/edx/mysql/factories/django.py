@@ -2,7 +2,7 @@
 
 import factory
 
-from mork.edx.models.django import DjangoCommentClientRoleUsers
+from mork.edx.mysql.models.django import DjangoCommentClientRoleUsers
 
 from .base import BaseSQLAlchemyModelFactory
 

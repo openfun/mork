@@ -2,7 +2,7 @@
 
 import factory
 
-from mork.edx.models.notify import NotifySetting
+from mork.edx.mysql.models.notify import NotifySetting
 
 from .base import BaseSQLAlchemyModelFactory
 

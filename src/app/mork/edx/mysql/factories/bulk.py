@@ -2,7 +2,7 @@
 
 import factory
 
-from mork.edx.models.bulk import BulkEmailCourseemail, BulkEmailOptout
+from mork.edx.mysql.models.bulk import BulkEmailCourseemail, BulkEmailOptout
 
 from .base import BaseSQLAlchemyModelFactory, faker
 

@@ -9,8 +9,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from mork.celery.celery_app import app
 from mork.conf import settings
 from mork.database import MorkDB
-from mork.edx import crud
-from mork.edx.database import OpenEdxDB
+from mork.edx.mysql import crud
+from mork.edx.mysql.database import OpenEdxMySQLDB
 from mork.exceptions import UserDeleteError
 from mork.models import EmailStatus
 
@@ -20,16 +20,16 @@ logger = getLogger(__name__)
 @app.task
 def delete_inactive_users(dry_run: bool = True):
     """Celery task to delete inactive users accounts."""
-    db = OpenEdxDB()
+    db = OpenEdxMySQLDB()
     threshold_date = datetime.now() - settings.DELETION_PERIOD
 
     total = crud.get_inactive_users_count(db.session, threshold_date)
-    for batch_offset in range(0, total, settings.EDX_QUERY_BATCH_SIZE):
+    for batch_offset in range(0, total, settings.EDX_MYSQL_QUERY_BATCH_SIZE):
         inactive_users = crud.get_inactive_users(
             db.session,
             threshold_date,
             offset=batch_offset,
-            limit=settings.EDX_QUERY_BATCH_SIZE,
+            limit=settings.EDX_MYSQL_QUERY_BATCH_SIZE,
         )
         delete_group = group(
             [
@@ -63,7 +63,7 @@ def delete_user(self, email: str, dry_run: bool = True):
 
 def delete_user_from_db(email):
     """Delete user from edX database."""
-    db = OpenEdxDB()
+    db = OpenEdxMySQLDB()
 
     # Delete user from edX database
     crud.delete_user(db.session, email=email)

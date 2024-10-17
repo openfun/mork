@@ -2,7 +2,7 @@
 
 import factory
 
-from mork.edx.models.payment import PaymentUseracceptance
+from mork.edx.mysql.models.payment import PaymentUseracceptance
 
 from .base import BaseSQLAlchemyModelFactory
 

@@ -9,8 +9,8 @@ COMPOSE_RUN_API  = $(COMPOSE_RUN) api
 COMPOSE_RUN_MAIL = $(COMPOSE_RUN) mail-generator
 
 # -- MySQL
-EDX_DB_HOST = mysql
-EDX_DB_PORT = 3306
+EDX_MYSQL_DB_HOST = mysql
+EDX_MYSQL_DB_PORT = 3306
 
 # -- Postgresql
 DB_HOST = postgresql
@@ -118,7 +118,7 @@ stop: ## stop all servers
 
 seed-edx-database:  ## seed the edx database with test data
 	@echo "Waiting for mysql to be up and running…"
-	@$(COMPOSE_RUN) dockerize -wait tcp://$(EDX_DB_HOST):$(EDX_DB_PORT) -timeout 60s
+	@$(COMPOSE_RUN) dockerize -wait tcp://$(EDX_MYSQL_DB_HOST):$(EDX_MYSQL_DB_PORT) -timeout 60s
 	@echo "Seeding the edx database…"
 	@$(COMPOSE) exec -T celery python /opt/src/seed_edx_database.py
 .PHONY: seed-edx-database

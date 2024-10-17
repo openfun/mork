@@ -2,7 +2,7 @@
 
 import factory
 
-from mork.edx.models.contentstore import ContentstoreVideouploadconfig
+from mork.edx.mysql.models.contentstore import ContentstoreVideouploadconfig
 
 from .base import BaseSQLAlchemyModelFactory
 

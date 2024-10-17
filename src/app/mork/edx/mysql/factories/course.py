@@ -2,7 +2,7 @@
 
 import factory
 
-from mork.edx.models.course import (
+from mork.edx.mysql.models.course import (
     CourseActionStateCoursererunstate,
     CourseCreatorsCoursecreator,
     CourseGroupsCohortmembership,
