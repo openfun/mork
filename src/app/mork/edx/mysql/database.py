@@ -1,4 +1,4 @@
-"""Mork edx database connection."""
+"""Mork edx MySQL database connection."""
 
 import logging
 
@@ -10,18 +10,20 @@ from mork.conf import settings
 logger = logging.getLogger(__name__)
 
 
-class OpenEdxDB:
-    """Class to connect to the Open edX database."""
+class OpenEdxMySQLDB:
+    """Class to connect to the Open edX MySQL database."""
 
     session = None
 
     def __init__(self, engine=None, session=None):
-        """Initialize SqlAlchemy engine and session."""
+        """Instantiate SQLAlchemy engine and session."""
         if engine is not None:
             self.engine = engine
         else:
             self.engine = create_engine(
-                settings.EDX_DB_URL, echo=settings.EDX_DB_DEBUG, pool_pre_ping=True
+                settings.EDX_MYSQL_DB_URL,
+                echo=settings.EDX_MYSQL_DB_DEBUG,
+                pool_pre_ping=True,
             )
         if session is not None:
             self.session = session

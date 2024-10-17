@@ -2,7 +2,7 @@
 
 import factory
 
-from mork.edx.models.student import (
+from mork.edx.mysql.models.student import (
     StudentAnonymoususerid,
     StudentCourseaccessrole,
     StudentCourseenrollment,
