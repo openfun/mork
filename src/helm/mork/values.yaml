@@ -112,7 +112,7 @@ db:
 
 # edx database configuration
 edx:
-  db:
+  mysql:
     engine: "mysql+pymysql"
     host: "mysql"
     name: "edxapp"

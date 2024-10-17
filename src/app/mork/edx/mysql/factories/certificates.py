@@ -2,7 +2,7 @@
 
 import factory
 
-from mork.edx.models.certificates import (
+from mork.edx.mysql.models.certificates import (
     CertificatesCertificatehtmlviewconfiguration,
     CertificatesGeneratedcertificate,
 )

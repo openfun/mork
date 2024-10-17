@@ -2,7 +2,7 @@
 
 import factory
 
-from mork.edx.models.user import UserApiUserpreference
+from mork.edx.mysql.models.user import UserApiUserpreference
 
 from .base import BaseSQLAlchemyModelFactory
 

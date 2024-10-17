@@ -2,7 +2,7 @@
 
 import factory
 
-from mork.edx.models.proctoru import ProctoruProctoruexam, ProctoruProctoruuser
+from mork.edx.mysql.models.proctoru import ProctoruProctoruexam, ProctoruProctoruuser
 
 from .base import BaseSQLAlchemyModelFactory
 

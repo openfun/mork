@@ -2,7 +2,7 @@
 
 import factory
 
-from mork.edx.models.verify import (
+from mork.edx.mysql.models.verify import (
     VerifyStudentHistoricalverificationdeadline,
     VerifyStudentSoftwaresecurephotoverification,
 )

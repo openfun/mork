@@ -5,14 +5,14 @@ import asyncio
 from sqlalchemy import create_engine
 
 from mork.conf import settings
-from mork.edx.factories.auth import EdxAuthUserFactory
-from mork.edx.factories.base import BaseSQLAlchemyModelFactory, Session
-from mork.edx.models.base import Base
+from mork.edx.mysql.factories.auth import EdxAuthUserFactory
+from mork.edx.mysql.factories.base import BaseSQLAlchemyModelFactory, Session
+from mork.edx.mysql.models.base import Base
 
 
-async def seed_edx_database():
+async def seed_edx_mysql_database():
     """Seed the MySQL edx database with mocked data."""
-    engine = create_engine(settings.EDX_DB_URL)
+    engine = create_engine(settings.EDX_MYSQL_DB_URL)
     Session.configure(bind=engine)
     BaseSQLAlchemyModelFactory._meta.sqlalchemy_session = Session  # noqa: SLF001
     Base.metadata.create_all(engine)
@@ -22,4 +22,4 @@ async def seed_edx_database():
 
 
 if __name__ == "__main__":
-    asyncio.run(seed_edx_database())
+    asyncio.run(seed_edx_mysql_database())

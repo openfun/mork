@@ -8,19 +8,19 @@ from sqlalchemy import delete, distinct, select, union_all
 from sqlalchemy.orm import Session, load_only
 from sqlalchemy.sql.functions import count
 
-from mork.edx.models.auth import AuthtokenToken, AuthUser
-from mork.edx.models.certificates import (
+from mork.edx.mysql.models.auth import AuthtokenToken, AuthUser
+from mork.edx.mysql.models.certificates import (
     CertificatesCertificatehtmlviewconfiguration,
 )
-from mork.edx.models.contentstore import ContentstoreVideouploadconfig
-from mork.edx.models.course import (
+from mork.edx.mysql.models.contentstore import ContentstoreVideouploadconfig
+from mork.edx.mysql.models.course import (
     CourseActionStateCoursererunstate,
     CourseCreatorsCoursecreator,
 )
-from mork.edx.models.dark import DarkLangDarklangconfig
-from mork.edx.models.student import StudentCourseenrollmentallowed
-from mork.edx.models.util import UtilRatelimitconfiguration
-from mork.edx.models.verify import VerifyStudentHistoricalverificationdeadline
+from mork.edx.mysql.models.dark import DarkLangDarklangconfig
+from mork.edx.mysql.models.student import StudentCourseenrollmentallowed
+from mork.edx.mysql.models.util import UtilRatelimitconfiguration
+from mork.edx.mysql.models.verify import VerifyStudentHistoricalverificationdeadline
 from mork.exceptions import UserDeleteError, UserProtectedDeleteError
 
 logger = getLogger(__name__)

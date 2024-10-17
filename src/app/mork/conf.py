@@ -54,15 +54,15 @@ class Settings(BaseSettings):
     DB_DEBUG: bool = False
     TEST_DB_NAME: str = "test-mork-db"
 
-    # EDX database
-    EDX_DB_ENGINE: str = "mysql+pymysql"
-    EDX_DB_HOST: str = "mysql"
-    EDX_DB_NAME: str = "edxapp"
-    EDX_DB_USER: str = "edxapp"
-    EDX_DB_PASSWORD: str = "password"
-    EDX_DB_PORT: int = 3306
-    EDX_DB_DEBUG: bool = False
-    EDX_QUERY_BATCH_SIZE: int = 1000
+    # EDX MySQL database
+    EDX_MYSQL_DB_ENGINE: str = "mysql+pymysql"
+    EDX_MYSQL_DB_HOST: str = "mysql"
+    EDX_MYSQL_DB_NAME: str = "edxapp"
+    EDX_MYSQL_DB_USER: str = "edxapp"
+    EDX_MYSQL_DB_PASSWORD: str = "password"
+    EDX_MYSQL_DB_PORT: int = 3306
+    EDX_MYSQL_DB_DEBUG: bool = False
+    EDX_MYSQL_QUERY_BATCH_SIZE: int = 1000
 
     # Emails
     EMAIL_HOST: str = "mailcatcher"
@@ -115,7 +115,14 @@ class Settings(BaseSettings):
         )
 
     @property
-    def EDX_DB_URL(self) -> str:
+    def EDX_MYSQL_DB_URL(self) -> str:
+        """Get the edx MySQL database URL as required by SQLAlchemy."""
+        return (
+            f"{self.EDX_MYSQL_DB_ENGINE}://"
+            f"{self.EDX_MYSQL_DB_USER}:{self.EDX_MYSQL_DB_PASSWORD}@"
+            f"{self.EDX_MYSQL_DB_HOST}/{self.EDX_MYSQL_DB_NAME}"
+        )
+
         """Get the edx database URL as required by SQLAlchemy."""
         return (
             f"{self.EDX_DB_ENGINE}://"

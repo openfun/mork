@@ -14,14 +14,14 @@ from mork.celery.tasks.deletion import (
     delete_user,
     delete_user_from_db,
 )
-from mork.edx import crud
-from mork.edx.factories.auth import EdxAuthUserFactory
+from mork.edx.mysql import crud
+from mork.edx.mysql.factories.auth import EdxAuthUserFactory
 from mork.exceptions import UserDeleteError
 from mork.factories import EmailStatusFactory
 from mork.models import EmailStatus
 
 
-def test_delete_inactive_users(edx_db, monkeypatch):
+def test_delete_inactive_users(edx_mysql_db, monkeypatch):
     """Test the `delete_inactive_users` function."""
     # 2 users that did not log in for 3 years
     EdxAuthUserFactory.create(
@@ -42,7 +42,9 @@ def test_delete_inactive_users(edx_db, monkeypatch):
         email="janedah2@example.com",
     )
 
-    monkeypatch.setattr("mork.celery.tasks.deletion.OpenEdxDB", lambda *args: edx_db)
+    monkeypatch.setattr(
+        "mork.celery.tasks.deletion.OpenEdxMySQLDB", lambda *args: edx_mysql_db
+    )
 
     mock_group = Mock()
     monkeypatch.setattr("mork.celery.tasks.deletion.group", mock_group)
@@ -59,7 +61,7 @@ def test_delete_inactive_users(edx_db, monkeypatch):
     )
 
 
-def test_delete_inactive_users_with_batch_size(edx_db, monkeypatch):
+def test_delete_inactive_users_with_batch_size(edx_mysql_db, monkeypatch):
     """Test the `warn_inactive_users` function."""
     # 2 users that did not log in for 3 years
     EdxAuthUserFactory.create(
@@ -71,7 +73,9 @@ def test_delete_inactive_users_with_batch_size(edx_db, monkeypatch):
         email="johndoe2@example.com",
     )
 
-    monkeypatch.setattr("mork.celery.tasks.deletion.OpenEdxDB", lambda *args: edx_db)
+    monkeypatch.setattr(
+        "mork.celery.tasks.deletion.OpenEdxMySQLDB", lambda *args: edx_mysql_db
+    )
 
     mock_group = Mock()
     monkeypatch.setattr("mork.celery.tasks.deletion.group", mock_group)
@@ -79,7 +83,9 @@ def test_delete_inactive_users_with_batch_size(edx_db, monkeypatch):
     monkeypatch.setattr("mork.celery.tasks.deletion.delete_user", mock_delete_user)
 
     # Set batch size to 1
-    monkeypatch.setattr("mork.celery.tasks.deletion.settings.EDX_QUERY_BATCH_SIZE", 1)
+    monkeypatch.setattr(
+        "mork.celery.tasks.deletion.settings.EDX_MYSQL_QUERY_BATCH_SIZE", 1
+    )
 
     delete_inactive_users(dry_run=False)
 
@@ -101,7 +107,7 @@ def test_delete_inactive_users_with_batch_size(edx_db, monkeypatch):
     )
 
 
-def test_delete_inactive_users_with_dry_run(edx_db, monkeypatch):
+def test_delete_inactive_users_with_dry_run(edx_mysql_db, monkeypatch):
     """Test the `delete_inactive_users` function with dry run activated (by default)."""
     # 2 users that did not log in for 3 years
     EdxAuthUserFactory.create(
@@ -113,7 +119,9 @@ def test_delete_inactive_users_with_dry_run(edx_db, monkeypatch):
         email="johndoe2@example.com",
     )
 
-    monkeypatch.setattr("mork.celery.tasks.deletion.OpenEdxDB", lambda *args: edx_db)
+    monkeypatch.setattr(
+        "mork.celery.tasks.deletion.OpenEdxMySQLDB", lambda *args: edx_mysql_db
+    )
 
     mock_group = Mock()
     monkeypatch.setattr("mork.celery.tasks.deletion.group", mock_group)
@@ -178,45 +186,49 @@ def test_delete_user_failure(monkeypatch):
         delete_user("johndoe@example.com", dry_run=False)
 
 
-def test_delete_user_from_db(edx_db, monkeypatch):
+def test_delete_user_from_db(edx_mysql_db, monkeypatch):
     """Test the `delete_user_from_db` function."""
-    EdxAuthUserFactory._meta.sqlalchemy_session = edx_db.session
+    EdxAuthUserFactory._meta.sqlalchemy_session = edx_mysql_db.session
     EdxAuthUserFactory.create(email="johndoe1@example.com")
     EdxAuthUserFactory.create(email="johndoe2@example.com")
 
-    monkeypatch.setattr("mork.celery.tasks.deletion.OpenEdxDB", lambda *args: edx_db)
+    monkeypatch.setattr(
+        "mork.celery.tasks.deletion.OpenEdxMySQLDB", lambda *args: edx_mysql_db
+    )
 
     assert crud.get_user(
-        edx_db.session,
+        edx_mysql_db.session,
         email="johndoe1@example.com",
     )
     assert crud.get_user(
-        edx_db.session,
+        edx_mysql_db.session,
         email="johndoe2@example.com",
     )
 
     delete_user_from_db(email="johndoe1@example.com")
 
     assert not crud.get_user(
-        edx_db.session,
+        edx_mysql_db.session,
         email="johndoe1@example.com",
     )
     assert crud.get_user(
-        edx_db.session,
+        edx_mysql_db.session,
         email="johndoe2@example.com",
     )
 
 
-def test_delete_user_from_db_with_failure(edx_db, monkeypatch):
+def test_delete_user_from_db_with_failure(edx_mysql_db, monkeypatch):
     """Test the `delete_user_from_db` function with a commit failure."""
-    EdxAuthUserFactory._meta.sqlalchemy_session = edx_db.session
+    EdxAuthUserFactory._meta.sqlalchemy_session = edx_mysql_db.session
     EdxAuthUserFactory.create(email="johndoe1@example.com")
 
     def mock_session_commit():
         raise SQLAlchemyError("An error occurred")
 
-    edx_db.session.commit = mock_session_commit
-    monkeypatch.setattr("mork.celery.tasks.deletion.OpenEdxDB", lambda *args: edx_db)
+    edx_mysql_db.session.commit = mock_session_commit
+    monkeypatch.setattr(
+        "mork.celery.tasks.deletion.OpenEdxMySQLDB", lambda *args: edx_mysql_db
+    )
 
     with pytest.raises(UserDeleteError, match="Failed to delete user."):
         delete_user_from_db(email="johndoe1@example.com")

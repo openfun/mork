@@ -5,17 +5,17 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session as SASession
 
 from mork.conf import settings
-from mork.edx.database import OpenEdxDB
-from mork.edx.factories.base import Session, engine
-from mork.edx.models.base import Base as EdxBase
+from mork.edx.mysql.database import OpenEdxMySQLDB
+from mork.edx.mysql.factories.base import Session, engine
+from mork.edx.mysql.models.base import Base as EdxBase
 from mork.models import Base
 
 
 @pytest.fixture
-def edx_db():
+def edx_mysql_db():
     """Test edx MySQL database fixture."""
     Session.configure(bind=engine)
-    db = OpenEdxDB(engine, Session)
+    db = OpenEdxMySQLDB(engine, Session)
     EdxBase.metadata.create_all(engine)
     yield db
     db.session.rollback()

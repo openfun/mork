@@ -1,12 +1,14 @@
 """Tests of the edx models."""
 
-from mork.edx.factories.auth import EdxAuthUserFactory, EdxAuthUserprofileFactory
-from mork.edx.factories.certificates import EdxCertificatesGeneratedCertificateFactory
-from mork.edx.factories.student import EdxStudentCourseenrollmentFactory
-from mork.edx.factories.user import EdxUserApiUserpreferenceFactory
+from mork.edx.mysql.factories.auth import EdxAuthUserFactory, EdxAuthUserprofileFactory
+from mork.edx.mysql.factories.certificates import (
+    EdxCertificatesGeneratedCertificateFactory,
+)
+from mork.edx.mysql.factories.student import EdxStudentCourseenrollmentFactory
+from mork.edx.mysql.factories.user import EdxUserApiUserpreferenceFactory
 
 
-def test_edx_models_auth_user_safe_dict(edx_db):
+def test_edx_models_auth_user_safe_dict(edx_mysql_db):
     """Test the `safe_dict` method for the AuthUser model."""
     edx_auth_user = EdxAuthUserFactory()
 
@@ -25,7 +27,7 @@ def test_edx_models_auth_user_safe_dict(edx_db):
     }
 
 
-def test_edx_models_auth_user_profile_safe_dict(edx_db):
+def test_edx_models_auth_user_profile_safe_dict(edx_mysql_db):
     """Test the `safe_dict` method for the AuthUserprofile model."""
     edx_auth_user_profile = EdxAuthUserprofileFactory()
 
@@ -50,7 +52,7 @@ def test_edx_models_auth_user_profile_safe_dict(edx_db):
     }
 
 
-def test_edx_models_user_api_user_preference_safe_dict(edx_db):
+def test_edx_models_user_api_user_preference_safe_dict(edx_mysql_db):
     """Test the `safe_dict` method for the UserApiUserPreference model."""
     edx_user_api_user_preference = EdxUserApiUserpreferenceFactory()
 
@@ -62,7 +64,7 @@ def test_edx_models_user_api_user_preference_safe_dict(edx_db):
     }
 
 
-def test_edx_models_student_course_enrollment_safe_dict(edx_db):
+def test_edx_models_student_course_enrollment_safe_dict(edx_mysql_db):
     """Test the `safe_dict` method for the StudentCourseEnrollment model."""
     edx_student_course_enrollment = EdxStudentCourseenrollmentFactory()
 
@@ -76,7 +78,7 @@ def test_edx_models_student_course_enrollment_safe_dict(edx_db):
     }
 
 
-def test_edx_models_certificates_generated_certificate_safe_dict(edx_db):
+def test_edx_models_certificates_generated_certificate_safe_dict(edx_mysql_db):
     """Test the `safe_dict` method for the StudentCourseEnrollment model."""
     edx_certificates_generated_certificate = (
         EdxCertificatesGeneratedCertificateFactory()

@@ -5,7 +5,7 @@ from faker import Faker
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from mork.edx.models.base import Base
+from mork.edx.mysql.models.base import Base
 
 faker = Faker()
 engine = create_engine("sqlite+pysqlite:///:memory:", echo=False, pool_pre_ping=True)

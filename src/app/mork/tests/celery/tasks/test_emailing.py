@@ -1,4 +1,4 @@
-"""Tests for Mork Celery tasks."""
+"""Tests for Mork Celery emailing tasks."""
 
 from unittest.mock import Mock, call
 
@@ -11,12 +11,12 @@ from mork.celery.tasks.emailing import (
     warn_inactive_users,
     warn_user,
 )
-from mork.edx.factories.auth import EdxAuthUserFactory
+from mork.edx.mysql.factories.auth import EdxAuthUserFactory
 from mork.exceptions import EmailAlreadySent, EmailSendError
 from mork.factories import EmailStatusFactory
 
 
-def test_warn_inactive_users(edx_db, monkeypatch):
+def test_warn_inactive_users(edx_mysql_db, monkeypatch):
     """Test the `warn_inactive_users` function."""
     # 2 users that did not log in for 3 years
     EdxAuthUserFactory.create(
@@ -41,7 +41,9 @@ def test_warn_inactive_users(edx_db, monkeypatch):
         email="janedah2@example.com",
     )
 
-    monkeypatch.setattr("mork.celery.tasks.emailing.OpenEdxDB", lambda *args: edx_db)
+    monkeypatch.setattr(
+        "mork.celery.tasks.emailing.OpenEdxMySQLDB", lambda *args: edx_mysql_db
+    )
 
     mock_group = Mock()
     monkeypatch.setattr("mork.celery.tasks.emailing.group", mock_group)
@@ -62,7 +64,7 @@ def test_warn_inactive_users(edx_db, monkeypatch):
     )
 
 
-def test_warn_inactive_users_with_batch_size(edx_db, monkeypatch):
+def test_warn_inactive_users_with_batch_size(edx_mysql_db, monkeypatch):
     """Test the `warn_inactive_users` function."""
     # 2 users that did not log in for 3 years
     EdxAuthUserFactory.create(
@@ -76,7 +78,9 @@ def test_warn_inactive_users_with_batch_size(edx_db, monkeypatch):
         email="johndoe2@example.com",
     )
 
-    monkeypatch.setattr("mork.celery.tasks.emailing.OpenEdxDB", lambda *args: edx_db)
+    monkeypatch.setattr(
+        "mork.celery.tasks.emailing.OpenEdxMySQLDB", lambda *args: edx_mysql_db
+    )
 
     mock_group = Mock()
     monkeypatch.setattr("mork.celery.tasks.emailing.group", mock_group)
@@ -84,7 +88,9 @@ def test_warn_inactive_users_with_batch_size(edx_db, monkeypatch):
     monkeypatch.setattr("mork.celery.tasks.emailing.warn_user", mock_warn_user)
 
     # Set batch size to 1
-    monkeypatch.setattr("mork.celery.tasks.emailing.settings.EDX_QUERY_BATCH_SIZE", 1)
+    monkeypatch.setattr(
+        "mork.celery.tasks.emailing.settings.EDX_MYSQL_QUERY_BATCH_SIZE", 1
+    )
 
     warn_inactive_users(dry_run=False)
 
@@ -110,7 +116,7 @@ def test_warn_inactive_users_with_batch_size(edx_db, monkeypatch):
     )
 
 
-def test_warn_inactive_users_with_dry_run(edx_db, monkeypatch):
+def test_warn_inactive_users_with_dry_run(edx_mysql_db, monkeypatch):
     """Test the `warn_inactive_users` function with dry run activated (by default)."""
     # 2 users that did not log in for 3 years
     EdxAuthUserFactory.create(
@@ -123,7 +129,9 @@ def test_warn_inactive_users_with_dry_run(edx_db, monkeypatch):
         username="JohnDoe2",
         email="johndoe2@example.com",
     )
-    monkeypatch.setattr("mork.celery.tasks.emailing.OpenEdxDB", lambda *args: edx_db)
+    monkeypatch.setattr(
+        "mork.celery.tasks.emailing.OpenEdxMySQLDB", lambda *args: edx_mysql_db
+    )
 
     mock_group = Mock()
     monkeypatch.setattr("mork.celery.tasks.emailing.group", mock_group)
