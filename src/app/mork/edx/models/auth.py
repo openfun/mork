@@ -39,7 +39,6 @@ from .student import (
     StudentHistoricalcourseenrollment,
     StudentLanguageproficiency,
     StudentLoginfailure,
-    StudentManualenrollmentaudit,
     StudentPendingemailchange,
     StudentUserstanding,
 )
@@ -258,13 +257,6 @@ class AuthUser(Base):
         "StudentLoginfailure",
         back_populates="user",
         cascade="all, delete-orphan",
-    )
-    student_manualenrollmentaudit: Mapped[List["StudentManualenrollmentaudit"]] = (
-        relationship(
-            "StudentManualenrollmentaudit",
-            back_populates="enrolled_by",
-            cascade="all, delete-orphan",
-        )
     )
     student_pendingemailchange: Mapped["StudentPendingemailchange"] = relationship(
         "StudentPendingemailchange",

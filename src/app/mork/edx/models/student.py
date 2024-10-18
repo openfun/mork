@@ -267,9 +267,6 @@ class StudentManualenrollmentaudit(Base):
     state_transition: Mapped[str] = mapped_column(String(255), nullable=False)
     reason: Mapped[str] = mapped_column(TEXT)
 
-    enrolled_by: Mapped["AuthUser"] = relationship(  # noqa: F821
-        "AuthUser", back_populates="student_manualenrollmentaudit"
-    )
     enrollment: Mapped["StudentCourseenrollment"] = relationship(
         "StudentCourseenrollment", back_populates="student_manualenrollmentaudit"
     )
