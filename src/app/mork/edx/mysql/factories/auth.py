@@ -2,7 +2,7 @@
 
 import factory
 
-from mork.edx.models.auth import (
+from mork.edx.mysql.models.auth import (
     AuthRegistration,
     AuthtokenToken,
     AuthUser,

@@ -34,6 +34,9 @@ class Settings(BaseSettings):
     DELETION_PERIOD: timedelta = "P3Y"
     DELETE_MAX_RETRIES: int = 3
 
+    # Edx forum configuration
+    EDX_FORUM_PLACEHOLDER_USER_ID: int = 1234
+
     # API Root path
     # (used at least by everything that is alembic-configuration-related)
     ROOT_PATH: Path = Path(__file__).parent
@@ -54,15 +57,24 @@ class Settings(BaseSettings):
     DB_DEBUG: bool = False
     TEST_DB_NAME: str = "test-mork-db"
 
-    # EDX database
-    EDX_DB_ENGINE: str = "mysql+pymysql"
-    EDX_DB_HOST: str = "mysql"
-    EDX_DB_NAME: str = "edxapp"
-    EDX_DB_USER: str = "edxapp"
-    EDX_DB_PASSWORD: str = "password"
-    EDX_DB_PORT: int = 3306
-    EDX_DB_DEBUG: bool = False
-    EDX_QUERY_BATCH_SIZE: int = 1000
+    # EDX MySQL database
+    EDX_MYSQL_DB_ENGINE: str = "mysql+pymysql"
+    EDX_MYSQL_DB_HOST: str = "mysql"
+    EDX_MYSQL_DB_NAME: str = "edxapp"
+    EDX_MYSQL_DB_USER: str = "edxapp"
+    EDX_MYSQL_DB_PASSWORD: str = "password"
+    EDX_MYSQL_DB_PORT: int = 3306
+    EDX_MYSQL_DB_DEBUG: bool = False
+    EDX_MYSQL_QUERY_BATCH_SIZE: int = 1000
+
+    # EDX MongoDB database
+    EDX_MONGO_DB_ENGINE: str = "mongodb"
+    EDX_MONGO_DB_HOST: str = "mongo"
+    EDX_MONGO_DB_NAME: str = "cs_comments_service"
+    EDX_MONGO_DB_USER: str = "cs_comments_service"
+    EDX_MONGO_DB_PASSWORD: str = "password"
+    EDX_MONGO_DB_PORT: int = 27017
+    EDX_MONGO_DB_DEBUG: bool = False
 
     # Redis configuration
     REDIS_HOST: str = "localhost"
@@ -116,12 +128,21 @@ class Settings(BaseSettings):
         )
 
     @property
-    def EDX_DB_URL(self) -> str:
+    def EDX_MYSQL_DB_URL(self) -> str:
+        """Get the edx MySQL database URL as required by SQLAlchemy."""
+        return (
+            f"{self.EDX_MYSQL_DB_ENGINE}://"
+            f"{self.EDX_MYSQL_DB_USER}:{self.EDX_MYSQL_DB_PASSWORD}@"
+            f"{self.EDX_MYSQL_DB_HOST}/{self.EDX_MYSQL_DB_NAME}"
+        )
+
+    @property
+    def EDX_MONGO_DB_URL(self) -> str:
         """Get the edx database URL as required by SQLAlchemy."""
         return (
-            f"{self.EDX_DB_ENGINE}://"
-            f"{self.EDX_DB_USER}:{self.EDX_DB_PASSWORD}@"
-            f"{self.EDX_DB_HOST}/{self.EDX_DB_NAME}"
+            f"{self.EDX_MONGO_DB_ENGINE}://"
+            f"{self.EDX_MONGO_DB_USER}:{self.EDX_MONGO_DB_PASSWORD}@"
+            f"{self.EDX_MONGO_DB_HOST}/{self.EDX_MONGO_DB_NAME}"
         )
 
     @property

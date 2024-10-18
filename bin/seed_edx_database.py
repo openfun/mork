@@ -5,14 +5,17 @@ import asyncio
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
+from mongoengine import connect, disconnect
+
+from mork.edx.mongo.factories import CommentFactory, CommentThreadFactory
 from mork.conf import settings
-from mork.edx.factories.auth import EdxAuthUserFactory
-from mork.edx.models.base import Base
+from mork.edx.mysql.factories.auth import EdxAuthUserFactory
+from mork.edx.mysql.models.base import Base
 
 
-async def seed_edx_database():
+async def seed_edx_mysql_database():
     """Seed the MySQL edx database with mocked data."""
-    engine = create_engine(settings.EDX_DB_URL)
+    engine = create_engine(settings.EDX_MYSQL_DB_URL)
     session = Session(engine)
     EdxAuthUserFactory._meta.sqlalchemy_session = session  # noqa: SLF001
     EdxAuthUserFactory._meta.sqlalchemy_session_persistence = "commit"  # noqa: SLF001
@@ -21,5 +24,20 @@ async def seed_edx_database():
     EdxAuthUserFactory.create_batch(1000)
 
 
+async def seed_edx_mongodb_database():
+    """Seed the MongoDB edx database with mocked data."""
+    connect(host=settings.EDX_MONGO_DB_HOST, db=settings.EDX_MONGO_DB_NAME)
+
+    CommentFactory.create_batch(1000)
+    CommentThreadFactory.create_batch(1000)
+
+    disconnect(alias="mongodb")
+
+
+async def main():
+    tasks = [seed_edx_mysql_database(), seed_edx_mongodb_database()]
+    await asyncio.gather(*tasks)
+
+
 if __name__ == "__main__":
-    asyncio.run(seed_edx_database())
+    asyncio.run(main())
