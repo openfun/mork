@@ -8,6 +8,9 @@ and this project adheres to
 
 ## [Unreleased]
 
+## Fixed
+
+- Fix relations in student_manualenrollmentaudit table for cascade delete
 
 ## [0.1.0] - 2024-10-22
 
