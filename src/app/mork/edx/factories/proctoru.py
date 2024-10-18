@@ -4,17 +4,16 @@ import factory
 
 from mork.edx.models.proctoru import ProctoruProctoruexam, ProctoruProctoruuser
 
-from .base import session
+from .base import BaseSQLAlchemyModelFactory
 
 
-class EdxProctoruProctoruexamFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxProctoruProctoruexamFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `proctoru_proctoruexam` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = ProctoruProctoruexam
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     user_id = factory.Sequence(lambda n: n + 1)
@@ -30,14 +29,13 @@ class EdxProctoruProctoruexamFactory(factory.alchemy.SQLAlchemyModelFactory):
     url = factory.Faker("url")
 
 
-class EdxProctoruProctoruuserFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxProctoruProctoruuserFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `proctoru_proctoruuser` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = ProctoruProctoruuser
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     student_id = factory.Sequence(lambda n: n + 1)

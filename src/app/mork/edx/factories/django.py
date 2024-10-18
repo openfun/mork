@@ -4,17 +4,16 @@ import factory
 
 from mork.edx.models.django import DjangoCommentClientRoleUsers
 
-from .base import session
+from .base import BaseSQLAlchemyModelFactory
 
 
-class EdxDjangoCommentClientRoleUsersFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxDjangoCommentClientRoleUsersFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `django_comment_client_role_users` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = DjangoCommentClientRoleUsers
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     role_id = factory.Sequence(lambda n: n + 1)

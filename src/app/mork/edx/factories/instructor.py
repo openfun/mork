@@ -4,17 +4,16 @@ import factory
 
 from mork.edx.models.instructor import InstructorTaskInstructortask
 
-from .base import faker, session
+from .base import BaseSQLAlchemyModelFactory, faker
 
 
-class EdxInstructorTaskInstructortaskFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxInstructorTaskInstructortaskFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `instructor_task_instructortask` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = InstructorTaskInstructortask
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     task_type = factory.Faker("word")

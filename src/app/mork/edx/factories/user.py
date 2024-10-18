@@ -4,17 +4,16 @@ import factory
 
 from mork.edx.models.user import UserApiUserpreference
 
-from .base import session
+from .base import BaseSQLAlchemyModelFactory
 
 
-class EdxUserApiUserpreferenceFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxUserApiUserpreferenceFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `user_api_userpreference` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = UserApiUserpreference
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     user_id = factory.Sequence(lambda n: n + 1)
