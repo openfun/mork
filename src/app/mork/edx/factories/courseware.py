@@ -10,17 +10,16 @@ from mork.edx.models.courseware import (
     CoursewareXmodulestudentprefsfield,
 )
 
-from .base import faker, session
+from .base import BaseSQLAlchemyModelFactory, faker
 
 
-class EdxCoursewareOfflinecomputedgradeFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxCoursewareOfflinecomputedgradeFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `courseware_offlinecomputedgrade` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = CoursewareOfflinecomputedgrade
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     user_id = factory.Sequence(lambda n: n + 1)
@@ -30,14 +29,13 @@ class EdxCoursewareOfflinecomputedgradeFactory(factory.alchemy.SQLAlchemyModelFa
     gradeset = factory.Faker("json")
 
 
-class EdxCoursewareStudentmodulehistoryFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxCoursewareStudentmodulehistoryFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `courseware_studentmodulehistory` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = CoursewareStudentmodulehistory
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     version = factory.Faker("pystr")
@@ -47,14 +45,13 @@ class EdxCoursewareStudentmodulehistoryFactory(factory.alchemy.SQLAlchemyModelFa
     max_grade = factory.Faker("pyfloat")
 
 
-class EdxCoursewareStudentmoduleFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxCoursewareStudentmoduleFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `courseware_studentmodule` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = CoursewareStudentmodule
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     module_type = factory.Faker(
@@ -78,16 +75,13 @@ class EdxCoursewareStudentmoduleFactory(factory.alchemy.SQLAlchemyModelFactory):
     )
 
 
-class EdxCoursewareXmodulestudentinfofieldFactory(
-    factory.alchemy.SQLAlchemyModelFactory
-):
+class EdxCoursewareXmodulestudentinfofieldFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `courseware_xmodulestudentinfofield` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = CoursewareXmodulestudentinfofield
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     field_name = factory.Faker("word")
@@ -97,16 +91,13 @@ class EdxCoursewareXmodulestudentinfofieldFactory(
     modified = factory.Faker("date_time")
 
 
-class EdxCoursewareXmodulestudentprefsfieldFactory(
-    factory.alchemy.SQLAlchemyModelFactory
-):
+class EdxCoursewareXmodulestudentprefsfieldFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `courseware_xmodulestudentprefsfield` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = CoursewareXmodulestudentprefsfield
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     field_name = factory.Faker("word")

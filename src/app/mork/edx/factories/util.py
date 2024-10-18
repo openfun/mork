@@ -4,17 +4,16 @@ import factory
 
 from mork.edx.models.util import UtilRatelimitconfiguration
 
-from .base import session
+from .base import BaseSQLAlchemyModelFactory
 
 
-class EdxUtilRatelimitconfigurationFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxUtilRatelimitconfigurationFactory(BaseSQLAlchemyModelFactory):
     """Model for the `util_ratelimitconfiguration` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = UtilRatelimitconfiguration
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     change_date = factory.Faker("date_time")

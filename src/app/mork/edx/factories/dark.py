@@ -4,17 +4,16 @@ import factory
 
 from mork.edx.models.dark import DarkLangDarklangconfig
 
-from .base import session
+from .base import BaseSQLAlchemyModelFactory
 
 
-class EdxDarkLangDarklangconfigFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxDarkLangDarklangconfigFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `dark_lang_darklangconfig` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = DarkLangDarklangconfig
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     change_date = factory.Faker("date_time")
