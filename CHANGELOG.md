@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+## Added
+
+- Add edx mongodb connection to anonymize personal data from edx forums
+
 ## Changed
 
 - Add a dry-run parameter to the task creation API (defaults to True)

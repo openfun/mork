@@ -1,6 +1,8 @@
 """Edx database test fixtures."""
 
+import mongomock
 import pytest
+from mongoengine import connect, disconnect
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session as SASession
 
@@ -20,6 +22,18 @@ def edx_mysql_db():
     yield db
     db.session.rollback()
     EdxBase.metadata.drop_all(engine)
+
+
+@pytest.fixture
+def edx_mongo_db():
+    """Test MongDB database fixture."""
+    connect(
+        db=settings.EDX_MONGO_DB_NAME,
+        host=settings.EDX_MONGO_DB_HOST,
+        mongo_client_class=mongomock.MongoClient,
+    )
+    yield
+    disconnect()
 
 
 @pytest.fixture(scope="session")
