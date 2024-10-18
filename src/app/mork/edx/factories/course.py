@@ -9,19 +9,16 @@ from mork.edx.models.course import (
     CourseGroupsCourseusergroupUsers,
 )
 
-from .base import faker, session
+from .base import BaseSQLAlchemyModelFactory, faker
 
 
-class EdxCourseActionStateCoursererunstateFactory(
-    factory.alchemy.SQLAlchemyModelFactory
-):
+class EdxCourseActionStateCoursererunstateFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `course_action_state_coursererunstate` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = CourseActionStateCoursererunstate
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     created_time = factory.Faker("date_time")
@@ -35,14 +32,13 @@ class EdxCourseActionStateCoursererunstateFactory(
     display_name = factory.Faker("text")
 
 
-class EdxCourseCreatorsCoursecreatorFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxCourseCreatorsCoursecreatorFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `course_creators_coursecreator` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = CourseCreatorsCoursecreator
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     user_id = factory.Sequence(lambda n: n + 1)
@@ -51,30 +47,26 @@ class EdxCourseCreatorsCoursecreatorFactory(factory.alchemy.SQLAlchemyModelFacto
     note = factory.Faker("text")
 
 
-class EdxCourseGroupsCourseusergroupUsersFactory(
-    factory.alchemy.SQLAlchemyModelFactory
-):
+class EdxCourseGroupsCourseusergroupUsersFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `course_groups_courseusergroup_users` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = CourseGroupsCourseusergroupUsers
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     courseusergroup_id = factory.Sequence(lambda n: n + 1)
     user_id = factory.Sequence(lambda n: n + 1)
 
 
-class EdxCourseGroupsCohortmembershipFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxCourseGroupsCohortmembershipFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `course_groups_cohortmembership` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = CourseGroupsCohortmembership
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     course_user_group_id = factory.Sequence(lambda n: n + 1)

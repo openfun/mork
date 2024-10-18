@@ -4,17 +4,16 @@ import factory
 
 from mork.edx.models.payment import PaymentUseracceptance
 
-from .base import session
+from .base import BaseSQLAlchemyModelFactory
 
 
-class EdxPaymentUseracceptanceFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxPaymentUseracceptanceFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `payment_useracceptance` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = PaymentUseracceptance
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     user_id = factory.Sequence(lambda n: n + 1)

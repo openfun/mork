@@ -7,11 +7,11 @@ from mork.edx.models.certificates import (
     CertificatesGeneratedcertificate,
 )
 
-from .base import faker, session
+from .base import BaseSQLAlchemyModelFactory, faker
 
 
 class EdxCertificatesCertificatehtmlviewconfigurationFactory(
-    factory.alchemy.SQLAlchemyModelFactory
+    BaseSQLAlchemyModelFactory
 ):
     """Factory for the `certificates_certificatehtmlviewconfiguration` table."""
 
@@ -19,7 +19,6 @@ class EdxCertificatesCertificatehtmlviewconfigurationFactory(
         """Factory configuration."""
 
         model = CertificatesCertificatehtmlviewconfiguration
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     change_date = factory.Faker("date_time")
@@ -28,16 +27,13 @@ class EdxCertificatesCertificatehtmlviewconfigurationFactory(
     configuration = factory.Faker("pystr")
 
 
-class EdxCertificatesGeneratedCertificateFactory(
-    factory.alchemy.SQLAlchemyModelFactory
-):
+class EdxCertificatesGeneratedCertificateFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `certificates_generatedcertificate` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = CertificatesGeneratedcertificate
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     user_id = factory.Sequence(lambda n: n + 1)

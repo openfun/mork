@@ -39,7 +39,6 @@ from .student import (
     StudentHistoricalcourseenrollment,
     StudentLanguageproficiency,
     StudentLoginfailure,
-    StudentManualenrollmentaudit,
     StudentPendingemailchange,
     StudentUserstanding,
 )
@@ -259,13 +258,6 @@ class AuthUser(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
-    student_manualenrollmentaudit: Mapped[List["StudentManualenrollmentaudit"]] = (
-        relationship(
-            "StudentManualenrollmentaudit",
-            back_populates="enrolled_by",
-            cascade="all, delete-orphan",
-        )
-    )
     student_pendingemailchange: Mapped["StudentPendingemailchange"] = relationship(
         "StudentPendingemailchange",
         back_populates="user",
@@ -346,7 +338,7 @@ class AuthUserGroups(Base):
 
 
 class AuthRegistration(Base):
-    """Model for the `auth_registration`table."""
+    """Model for the `auth_registration` table."""
 
     __tablename__ = "auth_registration"
     __table_args__ = (
