@@ -7,19 +7,16 @@ from mork.edx.models.verify import (
     VerifyStudentSoftwaresecurephotoverification,
 )
 
-from .base import faker, session
+from .base import BaseSQLAlchemyModelFactory, faker
 
 
-class EdxVerifyStudentHistoricalverificationdeadlineFactory(
-    factory.alchemy.SQLAlchemyModelFactory
-):
+class EdxVerifyStudentHistoricalverificationdeadlineFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `verify_student_historicalverificationdeadline` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = VerifyStudentHistoricalverificationdeadline
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     created = factory.Faker("date_time")
@@ -34,7 +31,7 @@ class EdxVerifyStudentHistoricalverificationdeadlineFactory(
 
 
 class EdxVerifyStudentSoftwaresecurephotoverificationFactory(
-    factory.alchemy.SQLAlchemyModelFactory
+    BaseSQLAlchemyModelFactory
 ):
     """Factory for the `verify_student_softwaresecurephotoverification` table."""
 
@@ -42,7 +39,6 @@ class EdxVerifyStudentSoftwaresecurephotoverificationFactory(
         """Factory configuration."""
 
         model = VerifyStudentSoftwaresecurephotoverification
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     status = factory.Faker("pystr")

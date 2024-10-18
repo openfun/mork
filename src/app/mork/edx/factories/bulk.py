@@ -4,17 +4,16 @@ import factory
 
 from mork.edx.models.bulk import BulkEmailCourseemail, BulkEmailOptout
 
-from .base import faker, session
+from .base import BaseSQLAlchemyModelFactory, faker
 
 
-class EdxBulkEmailCourseemailFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxBulkEmailCourseemailFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `bulk_email_courseemail` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = BulkEmailCourseemail
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     sender_id = factory.Sequence(lambda n: n + 1)
@@ -30,14 +29,13 @@ class EdxBulkEmailCourseemailFactory(factory.alchemy.SQLAlchemyModelFactory):
     from_addr = factory.Faker("text")
 
 
-class EdxBulkEmailOptoutFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxBulkEmailOptoutFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `bulk_email_optout` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = BulkEmailOptout
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     course_id = factory.Sequence(lambda n: f"course-v1:edX+{faker.pystr()}+{n}")

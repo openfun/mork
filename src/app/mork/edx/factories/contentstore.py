@@ -4,17 +4,16 @@ import factory
 
 from mork.edx.models.contentstore import ContentstoreVideouploadconfig
 
-from .base import session
+from .base import BaseSQLAlchemyModelFactory
 
 
-class EdxContentstoreVideouploadconfigFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxContentstoreVideouploadconfigFactory(BaseSQLAlchemyModelFactory):
     """Model for the `contentstore_videouploadconfig` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = ContentstoreVideouploadconfig
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     change_date = factory.Faker("date_time")

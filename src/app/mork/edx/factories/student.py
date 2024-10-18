@@ -16,17 +16,16 @@ from mork.edx.models.student import (
     StudentUserstanding,
 )
 
-from .base import faker, session
+from .base import BaseSQLAlchemyModelFactory, faker
 
 
-class EdxStudentAnonymoususeridFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxStudentAnonymoususeridFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `student_anonymoususerid` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = StudentAnonymoususerid
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     user_id = factory.Sequence(lambda n: n + 1)
@@ -34,14 +33,13 @@ class EdxStudentAnonymoususeridFactory(factory.alchemy.SQLAlchemyModelFactory):
     course_id = factory.Sequence(lambda n: f"course-v1:edX+{faker.pystr()}+{n}")
 
 
-class EdxStudentCourseaccessroleFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxStudentCourseaccessroleFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `student_courseaccessrole` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = StudentCourseaccessrole
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     user_id = factory.Sequence(lambda n: n + 1)
@@ -50,14 +48,13 @@ class EdxStudentCourseaccessroleFactory(factory.alchemy.SQLAlchemyModelFactory):
     role = factory.Faker("word")
 
 
-class EdxStudentCourseenrollmentallowedFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxStudentCourseenrollmentallowedFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `student_courseenrollmentallowed` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = StudentCourseenrollmentallowed
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     email = factory.Faker("email")
@@ -66,16 +63,13 @@ class EdxStudentCourseenrollmentallowedFactory(factory.alchemy.SQLAlchemyModelFa
     auto_enroll = factory.Faker("random_int", min=0, max=1)
 
 
-class EdxStudentCourseenrollmentattributeFactory(
-    factory.alchemy.SQLAlchemyModelFactory
-):
+class EdxStudentCourseenrollmentattributeFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `student_courseenrollmentattribute` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = StudentCourseenrollmentattribute
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     enrollment_id = factory.Sequence(lambda n: n + 1)
@@ -84,16 +78,13 @@ class EdxStudentCourseenrollmentattributeFactory(
     value = factory.Faker("pystr")
 
 
-class EdxStudentHistoricalcourseenrollmentFactory(
-    factory.alchemy.SQLAlchemyModelFactory
-):
+class EdxStudentHistoricalcourseenrollmentFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `student_historicalcourseenrollment` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = StudentHistoricalcourseenrollment
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     course_id = factory.Sequence(lambda n: f"course-v1:edX+{faker.pystr()}+{n}")
@@ -107,28 +98,26 @@ class EdxStudentHistoricalcourseenrollmentFactory(
     history_type = factory.Faker("random_letter")
 
 
-class EdxStudentLanguageproficiencyFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxStudentLanguageproficiencyFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `student_languageproficiency` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = StudentLanguageproficiency
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     user_profile_id = factory.Sequence(lambda n: n + 1)
-    code = factory.Faker("pystr")
+    code = factory.Faker("pystr", max_chars=16)
 
 
-class EdxStudentLoginfailureFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxStudentLoginfailureFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `student_loginfailure` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = StudentLoginfailure
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     user_id = factory.Sequence(lambda n: n + 1)
@@ -136,14 +125,13 @@ class EdxStudentLoginfailureFactory(factory.alchemy.SQLAlchemyModelFactory):
     lockout_until = factory.Faker("date_time")
 
 
-class EdxStudentManualenrollmentauditFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxStudentManualenrollmentauditFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `student_manualenrollmentaudit` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = StudentManualenrollmentaudit
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     enrollment_id = factory.Sequence(lambda n: n + 1)
@@ -154,14 +142,13 @@ class EdxStudentManualenrollmentauditFactory(factory.alchemy.SQLAlchemyModelFact
     reason = factory.Faker("text")
 
 
-class EdxStudentCourseenrollmentFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxStudentCourseenrollmentFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `student_courseenrollment` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = StudentCourseenrollment
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     user_id = factory.Sequence(lambda n: n + 1)
@@ -184,14 +171,13 @@ class EdxStudentCourseenrollmentFactory(factory.alchemy.SQLAlchemyModelFactory):
     )
 
 
-class EdxStudentPendingemailchangeFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxStudentPendingemailchangeFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `student_pendingemailchange` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = StudentPendingemailchange
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     user_id = factory.Sequence(lambda n: n + 1)
@@ -199,14 +185,13 @@ class EdxStudentPendingemailchangeFactory(factory.alchemy.SQLAlchemyModelFactory
     activation_key = factory.Faker("hexify", text="^" * 32)
 
 
-class EdxStudentUserstandingFactory(factory.alchemy.SQLAlchemyModelFactory):
+class EdxStudentUserstandingFactory(BaseSQLAlchemyModelFactory):
     """Factory for the `student_userstanding` table."""
 
     class Meta:
         """Factory configuration."""
 
         model = StudentUserstanding
-        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n + 1)
     user_id = factory.Sequence(lambda n: n + 1)

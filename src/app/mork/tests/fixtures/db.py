@@ -2,19 +2,20 @@
 
 import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session as SASession
 
 from mork.conf import settings
 from mork.edx.database import OpenEdxDB
-from mork.edx.factories.base import engine, session
+from mork.edx.factories.base import Session, engine
 from mork.edx.models.base import Base as EdxBase
 from mork.models import Base
 
 
 @pytest.fixture
 def edx_db():
-    """"""
-    db = OpenEdxDB(engine, session)
+    """Test edx MySQL database fixture."""
+    Session.configure(bind=engine)
+    db = OpenEdxDB(engine, Session)
     EdxBase.metadata.create_all(engine)
     yield db
     db.session.rollback()
@@ -43,7 +44,7 @@ def db_session(db_engine):
     # is bound to the test session.
     connection = db_engine.connect()
     transaction = connection.begin()
-    session = Session(bind=connection)
+    session = SASession(bind=connection)
 
     yield session
 

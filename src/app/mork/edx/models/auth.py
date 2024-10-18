@@ -338,7 +338,7 @@ class AuthUserGroups(Base):
 
 
 class AuthRegistration(Base):
-    """Model for the `auth_registration`table."""
+    """Model for the `auth_registration` table."""
 
     __tablename__ = "auth_registration"
     __table_args__ = (
