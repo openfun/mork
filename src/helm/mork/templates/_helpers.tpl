@@ -96,6 +96,23 @@ Environment variables
   value: "{{ .Values.edx.mysql.port }}"
 - name: MORK_EDX_MYSQL_DB_DEBUG
   value: "{{ .Values.edx.mysql.debug }}"
+- name: MORK_EDX_MONGO_DB_ENGINE
+  value: "{{ .Values.edx.mongo.engine }}"
+- name: MORK_EDX_MONGO_DB_HOST
+  value: "{{ .Values.edx.mongo.host }}"
+- name: MORK_EDX_MONGO_DB_NAME
+  value: "{{ .Values.edx.mongo.name }}"
+- name: MORK_EDX_MONGO_DB_USER
+  value: "{{ .Values.edx.mongo.user }}"
+- name: MORK_EDX_MONGO_DB_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: mork-edx-database
+      key: MORK_EDX_MONGO_DB_PASSWORD
+- name: MORK_EDX_MONGO_DB_PORT
+  value: "{{ .Values.edx.mongo.port }}"
+- name: MORK_EDX_MONGO_DB_DEBUG
+  value: "{{ .Values.edx.mongo.debug }}"
 - name: MORK_CELERY_BROKER_URL
   value: "{{ .Values.celery.brokerUrl }}"
 - name: MORK_CELERY_BROKER_TRANSPORT_OPTIONS

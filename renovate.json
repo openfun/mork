@@ -6,6 +6,7 @@
   "commitMessageAction": "upgrade",
   "commitBodyTable": true,
   "ignoreDeps": [
+    "pymongo"
   ],
   "dependencyDashboard": true
 }
