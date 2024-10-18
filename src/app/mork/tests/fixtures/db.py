@@ -1,6 +1,8 @@
 """Edx database test fixtures."""
 
+import mongomock
 import pytest
+from mongoengine import connect, disconnect
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
@@ -13,12 +15,25 @@ from mork.models import Base
 
 @pytest.fixture
 def edx_mysql_db():
-    """"""
+    """Test MySQL database fixture."""
     db = OpenEdxMySQLDB(engine, session)
     EdxBase.metadata.create_all(engine)
     yield db
     db.session.rollback()
     EdxBase.metadata.drop_all(engine)
+
+
+@pytest.fixture
+def edx_mongo_db():
+    """Test MongDB database fixture."""
+    connect(
+        "mongoenginetest",
+        host=settings.EDX_MONGO_DB_HOST,
+        db=settings.EDX_MONGO_DB_NAME,
+        mongo_client_class=mongomock.MongoClient,
+    )
+    yield
+    disconnect()
 
 
 @pytest.fixture(scope="session")

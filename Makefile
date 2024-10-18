@@ -12,6 +12,10 @@ COMPOSE_RUN_MAIL = $(COMPOSE_RUN) mail-generator
 EDX_MYSQL_DB_HOST = mysql
 EDX_MYSQL_DB_PORT = 3306
 
+# -- MongoDB
+EDX_MONGO_DB_HOST = mongo
+EDX_MONGO_DB_PORT = 27017
+
 # -- Postgresql
 DB_HOST = postgresql
 DB_PORT = 5432
@@ -52,7 +56,7 @@ bootstrap: \
   build \
   run \
   migrate \
-  seed-edx-database \
+  seed-edx-databases \
   mails-install \
   mails-build
 .PHONY: bootstrap
@@ -116,12 +120,14 @@ stop: ## stop all servers
 	@$(COMPOSE) stop
 .PHONY: stop
 
-seed-edx-database:  ## seed the edx database with test data
+seed-edx-databases:  ## seed the edx MySQL and MongoDB databases with test data
 	@echo "Waiting for mysql to be up and running…"
 	@$(COMPOSE_RUN) dockerize -wait tcp://$(EDX_MYSQL_DB_HOST):$(EDX_MYSQL_DB_PORT) -timeout 60s
+	@echo "Waiting for mongodb to be up and running…"
+	@$(COMPOSE_RUN) dockerize -wait tcp://$(EDX_MONGO_DB_HOST):$(EDX_MONGO_DB_PORT) -timeout 60s
 	@echo "Seeding the edx database…"
 	@$(COMPOSE) exec -T celery python /opt/src/seed_edx_database.py
-.PHONY: seed-edx-database
+.PHONY: seed-edx-databases
 
 # -- Provisioning
 create-test-db: ## create test database
