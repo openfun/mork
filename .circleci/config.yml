@@ -192,7 +192,7 @@ jobs:
         environment:
           MORK_DB_HOST: localhost
           PYTHONPATH: /home/circleci/fun
-      - image: cimg/postgres:12.14
+      - image: cimg/postgres:13.16
         auth:
           username: $DOCKER_HUB_USER
           password: $DOCKER_HUB_PASS
