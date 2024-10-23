@@ -24,7 +24,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ include "mork.fullname" . }}
+                name: {{ include "mork.fullname" . }}-api
                 port:
                   number: {{ .Values.service.port }}
 {{- end }}
