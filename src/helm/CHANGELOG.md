@@ -8,8 +8,11 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.1.0] - 2024-10-23
+
 ### Added
 
 - Implement base Helm chart
 
-[unreleased]: https://github.com/openfun/mork
+[unreleased]: https://github.com/openfun/mork/tree/main/src/helm
+[0.1.0]: https://github.com/openfun/mork/releases/tag/helm/v0.1.0
