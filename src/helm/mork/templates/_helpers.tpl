@@ -79,23 +79,40 @@ Environment variables
   value: "{{ .Values.db.port }}"
 - name: MORK_DB_DEBUG
   value: "{{ .Values.db.debug }}"
-- name: MORK_EDX_DB_ENGINE
-  value: "{{ .Values.edx.db.engine }}"
-- name: MORK_EDX_DB_HOST
-  value: "{{ .Values.edx.db.host }}"
-- name: MORK_EDX_DB_NAME
-  value: "{{ .Values.edx.db.name }}"
-- name: MORK_EDX_DB_USER
-  value: "{{ .Values.edx.db.user }}"
-- name: MORK_EDX_DB_PASSWORD
+- name: MORK_EDX_MYSQL_DB_ENGINE
+  value: "{{ .Values.edx.mysql.engine }}"
+- name: MORK_EDX_MYSQL_DB_HOST
+  value: "{{ .Values.edx.mysql.host }}"
+- name: MORK_EDX_MYSQL_DB_NAME
+  value: "{{ .Values.edx.mysql.name }}"
+- name: MORK_EDX_MYSQL_DB_USER
+  value: "{{ .Values.edx.mysql.user }}"
+- name: MORK_EDX_MYSQL_DB_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: mork-edx-mysql-db
+      key: MORK_EDX_MYSQL_DB_PASSWORD
+- name: MORK_EDX_MYSQL_DB_PORT
+  value: "{{ .Values.edx.mysql.port }}"
+- name: MORK_EDX_MYSQL_DB_DEBUG
+  value: "{{ .Values.edx.mysql.debug }}"
+- name: MORK_EDX_MONGO_DB_ENGINE
+  value: "{{ .Values.edx.mongo.engine }}"
+- name: MORK_EDX_MONGO_DB_HOST
+  value: "{{ .Values.edx.mongo.host }}"
+- name: MORK_EDX_MONGO_DB_NAME
+  value: "{{ .Values.edx.mongo.name }}"
+- name: MORK_EDX_MONGO_DB_USER
+  value: "{{ .Values.edx.mongo.user }}"
+- name: MORK_EDX_MONGO_DB_PASSWORD
   valueFrom:
     secretKeyRef:
       name: mork-edx-database
-      key: MORK_EDX_DB_PASSWORD
-- name: MORK_EDX_DB_PORT
-  value: "{{ .Values.edx.db.port }}"
-- name: MORK_EDX_DB_DEBUG
-  value: "{{ .Values.edx.db.debug }}"
+      key: MORK_EDX_MONGO_DB_PASSWORD
+- name: MORK_EDX_MONGO_DB_PORT
+  value: "{{ .Values.edx.mongo.port }}"
+- name: MORK_EDX_MONGO_DB_DEBUG
+  value: "{{ .Values.edx.mongo.debug }}"
 - name: MORK_CELERY_BROKER_URL
   value: "{{ .Values.celery.brokerUrl }}"
 - name: MORK_CELERY_RESULT_BACKEND

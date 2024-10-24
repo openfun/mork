@@ -112,12 +112,19 @@ db:
 
 # edx database configuration
 edx:
-  db:
+  mysql:
     engine: "mysql+pymysql"
     host: "mysql"
     name: "edxapp"
     user: "edxapp"
     port: 3306
+    debug: false
+  mongo:
+    engine: "mongodb"
+    host: "mongo"
+    name: "cs_comments_service"
+    user: "cs_comments_service"
+    port: 27017
     debug: false
 
 # Celery configuration

@@ -2,7 +2,7 @@
 
 import factory
 
-from mork.edx.models.courseware import (
+from mork.edx.mysql.models.courseware import (
     CoursewareOfflinecomputedgrade,
     CoursewareStudentmodule,
     CoursewareStudentmodulehistory,
