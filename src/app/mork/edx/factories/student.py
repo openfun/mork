@@ -168,6 +168,7 @@ class EdxStudentCourseenrollmentFactory(BaseSQLAlchemyModelFactory):
         "enrollment",
         size=3,
         enrollment_id=factory.SelfAttribute("..id"),
+        enrolled_by_id=factory.SelfAttribute("..user_id"),
     )
 
 
