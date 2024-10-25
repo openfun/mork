@@ -16,6 +16,10 @@ and this project adheres to
 
 - Add a dry-run parameter to the task creation API (defaults to True)
 
+## Fixed
+
+- Fix HTTP 500 errors on heartbeat endpoint when QueuePool limits are reached
+
 ## [0.3.0] - 2024-11-04
 
 ## Added

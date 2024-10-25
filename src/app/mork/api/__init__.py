@@ -6,10 +6,12 @@ from urllib.parse import urlparse
 
 import sentry_sdk
 from fastapi import FastAPI
+from fastapi.concurrency import asynccontextmanager
 
 from mork import __version__
 from mork.api.routes import health, tasks
 from mork.conf import settings
+from mork.database import get_engine
 
 
 @lru_cache(maxsize=None)
@@ -28,16 +30,26 @@ def filter_transactions(event: Dict, hint) -> Union[Dict, None]:  # noqa: ARG001
     return event
 
 
-if settings.SENTRY_DSN is not None:
-    sentry_sdk.init(
-        dsn=settings.SENTRY_DSN,
-        traces_sample_rate=settings.SENTRY_API_TRACES_SAMPLE_RATE,
-        release=__version__,
-        environment=settings.SENTRY_EXECUTION_ENVIRONMENT,
-        max_breadcrumbs=50,
-        before_send_transaction=filter_transactions,
-    )
+@asynccontextmanager
+async def lifespan(app: FastAPI):  # noqa: ARG001
+    """Application life span."""
+    engine = get_engine()
 
-app = FastAPI()
+    # Sentry
+    if settings.SENTRY_DSN is not None:
+        sentry_sdk.init(
+            dsn=settings.SENTRY_DSN,
+            traces_sample_rate=settings.SENTRY_API_TRACES_SAMPLE_RATE,
+            release=__version__,
+            environment=settings.SENTRY_EXECUTION_ENVIRONMENT,
+            max_breadcrumbs=50,
+            before_send_transaction=filter_transactions,
+        )
+
+    yield
+    engine.dispose()
+
+
+app = FastAPI(lifespan=lifespan)
 app.include_router(health.router)
 app.include_router(tasks.router)
