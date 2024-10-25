@@ -25,8 +25,12 @@ async def test_tasks_auth(http_client: AsyncClient):
         "delete_user",
     ],
 )
+@pytest.mark.parametrize(
+    "tasks_endpoint",
+    ["/tasks/", "/tasks"],
+)
 async def test_create_task(
-    http_client: AsyncClient, auth_headers: dict, task_type: str
+    http_client: AsyncClient, auth_headers: dict, task_type: str, tasks_endpoint: str
 ):
     """Test creating a task with valid data."""
 
@@ -39,7 +43,7 @@ async def test_create_task(
 
     with patch.dict("mork.api.tasks.TASK_TYPE_TO_FUNC", {task_type: celery_task}):
         response = await http_client.post(
-            "/tasks/", headers=auth_headers, json=mock_task_create
+            tasks_endpoint, headers=auth_headers, json=mock_task_create
         )
         response_data = response.json()
 
@@ -105,9 +109,15 @@ async def test_create_task_missing_param(
 
 
 @pytest.mark.anyio
-async def test_get_available_tasks(http_client: AsyncClient, auth_headers: dict):
+@pytest.mark.parametrize(
+    "tasks_endpoint",
+    ["/tasks/", "/tasks"],
+)
+async def test_get_available_tasks(
+    http_client: AsyncClient, auth_headers: dict, tasks_endpoint: str
+):
     """Test getting available tasks."""
-    response = await http_client.options("/tasks/", headers=auth_headers)
+    response = await http_client.options(tasks_endpoint, headers=auth_headers)
     response_data = response.json()
     assert response.status_code == 200
     assert response.headers["allow"] == "POST"
