@@ -18,11 +18,14 @@ async def test_tasks_auth(http_client: AsyncClient):
 
 @pytest.mark.anyio
 @pytest.mark.parametrize(
-    "task_type",
+    "body_params",
     [
-        "email_inactive_users",
-        "delete_inactive_users",
-        "delete_user",
+        {"type": "email_inactive_users", "dry_run": False},
+        {"type": "delete_inactive_users", "dry_run": False},
+        {"type": "delete_user", "email": "johndoe@example.com", "dry_run": False},
+        {"type": "email_inactive_users", "dry_run": True},
+        {"type": "delete_inactive_users", "dry_run": True},
+        {"type": "delete_user", "email": "johndoe@example.com", "dry_run": True},
     ],
 )
 @pytest.mark.parametrize(
@@ -30,20 +33,18 @@ async def test_tasks_auth(http_client: AsyncClient):
     ["/tasks/", "/tasks"],
 )
 async def test_create_task(
-    http_client: AsyncClient, auth_headers: dict, task_type: str, tasks_endpoint: str
+    http_client: AsyncClient, auth_headers: dict, body_params: str, tasks_endpoint: str
 ):
     """Test creating a task with valid data."""
-
-    mock_task_create = {"type": task_type}
-    if task_type == "delete_user":
-        mock_task_create["email"] = "johndoe@example.com"
 
     celery_task = Mock()
     celery_task.delay.return_value.task_id = "1234"
 
-    with patch.dict("mork.api.tasks.TASK_TYPE_TO_FUNC", {task_type: celery_task}):
+    with patch.dict(
+        "mork.api.tasks.TASK_TYPE_TO_FUNC", {body_params["type"]: celery_task}
+    ):
         response = await http_client.post(
-            tasks_endpoint, headers=auth_headers, json=mock_task_create
+            tasks_endpoint, headers=auth_headers, json=body_params
         )
         response_data = response.json()
 
@@ -53,10 +54,11 @@ async def test_create_task(
         assert (
             response.headers["location"] == f"/tasks/status/{response_data.get("id")}"
         )
-        if task_type == "delete_user":
-            celery_task.delay.assert_called_with(email="johndoe@example.com")
-        else:
-            celery_task.delay.assert_called()
+
+        expected_params = {
+            key: value for key, value in body_params.items() if key != "type"
+        }
+        celery_task.delay.assert_called_with(**expected_params)
 
 
 @pytest.mark.anyio

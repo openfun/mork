@@ -19,7 +19,7 @@ logger = getLogger(__name__)
 
 
 @app.task
-def warn_inactive_users():
+def warn_inactive_users(dry_run: bool = True):
     """Celery task to warn inactive users by email."""
     db = OpenEdxDB()
 
@@ -34,7 +34,10 @@ def warn_inactive_users():
             limit=settings.EDX_QUERY_BATCH_SIZE,
         )
         send_email_group = group(
-            [warn_user.s(user.email, user.username) for user in inactive_users]
+            [
+                warn_user.s(email=user.email, username=user.username, dry_run=dry_run)
+                for user in inactive_users
+            ]
         )
         send_email_group.delay()
 
@@ -44,34 +47,39 @@ def warn_inactive_users():
     rate_limit=settings.EMAIL_RATE_LIMIT,
     retry_kwargs={"max_retries": settings.EMAIL_MAX_RETRIES},
 )
-def warn_user(self, email_address: str, username: str):
+def warn_user(self, email: str, username: str, dry_run: bool = True):
     """Celery task that warns the specified user by sending an email."""
     # Check that user has not already received a warning email
-    if check_email_already_sent(email_address):
+    if check_email_already_sent(email):
         raise EmailAlreadySent("An email has already been sent to this user")
 
+    if dry_run:
+        logger.info(f"Dry run: An email would have been sent to user with {email=} ")
+        return
+
+    logger.info(f"Sending an email to user with {email=}")
     try:
-        send_email(email_address, username)
+        send_email(email, username)
     except EmailSendError as exc:
         logger.exception(exc)
         raise self.retry(exc=exc) from exc
 
     # Write flag that email was correctly sent to this user
-    mark_email_status(email_address)
+    mark_email_status(email)
 
 
-def check_email_already_sent(email_address: str):
+def check_email_already_sent(email: str):
     """Check if an email has already been sent to the user."""
     db = MorkDB()
-    query = select(EmailStatus.email).where(EmailStatus.email == email_address)
+    query = select(EmailStatus.email).where(EmailStatus.email == email)
     result = db.session.execute(query).scalars().first()
     db.session.close()
     return result
 
 
-def mark_email_status(email_address: str):
+def mark_email_status(email: str):
     """Mark the email status in database."""
     db = MorkDB()
-    db.session.add(EmailStatus(email=email_address, sent_date=datetime.now()))
+    db.session.add(EmailStatus(email=email, sent_date=datetime.now()))
     db.session.commit()
     db.session.close()

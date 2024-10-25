@@ -18,7 +18,7 @@ logger = getLogger(__name__)
 
 
 @app.task
-def delete_inactive_users():
+def delete_inactive_users(dry_run: bool = True):
     """Celery task to delete inactive users accounts."""
     db = OpenEdxDB()
     threshold_date = datetime.now() - settings.DELETION_PERIOD
@@ -31,7 +31,12 @@ def delete_inactive_users():
             offset=batch_offset,
             limit=settings.EDX_QUERY_BATCH_SIZE,
         )
-        delete_group = group([delete_user.s(user.email) for user in inactive_users])
+        delete_group = group(
+            [
+                delete_user.s(email=user.email, dry_run=dry_run)
+                for user in inactive_users
+            ]
+        )
         delete_group.delay()
 
 
@@ -39,8 +44,13 @@ def delete_inactive_users():
     bind=True,
     retry_kwargs={"max_retries": settings.DELETE_MAX_RETRIES},
 )
-def delete_user(self, email: str):
+def delete_user(self, email: str, dry_run: bool = True):
     """Celery task that delete a specified user."""
+    if dry_run:
+        logger.info(f"Dry run: User with {email=} would have been deleted")
+        return
+
+    logger.info(f"Deleting user with {email=}")
     try:
         delete_user_from_db(email)
     except UserDeleteError as exc:

@@ -48,12 +48,16 @@ def test_warn_inactive_users(edx_db, monkeypatch):
     mock_warn_user = Mock()
     monkeypatch.setattr("mork.celery.tasks.emailing.warn_user", mock_warn_user)
 
-    warn_inactive_users()
+    warn_inactive_users(dry_run=False)
 
     mock_group.assert_called_once_with(
         [
-            mock_warn_user.s(email="johndoe1@example.com", username="JohnDoe1"),
-            mock_warn_user.s(email="johndoe2@example.com", username="JohnDoe2"),
+            mock_warn_user.s(
+                email="johndoe1@example.com", username="JohnDoe1", dry_run=False
+            ),
+            mock_warn_user.s(
+                email="johndoe2@example.com", username="JohnDoe2", dry_run=False
+            ),
         ]
     )
 
@@ -82,19 +86,23 @@ def test_warn_inactive_users_with_batch_size(edx_db, monkeypatch):
     # Set batch size to 1
     monkeypatch.setattr("mork.celery.tasks.emailing.settings.EDX_QUERY_BATCH_SIZE", 1)
 
-    warn_inactive_users()
+    warn_inactive_users(dry_run=False)
 
     mock_group.assert_has_calls(
         [
             call(
                 [
-                    mock_warn_user.s(email="johndoe1@example.com", username="JohnDoe1"),
+                    mock_warn_user.s(
+                        email="johndoe1@example.com", username="JohnDoe1", dry_run=False
+                    ),
                 ]
             ),
             call().delay(),
             call(
                 [
-                    mock_warn_user.s(email="johndoe2@example.com", username="JohnDoe2"),
+                    mock_warn_user.s(
+                        email="johndoe2@example.com", username="JohnDoe2", dry_run=False
+                    ),
                 ]
             ),
             call().delay(),
@@ -102,15 +110,82 @@ def test_warn_inactive_users_with_batch_size(edx_db, monkeypatch):
     )
 
 
+def test_warn_inactive_users_with_dry_run(edx_db, monkeypatch):
+    """Test the `warn_inactive_users` function with dry run activated (by default)."""
+    # 2 users that did not log in for 3 years
+    EdxAuthUserFactory.create(
+        last_login=Faker().date_time_between(end_date="-3y"),
+        username="JohnDoe1",
+        email="johndoe1@example.com",
+    )
+    EdxAuthUserFactory.create(
+        last_login=Faker().date_time_between(end_date="-3y"),
+        username="JohnDoe2",
+        email="johndoe2@example.com",
+    )
+    monkeypatch.setattr("mork.celery.tasks.emailing.OpenEdxDB", lambda *args: edx_db)
+
+    mock_group = Mock()
+    monkeypatch.setattr("mork.celery.tasks.emailing.group", mock_group)
+    mock_warn_user = Mock()
+    monkeypatch.setattr("mork.celery.tasks.emailing.warn_user", mock_warn_user)
+
+    warn_inactive_users()
+
+    mock_group.assert_called_once_with(
+        [
+            mock_warn_user.s(
+                email="johndoe1@example.com", username="JohnDoe1", dry_run=True
+            ),
+            mock_warn_user.s(
+                email="johndoe2@example.com", username="JohnDoe2", dry_run=True
+            ),
+        ]
+    )
+
+
 def test_warn_user(monkeypatch):
     """Test the `warn_user` function."""
+    mock_check_email = Mock(return_value=False)
     monkeypatch.setattr(
-        "mork.celery.tasks.emailing.check_email_already_sent", lambda x: False
+        "mork.celery.tasks.emailing.check_email_already_sent", mock_check_email
     )
-    monkeypatch.setattr("mork.celery.tasks.emailing.send_email", lambda *args: None)
-    monkeypatch.setattr("mork.celery.tasks.emailing.mark_email_status", lambda x: None)
+    mock_send_email = Mock()
+    monkeypatch.setattr("mork.celery.tasks.emailing.send_email", mock_send_email)
+    mock_mark_email_status = Mock()
+    monkeypatch.setattr(
+        "mork.celery.tasks.emailing.mark_email_status", mock_mark_email_status
+    )
 
-    warn_user("johndoe@example.com", "JohnDoe")
+    email = "johndoe@example.com"
+    username = "JohnDoe"
+    warn_user(email, username, dry_run=False)
+
+    mock_check_email.assert_called_once_with(email)
+    mock_send_email.assert_called_once_with(email, username)
+    mock_mark_email_status.assert_called_once_with(email)
+
+
+def test_warn_user_with_dry_run(monkeypatch):
+    """Test the `warn_user` function with dry run activated (by default)."""
+    mock_check_email = Mock(return_value=False)
+    monkeypatch.setattr(
+        "mork.celery.tasks.emailing.check_email_already_sent", mock_check_email
+    )
+    mock_send_email = Mock()
+    monkeypatch.setattr("mork.celery.tasks.emailing.send_email", mock_send_email)
+    mock_mark_email_status = Mock()
+    monkeypatch.setattr(
+        "mork.celery.tasks.emailing.mark_email_status", mock_mark_email_status
+    )
+
+    email = "johndoe@example.com"
+    username = "JohnDoe"
+    warn_user(email, username)
+
+    mock_check_email.assert_called_once_with(email)
+    mock_send_email.assert_not_called()
+    mock_mark_email_status.assert_not_called()
 
 
 def test_warn_user_already_sent(monkeypatch):
@@ -137,7 +212,7 @@ def test_warn_user_sending_failure(monkeypatch):
     monkeypatch.setattr("mork.celery.tasks.emailing.send_email", mock_send)
 
     with pytest.raises(EmailSendError, match="An error occurred"):
-        warn_user("johndoe@example.com", "JohnDoe")
+        warn_user("johndoe@example.com", "JohnDoe", dry_run=False)
 
 
 def test_check_email_already_sent(monkeypatch, db_session):

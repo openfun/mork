@@ -35,6 +35,7 @@ class TaskCreateBase(BaseModel):
     """Base model for creating a task."""
 
     model_config = ConfigDict(extra="ignore")
+    dry_run: bool = True
 
 
 class DeleteInactiveUsers(TaskCreateBase):
