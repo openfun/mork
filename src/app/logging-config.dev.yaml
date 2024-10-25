@@ -32,7 +32,7 @@ loggers:
       - access
     level: INFO
     propagate: false
-  mork.api:
+  mork:
     handlers:
       - default
     level: DEBUG

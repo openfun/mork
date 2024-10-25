@@ -70,11 +70,11 @@ def get_session() -> Generator[SASession, None, None]:
     with SASession(bind=get_engine()) as session:
         logger.debug("Getting session %s", session)
         yield session
+        logger.debug("Closing session %s", session)
 
 
-def is_alive() -> bool:
+def is_alive(session: SASession) -> bool:
     """Check if database connection is alive."""
-    session = next(get_session())
     try:
         session.execute(text("SELECT 1 as is_alive"))
         return True
