@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/tasks", dependencies=[Depends(authenticate_api_key)])
 
 
+@router.post("", status_code=status.HTTP_202_ACCEPTED)
 @router.post("/", status_code=status.HTTP_202_ACCEPTED)
 async def create_task(
     response: Response,
@@ -42,6 +43,7 @@ async def create_task(
     return task_response
 
 
+@router.options("")
 @router.options("/")
 async def get_available_tasks(response: Response) -> dict:
     """Get available tasks that can be created."""
