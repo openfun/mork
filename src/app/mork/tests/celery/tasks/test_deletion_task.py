@@ -49,12 +49,12 @@ def test_delete_inactive_users(edx_db, monkeypatch):
     mock_delete_user = Mock()
     monkeypatch.setattr("mork.celery.tasks.deletion.delete_user", mock_delete_user)
 
-    delete_inactive_users()
+    delete_inactive_users(dry_run=False)
 
     mock_group.assert_called_once_with(
         [
-            mock_delete_user.s(email="johndoe1@example.com"),
-            mock_delete_user.s(email="johndoe2@example.com"),
+            mock_delete_user.s(email="johndoe1@example.com", dry_run=False),
+            mock_delete_user.s(email="johndoe2@example.com", dry_run=False),
         ]
     )
 
@@ -81,22 +81,51 @@ def test_delete_inactive_users_with_batch_size(edx_db, monkeypatch):
     # Set batch size to 1
     monkeypatch.setattr("mork.celery.tasks.deletion.settings.EDX_QUERY_BATCH_SIZE", 1)
 
-    delete_inactive_users()
+    delete_inactive_users(dry_run=False)
 
     mock_group.assert_has_calls(
         [
             call(
                 [
-                    mock_delete_user.s(email="johndoe1@example.com"),
+                    mock_delete_user.s(email="johndoe1@example.com", dry_run=False),
                 ]
             ),
             call().delay(),
             call(
                 [
-                    mock_delete_user.s(email="johndoe2@example.com"),
+                    mock_delete_user.s(email="johndoe2@example.com", dry_run=False),
                 ]
             ),
             call().delay(),
+        ]
+    )
+
+
+def test_delete_inactive_users_with_dry_run(edx_db, monkeypatch):
+    """Test the `delete_inactive_users` function with dry run activated (by default)."""
+    # 2 users that did not log in for 3 years
+    EdxAuthUserFactory.create(
+        last_login=Faker().date_time_between(end_date="-3y"),
+        email="johndoe1@example.com",
+    )
+    EdxAuthUserFactory.create(
+        last_login=Faker().date_time_between(end_date="-3y"),
+        email="johndoe2@example.com",
+    )
+
+    monkeypatch.setattr("mork.celery.tasks.deletion.OpenEdxDB", lambda *args: edx_db)
+
+    mock_group = Mock()
+    monkeypatch.setattr("mork.celery.tasks.deletion.group", mock_group)
+    mock_delete_user = Mock()
+    monkeypatch.setattr("mork.celery.tasks.deletion.delete_user", mock_delete_user)
+
+    delete_inactive_users()
+
+    mock_group.assert_called_once_with(
+        [
+            mock_delete_user.s(email="johndoe1@example.com", dry_run=True),
+            mock_delete_user.s(email="johndoe2@example.com", dry_run=True),
         ]
     )
 
@@ -112,10 +141,27 @@ def test_delete_user(monkeypatch):
         "mork.celery.tasks.deletion.delete_email_status", mock_delete_email_status
     )
     email = "johndoe@example.com"
-    delete_user(email)
+    delete_user(email, dry_run=False)
 
     mock_delete_user_from_db.assert_called_once_with(email)
     mock_delete_email_status.assert_called_once_with(email)
+
+
+def test_delete_user_with_dry_run(monkeypatch):
+    """Test the `delete_user` function with dry run activated (by default)."""
+    mock_delete_user_from_db = Mock()
+    monkeypatch.setattr(
+        "mork.celery.tasks.deletion.delete_user_from_db", mock_delete_user_from_db
+    )
+    mock_delete_email_status = Mock()
+    monkeypatch.setattr(
+        "mork.celery.tasks.deletion.delete_email_status", mock_delete_email_status
+    )
+    email = "johndoe@example.com"
+    delete_user(email)
+
+    mock_delete_user_from_db.assert_not_called()
+    mock_delete_email_status.assert_not_called()
 
 
 def test_delete_user_failure(monkeypatch):
@@ -129,7 +175,7 @@ def test_delete_user_failure(monkeypatch):
     )
 
     with pytest.raises(UserDeleteError, match="An error occurred"):
-        delete_user("johndoe@example.com")
+        delete_user("johndoe@example.com", dry_run=False)
 
 
 def test_delete_user_from_db(edx_db, monkeypatch):

@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+## Changed
+
+- Add a dry-run parameter to the task creation API (defaults to True)
+
 ## [0.3.0] - 2024-11-04
 
 ## Added
