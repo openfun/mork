@@ -132,8 +132,9 @@ celery:
     - "-n"
     - "mork@%"
   brokerUrl: "redis://redis:6379/0"
-  resultBackend: "redis://redis:6379/0"
   brokerTransportOptions: '{"master_name": "mymaster"}'
+  resultBackend: "redis://redis:6379/0"
+  resultBackendTransportOptions: '{"master_name": "mymaster"}'
   taskDefaultQueue: "celery"
 
 # Email sending configuration
