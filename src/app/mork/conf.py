@@ -83,11 +83,14 @@ class Settings(BaseSettings):
 
     # Celery
     broker_url: str = Field("redis://redis:6379/0", alias="MORK_CELERY_BROKER_URL")
+    broker_transport_options: dict = Field(
+        {}, alias="MORK_CELERY_BROKER_TRANSPORT_OPTIONS"
+    )
     result_backend: str = Field(
         "redis://redis:6379/0", alias="MORK_CELERY_RESULT_BACKEND"
     )
-    broker_transport_options: dict = Field(
-        {}, alias="MORK_CELERY_BROKER_TRANSPORT_OPTIONS"
+    result_backend_transport_options: dict = Field(
+        {}, alias="MORK_CELERY_RESULT_BACKEND_TRANSPORT_OPTIONS"
     )
     task_default_queue: str = Field("celery", alias="MORK_CELERY_TASK_DEFAULT_QUEUE")
 

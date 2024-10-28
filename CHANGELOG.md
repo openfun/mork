@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+## Added
+
+- Add configuration for Celery result backend transport options
+
 ## Fixed
 
 - Fix relations in student_manualenrollmentaudit table for cascade delete

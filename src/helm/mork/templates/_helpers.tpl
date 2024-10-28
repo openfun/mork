@@ -98,10 +98,12 @@ Environment variables
   value: "{{ .Values.edx.db.debug }}"
 - name: MORK_CELERY_BROKER_URL
   value: "{{ .Values.celery.brokerUrl }}"
-- name: MORK_CELERY_RESULT_BACKEND
-  value: "{{ .Values.celery.resultBackend }}"
 - name: MORK_CELERY_BROKER_TRANSPORT_OPTIONS
   value: {{ .Values.celery.brokerTransportOptions | squote }}
+- name: MORK_CELERY_RESULT_BACKEND
+  value: "{{ .Values.celery.resultBackend }}"
+- name: MORK_CELERY_RESULT_BACKEND_TRANSPORT_OPTIONS
+  value: {{ .Values.celery.resultBackendTransportOptions | squote }}
 - name: MORK_CELERY_TASK_DEFAULT_QUEUE
   value: "{{ .Values.celery.taskDefaultQueue }}"
 - name: MORK_EMAIL_HOST

@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+## Added
+
+- Add configuration of Celery result backend transport options
+
 ## [0.1.0] - 2024-10-23
 
 ### Added
