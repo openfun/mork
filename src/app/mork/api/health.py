@@ -1,4 +1,4 @@
-"""API routes related to application health checking."""
+"""API health router."""
 
 import logging
 from enum import Enum
@@ -8,8 +8,8 @@ from fastapi import APIRouter, Depends, Response, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from mork.database import get_session
-from mork.database import is_alive as is_db_alive
+from mork.db import get_session
+from mork.db import is_alive as is_db_alive
 
 logger = logging.getLogger(__name__)
 

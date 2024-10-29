@@ -1,4 +1,4 @@
-"""Main module for Mork API authentication."""
+"""Main module for Mork authentication."""
 
 from fastapi import HTTPException, Security, status
 from fastapi.security import APIKeyHeader

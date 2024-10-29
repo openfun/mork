@@ -3,7 +3,7 @@
 import pytest
 from fastapi import HTTPException, status
 
-from mork.api.auth import authenticate_api_key
+from mork.auth import authenticate_api_key
 from mork.conf import settings
 
 

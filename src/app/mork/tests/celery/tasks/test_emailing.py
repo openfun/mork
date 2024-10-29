@@ -13,7 +13,7 @@ from mork.celery.tasks.emailing import (
 )
 from mork.edx.mysql.factories.auth import EdxAuthUserFactory
 from mork.exceptions import EmailAlreadySent, EmailSendError
-from mork.factories import EmailStatusFactory
+from mork.factories.tasks import EmailStatusFactory
 
 
 def test_warn_inactive_users(edx_mysql_db, monkeypatch):

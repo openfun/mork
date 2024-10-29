@@ -8,12 +8,12 @@ from sqlalchemy import select
 
 from mork.celery.celery_app import app
 from mork.conf import settings
-from mork.database import MorkDB
+from mork.db import MorkDB
 from mork.edx.mysql import crud
 from mork.edx.mysql.database import OpenEdxMySQLDB
 from mork.exceptions import EmailAlreadySent, EmailSendError
 from mork.mail import send_email
-from mork.models import EmailStatus
+from mork.models.tasks import EmailStatus
 
 logger = getLogger(__name__)
 

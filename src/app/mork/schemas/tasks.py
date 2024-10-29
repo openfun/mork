@@ -1,4 +1,4 @@
-"""Mork models."""
+"""Mork tasks schemas."""
 
 from enum import Enum, unique
 from typing import Literal
