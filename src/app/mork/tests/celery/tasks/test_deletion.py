@@ -17,8 +17,8 @@ from mork.celery.tasks.deletion import (
 from mork.edx.mysql import crud
 from mork.edx.mysql.factories.auth import EdxAuthUserFactory
 from mork.exceptions import UserDeleteError
-from mork.factories import EmailStatusFactory
-from mork.models import EmailStatus
+from mork.factories.tasks import EmailStatusFactory
+from mork.models.tasks import EmailStatus
 
 
 def test_delete_inactive_users(edx_mysql_db, monkeypatch):

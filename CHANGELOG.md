@@ -15,6 +15,7 @@ and this project adheres to
 ## Changed
 
 - Add a dry-run parameter to the task creation API (defaults to True)
+- Introduce API versioning with `v1` namespace
 
 ## Fixed
 

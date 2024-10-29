@@ -10,7 +10,7 @@ from mork.conf import settings
 from mork.edx.mysql.database import OpenEdxMySQLDB
 from mork.edx.mysql.factories.base import Session, engine
 from mork.edx.mysql.models.base import Base as EdxBase
-from mork.models import Base
+from mork.models.tasks import Base
 
 
 @pytest.fixture

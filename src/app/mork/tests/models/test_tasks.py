@@ -1,6 +1,6 @@
 """Tests of the Mork models."""
 
-from mork.factories import EmailStatusFactory
+from mork.factories.tasks import EmailStatusFactory
 
 
 def test_models_user_safe_dict(db_session):

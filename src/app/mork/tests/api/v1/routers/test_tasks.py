@@ -11,9 +11,9 @@ async def test_tasks_auth(http_client: AsyncClient):
     """Test required authentication for tasks endpoints."""
     # FastAPI returns a 403 error (instead of a 401 error) if no API token is given
     # see https://github.com/tiangolo/fastapi/discussions/9130
-    assert (await http_client.post("/tasks/")).status_code == 403
-    assert (await http_client.options("/tasks/")).status_code == 403
-    assert (await http_client.get("/tasks/status/1234")).status_code == 403
+    assert (await http_client.post("/v1/tasks/")).status_code == 403
+    assert (await http_client.options("/v1/tasks/")).status_code == 403
+    assert (await http_client.get("/v1/tasks/status/1234")).status_code == 403
 
 
 @pytest.mark.anyio
@@ -30,7 +30,7 @@ async def test_tasks_auth(http_client: AsyncClient):
 )
 @pytest.mark.parametrize(
     "tasks_endpoint",
-    ["/tasks/", "/tasks"],
+    ["/v1/tasks/", "/v1/tasks"],
 )
 async def test_create_task(
     http_client: AsyncClient, auth_headers: dict, body_params: str, tasks_endpoint: str
@@ -41,7 +41,7 @@ async def test_create_task(
     celery_task.delay.return_value.task_id = "1234"
 
     with patch.dict(
-        "mork.api.tasks.TASK_TYPE_TO_FUNC", {body_params["type"]: celery_task}
+        "mork.api.v1.tasks.TASK_TYPE_TO_FUNC", {body_params["type"]: celery_task}
     ):
         response = await http_client.post(
             tasks_endpoint, headers=auth_headers, json=body_params
@@ -66,8 +66,8 @@ async def test_create_task_invalid_type(http_client: AsyncClient, auth_headers: 
     """Test creating a task with an invalid type."""
 
     # Without a type
-    with patch.dict("mork.api.tasks.TASK_TYPE_TO_FUNC"):
-        response = await http_client.post("/tasks/", headers=auth_headers)
+    with patch.dict("mork.api.v1.tasks.TASK_TYPE_TO_FUNC"):
+        response = await http_client.post("/v1/tasks/", headers=auth_headers)
 
         assert response.status_code == 422
 
@@ -77,9 +77,9 @@ async def test_create_task_invalid_type(http_client: AsyncClient, auth_headers: 
     celery_task = Mock()
     celery_task.delay.return_value.task_id = "1234"
 
-    with patch.dict("mork.api.tasks.TASK_TYPE_TO_FUNC"):
+    with patch.dict("mork.api.v1.tasks.TASK_TYPE_TO_FUNC"):
         response = await http_client.post(
-            "/tasks/", headers=auth_headers, json=mock_task_create
+            "/v1/tasks/", headers=auth_headers, json=mock_task_create
         )
 
         assert response.status_code == 422
@@ -100,9 +100,9 @@ async def test_create_task_missing_param(
     celery_task = Mock()
     celery_task.delay.return_value.task_id = "1234"
 
-    with patch.dict("mork.api.tasks.TASK_TYPE_TO_FUNC", {task_type: celery_task}):
+    with patch.dict("mork.api.v1.tasks.TASK_TYPE_TO_FUNC", {task_type: celery_task}):
         response = await http_client.post(
-            "/tasks/", headers=auth_headers, json=mock_task_create
+            "/v1/tasks/", headers=auth_headers, json=mock_task_create
         )
         response_data = response.json()
 
@@ -113,7 +113,7 @@ async def test_create_task_missing_param(
 @pytest.mark.anyio
 @pytest.mark.parametrize(
     "tasks_endpoint",
-    ["/tasks/", "/tasks"],
+    ["/v1/tasks/", "/v1/tasks"],
 )
 async def test_get_available_tasks(
     http_client: AsyncClient, auth_headers: dict, tasks_endpoint: str
@@ -138,9 +138,9 @@ async def test_get_task_status(http_client: AsyncClient, auth_headers: dict):
     celery_result = Mock(task_id)
     celery_result(task_id).state = "SUCCESS"
 
-    with patch("mork.api.tasks.AsyncResult", celery_result):
+    with patch("mork.api.v1.tasks.AsyncResult", celery_result):
         response = await http_client.get(
-            f"/tasks/status/{task_id}",
+            f"/v1/tasks/status/{task_id}",
             headers=auth_headers,
         )
         response_data = response.json()

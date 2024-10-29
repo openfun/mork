@@ -1,25 +1,13 @@
-"""Mork models."""
+"""Mork tasks models."""
 
 import datetime
 import uuid
 
 from sqlalchemy import DateTime, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
 
-
-class Base(DeclarativeBase):
-    """Base class for all models in the database."""
-
-    filtered_attrs = []
-
-    def safe_dict(self):
-        """Return a dictionary representation of the model."""
-        return {
-            c.name: getattr(self, c.name)
-            for c in self.__table__.columns
-            if c.name not in self.filtered_attrs
-        }
+from mork.models import Base
 
 
 class EmailStatus(Base):

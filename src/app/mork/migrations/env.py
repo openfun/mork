@@ -9,6 +9,7 @@ from mork.conf import settings
 
 # Nota bene: be sure to import all models that need to be migrated here
 from mork.models import Base
+from mork.models.tasks import EmailStatus
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -1,4 +1,4 @@
-"""API routes related to tasks."""
+"""API tasks router."""
 
 import logging
 from typing import Union
@@ -6,8 +6,8 @@ from typing import Union
 from celery.result import AsyncResult
 from fastapi import APIRouter, Body, Depends, Response, status
 
-from mork.api.auth import authenticate_api_key
-from mork.api.models import (
+from mork.auth import authenticate_api_key
+from mork.schemas.tasks import (
     TASK_TYPE_TO_FUNC,
     DeleteInactiveUsers,
     DeleteUser,

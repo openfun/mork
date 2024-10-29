@@ -2,7 +2,7 @@
 
 import factory
 
-from mork import models
+from mork.models.tasks import EmailStatus
 
 
 class EmailStatusFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -11,7 +11,7 @@ class EmailStatusFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         """Factory configuration."""
 
-        model = models.EmailStatus
+        model = EmailStatus
 
     email = factory.Faker("email")
     sent_date = factory.Faker("date_time")

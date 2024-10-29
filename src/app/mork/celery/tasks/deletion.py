@@ -8,11 +8,11 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from mork.celery.celery_app import app
 from mork.conf import settings
-from mork.database import MorkDB
+from mork.db import MorkDB
 from mork.edx.mysql import crud
 from mork.edx.mysql.database import OpenEdxMySQLDB
 from mork.exceptions import UserDeleteError
-from mork.models import EmailStatus
+from mork.models.tasks import EmailStatus
 
 logger = getLogger(__name__)
 
