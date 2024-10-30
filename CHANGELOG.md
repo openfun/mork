@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.2.0] - 2024-10-30
+
 ## Added
 
 - Add configuration for Celery result backend transport options
@@ -27,5 +29,6 @@ and this project adheres to
 - Add celery task to warn inactive users by email
 - Add celery task to delete inactive users from edx database
 
-[unreleased]: https://github.com/openfun/mork/compare/v0.1.0...main
+[unreleased]: https://github.com/openfun/mork/compare/v0.2.0...main
+[0.2.0]: https://github.com/openfun/mork/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/openfun/mork/compare/1e60ac8...v0.1.0
