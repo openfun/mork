@@ -12,6 +12,10 @@ and this project adheres to
 
 - Allow to OPTIONS and POST `tasks` endpoint without a trailing slash
 
+## Fixed
+
+- Remove unused `REDIS_` environment variables that cause conflict on k8s
+
 ## [0.2.0] - 2024-10-30
 
 ## Added

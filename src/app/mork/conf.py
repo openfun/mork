@@ -64,10 +64,6 @@ class Settings(BaseSettings):
     EDX_DB_DEBUG: bool = False
     EDX_QUERY_BATCH_SIZE: int = 1000
 
-    # Redis configuration
-    REDIS_HOST: str = "localhost"
-    REDIS_PORT: int = 6379
-
     # Emails
     EMAIL_HOST: str = "mailcatcher"
     EMAIL_HOST_USER: str = ""
