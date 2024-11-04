@@ -218,7 +218,7 @@ def test_delete_email_status_no_entry(caplog, db_session, monkeypatch):
     assert (
         "mork.celery.tasks.deletion",
         logging.WARNING,
-        "Mork DB - No user found with email='johndoe1@example.com' for deletion",
+        "Email status - No user found with email='johndoe1@example.com' for deletion",
     ) in caplog.record_tuples
 
 
@@ -246,6 +246,6 @@ def test_delete_email_status_with_failure(caplog, db_session, monkeypatch):
     assert (
         "mork.celery.tasks.deletion",
         logging.ERROR,
-        "Mork DB - Failed to delete user with email='johndoe1@example.com':"
+        "Email status - Failed to delete user with email='johndoe1@example.com':"
         " An error occurred",
     ) in caplog.record_tuples

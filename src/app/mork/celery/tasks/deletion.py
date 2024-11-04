@@ -75,7 +75,7 @@ def delete_email_status(email: str):
         mork_db.session.query(EmailStatus).filter(EmailStatus.email == email).first()
     )
     if not user_to_delete:
-        logger.warning(f"Mork DB - No user found with {email=} for deletion")
+        logger.warning(f"Email status - No user found with {email=} for deletion")
         return
 
     mork_db.session.delete(user_to_delete)
@@ -83,7 +83,7 @@ def delete_email_status(email: str):
         mork_db.session.commit()
     except SQLAlchemyError as exc:
         mork_db.session.rollback()
-        logger.error(f"Mork DB - Failed to delete user with {email=}: {exc}")
+        logger.error(f"Email status - Failed to delete user with {email=}: {exc}")
         return
     finally:
         mork_db.session.close()
