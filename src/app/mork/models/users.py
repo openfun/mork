@@ -38,6 +38,7 @@ class DeletionStatus(str, enum.Enum):
     """Enum for deletion statuses."""
 
     TO_DELETE = "to_delete"
+    DELETING = "deleting"
     DELETED = "deleted"
 
 
