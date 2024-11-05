@@ -2,11 +2,15 @@
 
 import mongomock
 import pytest
+from alembic import command
+from alembic.config import Config
 from mongoengine import connect, disconnect
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session as SASession
 
+from mork.api.v1 import app as v1
 from mork.conf import settings
+from mork.db import get_session
 from mork.edx.mysql.database import OpenEdxMySQLDB
 from mork.edx.mysql.factories.base import Session, engine
 from mork.edx.mysql.models.base import Base as EdxBase
@@ -43,6 +47,11 @@ def db_engine():
     # Create database and tables
     Base.metadata.create_all(engine)
 
+    # Pretend to have all migrations applied
+    alembic_cfg = Config(settings.ALEMBIC_CFG_PATH)
+    alembic_cfg.set_main_option("sqlalchemy.url", settings.TEST_DB_URL)
+    command.stamp(alembic_cfg, "head")
+
     yield engine
 
     Base.metadata.drop_all(engine)
@@ -69,3 +78,15 @@ def db_session(db_engine):
     session.close()
     transaction.rollback()
     connection.close()
+
+
+@pytest.fixture(autouse=True)
+def override_db_test_session(db_session):
+    """Use test database along with a test session by default."""
+
+    def get_session_override():
+        return db_session
+
+    v1.dependency_overrides[get_session] = get_session_override
+
+    yield

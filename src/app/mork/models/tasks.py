@@ -1,7 +1,7 @@
 """Mork tasks models."""
 
-import datetime
-import uuid
+from datetime import datetime
+from uuid import uuid4
 
 from sqlalchemy import DateTime, String
 from sqlalchemy.dialects.postgresql import UUID
@@ -17,8 +17,6 @@ class EmailStatus(Base):
 
     filtered_attrs = ["email"]
 
-    id: Mapped[int] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[int] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     email: Mapped[str] = mapped_column(String(254), unique=True)
-    sent_date: Mapped[datetime.datetime] = mapped_column(DateTime)
+    sent_date: Mapped[datetime] = mapped_column(DateTime)
