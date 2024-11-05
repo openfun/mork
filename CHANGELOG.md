@@ -11,6 +11,7 @@ and this project adheres to
 ## Added
 
 - Add edx mongodb connection to anonymize personal data from edx forums
+- Add `users` endpoints for services to retrieve the list of users to delete  
 
 ## Changed
 
