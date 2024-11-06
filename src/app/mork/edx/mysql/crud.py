@@ -21,7 +21,7 @@ from mork.edx.mysql.models.dark import DarkLangDarklangconfig
 from mork.edx.mysql.models.student import StudentCourseenrollmentallowed
 from mork.edx.mysql.models.util import UtilRatelimitconfiguration
 from mork.edx.mysql.models.verify import VerifyStudentHistoricalverificationdeadline
-from mork.exceptions import UserDeleteError, UserProtectedDeleteError
+from mork.exceptions import UserNotFound, UserProtected
 
 logger = getLogger(__name__)
 
@@ -29,7 +29,7 @@ logger = getLogger(__name__)
 def get_inactive_users_count(
     session: Session,
     threshold_date: datetime,
-):
+) -> int:
     """Get inactive users count from edx database.
 
     SELECT count(auth_user.id) FROM auth_user
@@ -47,7 +47,7 @@ def get_inactive_users(
     threshold_date: datetime,
     offset: Optional[int] = 0,
     limit: Optional[int] = 0,
-):
+) -> list[AuthUser]:
     """Get users from edx database who have not logged in for a specified period.
 
     SELECT auth_user.id,
@@ -78,7 +78,7 @@ def get_inactive_users(
     return session.scalars(query).unique().all()
 
 
-def get_user(session: Session, email: str):
+def get_user(session: Session, email: str) -> AuthUser:
     """Get a user entry based on the provided email.
 
     Parameters:
@@ -119,15 +119,16 @@ def delete_user(session: Session, email: str) -> None:
     session (Session): SQLAlchemy session object.
     email (str): The email of the user to delete.
     """
-    user_to_delete = session.query(AuthUser).filter(AuthUser.email == email).first()
+    user_to_delete = session.scalar(select(AuthUser).where(AuthUser.email == email))
     if not user_to_delete:
-        logger.error(f"No user found with {email=} for deletion")
-        raise UserDeleteError("User to delete does not exist")
+        msg = f"User with {email=} does not exist"
+        logger.error(msg)
+        raise UserNotFound(msg)
 
     if _has_protected_children(session, user_to_delete.id):
-        raise UserProtectedDeleteError(
-            "User is linked to a protected table and cannot be deleted"
-        )
+        msg = f"User with {email=} is linked to a protected table and cannot be deleted"
+        logger.error(msg)
+        raise UserProtected(msg)
 
     # Delete entries in student_courseenrollmentallowed table containing user email
     session.execute(
@@ -139,4 +140,4 @@ def delete_user(session: Session, email: str) -> None:
     # Delete user from auth_user table and all its children
     session.delete(user_to_delete)
 
-    logger.info(f"Deleting user {email=}")
+    logger.debug(f"Deleting user {email=}")

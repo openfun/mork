@@ -27,7 +27,7 @@ from mork.edx.mysql.factories.verify import (
 )
 from mork.edx.mysql.models.auth import AuthUser
 from mork.edx.mysql.models.base import Base
-from mork.exceptions import UserDeleteError, UserProtectedDeleteError
+from mork.exceptions import UserNotFound, UserProtected
 
 
 def test_edx_crud_get_inactive_users_count(edx_mysql_db):
@@ -156,8 +156,10 @@ def test_edx_crud_get_user(edx_mysql_db):
 def test_edx_crud_delete_user_missing(edx_mysql_db):
     """Test the `delete_user` method with missing user in the database."""
 
-    with pytest.raises(UserDeleteError, match="User to delete does not exist"):
-        crud.delete_user(edx_mysql_db.session, email="john_doe@example.com")
+    email = "john_doe@example.com"
+
+    with pytest.raises(UserNotFound, match=f"User with {email=} does not exist"):
+        crud.delete_user(edx_mysql_db.session, email=email)
 
 
 def test_edx_crud_delete_user(edx_mysql_db):
@@ -219,9 +221,10 @@ def test_edx_crud_delete_user(edx_mysql_db):
 
 def test_edx_crud_delete_user_protected_table(edx_mysql_db):
     """Test the `delete_user` method on a user with entries in a protected tables."""
+    email = "john_doe@example.com"
     EdxAuthUserFactory.create_batch(
         1,
-        email="john_doe@example.com",
+        email=email,
         with_protected_tables=True,
     )
 
@@ -242,10 +245,10 @@ def test_edx_crud_delete_user_protected_table(edx_mysql_db):
         assert edx_mysql_db.session.query(table).count() > 0
 
     with pytest.raises(
-        UserProtectedDeleteError,
-        match="User is linked to a protected table and cannot be deleted",
+        UserProtected,
+        match=f"User with {email=} is linked to a protected table and cannot be deleted",  # noqa: E501
     ):
-        crud.delete_user(edx_mysql_db.session, email="john_doe@example.com")
+        crud.delete_user(edx_mysql_db.session, email=email)
 
     # Ensure the parent table is empty
     assert edx_mysql_db.session.query(AuthUser).count() > 0
