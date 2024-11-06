@@ -9,16 +9,21 @@ from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
 from mork.celery.tasks.deletion import (
-    delete_email_status,
     delete_inactive_users,
     delete_user,
-    delete_user_from_db,
+    mark_user_for_deletion,
+    remove_email_status,
 )
-from mork.edx.mysql import crud
 from mork.edx.mysql.factories.auth import EdxAuthUserFactory
 from mork.exceptions import UserDeleteError
 from mork.factories.tasks import EmailStatusFactory
+from mork.factories.users import UserFactory, UserServiceStatusFactory
 from mork.models.tasks import EmailStatus
+from mork.models.users import (
+    DeletionReason,
+    DeletionStatus,
+    User,
+)
 
 
 def test_delete_inactive_users(edx_mysql_db, monkeypatch):
@@ -140,102 +145,171 @@ def test_delete_inactive_users_with_dry_run(edx_mysql_db, monkeypatch):
 
 def test_delete_user(monkeypatch):
     """Test the `delete_user` function."""
-    mock_delete_user_from_db = Mock()
+
+    mock_chain = Mock()
+    monkeypatch.setattr("mork.celery.tasks.deletion.chain", mock_chain)
+
+    mock_mark_user_for_deletion = Mock()
     monkeypatch.setattr(
-        "mork.celery.tasks.deletion.delete_user_from_db", mock_delete_user_from_db
+        "mork.celery.tasks.deletion.mark_user_for_deletion", mock_mark_user_for_deletion
     )
-    mock_delete_email_status = Mock()
+    mock_delete_edx_platform_user = Mock()
     monkeypatch.setattr(
-        "mork.celery.tasks.deletion.delete_email_status", mock_delete_email_status
+        "mork.celery.tasks.deletion.delete_edx_platform_user",
+        mock_delete_edx_platform_user,
+    )
+    mock_remove_email_status = Mock()
+    monkeypatch.setattr(
+        "mork.celery.tasks.deletion.remove_email_status", mock_remove_email_status
     )
     email = "johndoe@example.com"
-    delete_user(email, dry_run=False)
+    reason = DeletionReason.USER_REQUESTED
+    delete_user(email, reason, dry_run=False)
 
-    mock_delete_user_from_db.assert_called_once_with(email)
-    mock_delete_email_status.assert_called_once_with(email)
+    mock_chain.assert_called_once_with(
+        mock_remove_email_status.si(email=email),
+        mock_mark_user_for_deletion.si(email=email, reason=reason),
+        mock_delete_edx_platform_user.s(email=email),
+    )
+    mock_chain.assert_has_calls([call().delay()])
 
 
 def test_delete_user_with_dry_run(monkeypatch):
     """Test the `delete_user` function with dry run activated (by default)."""
-    mock_delete_user_from_db = Mock()
+    mock_mark_user_for_deletion = Mock()
     monkeypatch.setattr(
-        "mork.celery.tasks.deletion.delete_user_from_db", mock_delete_user_from_db
+        "mork.celery.tasks.deletion.mark_user_for_deletion", mock_mark_user_for_deletion
     )
-    mock_delete_email_status = Mock()
+    mock_delete_edx_platform_user = Mock()
     monkeypatch.setattr(
-        "mork.celery.tasks.deletion.delete_email_status", mock_delete_email_status
+        "mork.celery.tasks.deletion.delete_edx_platform_user",
+        mock_delete_edx_platform_user,
+    )
+    mock_remove_email_status = Mock()
+    monkeypatch.setattr(
+        "mork.celery.tasks.deletion.remove_email_status", mock_remove_email_status
     )
     email = "johndoe@example.com"
     delete_user(email)
 
-    mock_delete_user_from_db.assert_not_called()
-    mock_delete_email_status.assert_not_called()
+    mock_delete_edx_platform_user.assert_not_called()
+    mock_remove_email_status.assert_not_called()
 
+    mock_chain = Mock()
+    monkeypatch.setattr("mork.celery.tasks.deletion.chain", mock_chain)
 
-def test_delete_user_failure(monkeypatch):
-    """Test the `delete_user` function with a delete failure."""
-
-    def mock_delete_user_from_db(*args):
-        raise UserDeleteError("An error occurred")
-
+    mock_mark_user_for_deletion = Mock()
     monkeypatch.setattr(
-        "mork.celery.tasks.deletion.delete_user_from_db", mock_delete_user_from_db
+        "mork.celery.tasks.deletion.mark_user_for_deletion", mock_mark_user_for_deletion
     )
+    mock_delete_edx_platform_user = Mock()
+    monkeypatch.setattr(
+        "mork.celery.tasks.deletion.delete_edx_platform_user",
+        mock_delete_edx_platform_user,
+    )
+    mock_remove_email_status = Mock()
+    monkeypatch.setattr(
+        "mork.celery.tasks.deletion.remove_email_status", mock_remove_email_status
+    )
+    email = "johndoe@example.com"
+    reason = DeletionReason.USER_REQUESTED
+    delete_user(email, reason)
 
-    with pytest.raises(UserDeleteError, match="An error occurred"):
-        delete_user("johndoe@example.com", dry_run=False)
+    mock_chain.assert_not_called()
+    mock_chain.delay.assert_not_called()
 
 
-def test_delete_user_from_db(edx_mysql_db, monkeypatch):
-    """Test the `delete_user_from_db` function."""
+def test_mark_user_for_deletion(edx_mysql_db, db_session, caplog, monkeypatch):
+    """Test the `mark_user_for_deletion` function."""
+
+    UserServiceStatusFactory._meta.sqlalchemy_session = db_session
+    UserFactory._meta.sqlalchemy_session = db_session
+
+    class MockMorkDB:
+        session = db_session
+
+    monkeypatch.setattr("mork.celery.tasks.deletion.MorkDB", MockMorkDB)
+
     EdxAuthUserFactory._meta.sqlalchemy_session = edx_mysql_db.session
-    EdxAuthUserFactory.create(email="johndoe1@example.com")
-    EdxAuthUserFactory.create(email="johndoe2@example.com")
-
+    # As we are closing the session inside the function tested, the factory need to
+    # commit the AuthUser created
+    EdxAuthUserFactory._meta.sqlalchemy_session_persistence = "commit"
     monkeypatch.setattr(
         "mork.celery.tasks.deletion.OpenEdxMySQLDB", lambda *args: edx_mysql_db
     )
+    auth_user = EdxAuthUserFactory.create()
 
-    assert crud.get_user(
-        edx_mysql_db.session,
-        email="johndoe1@example.com",
-    )
-    assert crud.get_user(
-        edx_mysql_db.session,
-        email="johndoe2@example.com",
-    )
+    # Mark this user for deletion
+    mark_user_for_deletion(auth_user.email, DeletionReason.GDPR)
 
-    delete_user_from_db(email="johndoe1@example.com")
-
-    assert not crud.get_user(
-        edx_mysql_db.session,
-        email="johndoe1@example.com",
-    )
-    assert crud.get_user(
-        edx_mysql_db.session,
-        email="johndoe2@example.com",
+    # Verify user is created
+    inserted_user = db_session.scalars(select(User)).first()
+    assert inserted_user.username == auth_user.username
+    assert inserted_user.edx_user_id == auth_user.id
+    assert inserted_user.email == auth_user.email
+    assert inserted_user.reason == DeletionReason.GDPR
+    # Verify statuses were created for all users and services
+    assert all(
+        status.status == DeletionStatus.TO_DELETE
+        for status in inserted_user.service_statuses
     )
 
+    # Try to mark the user for deletion again
+    with caplog.at_level(logging.INFO):
+        mark_user_for_deletion(auth_user.email, DeletionReason.GDPR)
 
-def test_delete_user_from_db_with_failure(edx_mysql_db, monkeypatch):
-    """Test the `delete_user_from_db` function with a commit failure."""
+    assert (
+        "mork.celery.tasks.deletion",
+        logging.INFO,
+        f"User with email='{inserted_user.email}' is already marked for deletion",
+    ) in caplog.record_tuples
+
+    # Reset factory persistence
+    EdxAuthUserFactory._meta.sqlalchemy_session_persistence = None
+
+
+def test_mark_user_for_deletion_nonexistent_user(
+    edx_mysql_db, db_session, caplog, monkeypatch
+):
+    """Test the `mark_user_for_deletion` function with a nonexistent user."""
+
     EdxAuthUserFactory._meta.sqlalchemy_session = edx_mysql_db.session
-    EdxAuthUserFactory.create(email="johndoe1@example.com")
+    monkeypatch.setattr(
+        "mork.celery.tasks.deletion.OpenEdxMySQLDB", lambda *args: edx_mysql_db
+    )
+    email = "johndoe@example.com"
+    # Try to mark this user for deletion
+    with pytest.raises(
+        UserDeleteError, match=f"User with {email=} not found in edx database"
+    ):
+        mark_user_for_deletion(email, DeletionReason.GDPR)
+
+
+def test_mark_user_for_deletion_failure(edx_mysql_db, db_session, monkeypatch):
+    """Test the `mark_user_for_deletion` function with a write failure."""
 
     def mock_session_commit():
         raise SQLAlchemyError("An error occurred")
 
-    edx_mysql_db.session.commit = mock_session_commit
+    db_session.commit = mock_session_commit
+
+    class MockMorkDB:
+        session = db_session
+
+    monkeypatch.setattr("mork.celery.tasks.deletion.MorkDB", MockMorkDB)
+
+    EdxAuthUserFactory._meta.sqlalchemy_session = edx_mysql_db.session
     monkeypatch.setattr(
         "mork.celery.tasks.deletion.OpenEdxMySQLDB", lambda *args: edx_mysql_db
     )
+    auth_user = EdxAuthUserFactory.create()
 
-    with pytest.raises(UserDeleteError, match="Failed to delete user."):
-        delete_user_from_db(email="johndoe1@example.com")
+    with pytest.raises(UserDeleteError, match="Failed to mark user to be deleted"):
+        mark_user_for_deletion(auth_user.email, reason=DeletionReason.GDPR)
 
 
-def test_delete_email_status(db_session, monkeypatch):
-    """Test the `delete_email_status` function."""
+def test_remove_email_status(db_session, monkeypatch):
+    """Test the `remove_email_status` function."""
 
     class MockMorkDB:
         session = db_session
@@ -251,15 +325,15 @@ def test_delete_email_status(db_session, monkeypatch):
     assert db_session.execute(query).scalars().first()
 
     # Delete entry
-    delete_email_status(email)
+    remove_email_status(email)
 
     # Check that the entry has been deleted for this email
     query = select(EmailStatus.email).where(EmailStatus.email == email)
     assert not db_session.execute(query).scalars().first()
 
 
-def test_delete_email_status_no_entry(caplog, db_session, monkeypatch):
-    """Test the `delete_email_status` function when entry does not exist."""
+def test_remove_email_status_no_entry(caplog, db_session, monkeypatch):
+    """Test the `remove_email_status` function when entry does not exist."""
 
     class MockMorkDB:
         session = db_session
@@ -271,17 +345,17 @@ def test_delete_email_status_no_entry(caplog, db_session, monkeypatch):
 
     # Delete non existent entry
     with caplog.at_level(logging.WARNING):
-        delete_email_status(email)
+        remove_email_status(email)
 
     assert (
         "mork.celery.tasks.deletion",
         logging.WARNING,
-        "Email status - No user found with email='johndoe1@example.com' for deletion",
+        "Email status - No user found with email johndoe1@example.com for deletion",
     ) in caplog.record_tuples
 
 
-def test_delete_email_status_with_failure(caplog, db_session, monkeypatch):
-    """Test the `delete_email_status` with a commit failure."""
+def test_remove_email_status_with_failure(caplog, db_session, monkeypatch):
+    """Test the `remove_email_status` with a commit failure."""
 
     def mock_session_commit():
         raise SQLAlchemyError("An error occurred")
@@ -299,11 +373,10 @@ def test_delete_email_status_with_failure(caplog, db_session, monkeypatch):
 
     # Try to delete entry
     with caplog.at_level(logging.ERROR):
-        delete_email_status(email)
+        remove_email_status(email)
 
     assert (
         "mork.celery.tasks.deletion",
         logging.ERROR,
-        "Email status - Failed to delete user with email='johndoe1@example.com':"
-        " An error occurred",
+        "Email status - Failed to delete user with email johndoe1@example.com",
     ) in caplog.record_tuples

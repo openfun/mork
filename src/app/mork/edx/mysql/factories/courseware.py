@@ -84,7 +84,7 @@ class EdxCoursewareXmodulestudentinfofieldFactory(BaseSQLAlchemyModelFactory):
         model = CoursewareXmodulestudentinfofield
 
     id = factory.Sequence(lambda n: n + 1)
-    field_name = factory.Faker("word")
+    field_name = factory.Faker("pystr", max_chars=64)
     value = factory.Faker("random_element", elements=["true", "false"])
     student_id = factory.Sequence(lambda n: n + 1)
     created = factory.Faker("date_time")
