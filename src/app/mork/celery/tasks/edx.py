@@ -3,6 +3,7 @@
 from logging import getLogger
 from uuid import UUID
 
+from mongoengine.errors import OperationError
 from sqlalchemy.exc import SQLAlchemyError
 
 from mork.celery.celery_app import app
@@ -12,6 +13,8 @@ from mork.celery.utils import (
     update_status_in_mork,
 )
 from mork.conf import settings
+from mork.edx.mongo import crud as mongo
+from mork.edx.mongo.database import OpenEdxMongoDB
 from mork.edx.mysql import crud as mysql
 from mork.edx.mysql.database import OpenEdxMySQLDB
 from mork.exceptions import (
@@ -79,7 +82,16 @@ def delete_edx_mysql_user(email: str):
         db.session.close()
 
 
-def delete_edx_mongo_user(username: str):  # noqa: ARG001
+def delete_edx_mongo_user(username: str):
     """Delete user's data from edX MongoDB database."""
     logger.debug("Deleting user's data from edX MongoDB")
-    pass
+
+    db = OpenEdxMongoDB()
+    try:
+        mongo.anonymize_comments(username)
+    except OperationError as exc:
+        msg = f"Failed to delete comments of user {username} : {exc}"
+        logger.error(msg)
+        raise UserDeleteError(msg) from exc
+    finally:
+        db.disconnect()

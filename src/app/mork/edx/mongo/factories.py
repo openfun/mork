@@ -1,12 +1,20 @@
 """Factory classes for MongoDB models."""
 
+import random
+
 import factory
+from faker import Faker
 
 from mork.edx.mongo.models import Comment, CommentThread
 
 
 class CommentBaseFactory(factory.mongoengine.MongoEngineFactory):
     """Base factory for MongoDB comment objects."""
+
+    class Params:
+        """Factory parameter to pick username from a list."""
+
+        usernames = []
 
     votes = {}
     visible = factory.Faker("pybool")
@@ -23,7 +31,11 @@ class CommentBaseFactory(factory.mongoengine.MongoEngineFactory):
     anonymous_to_peers = factory.Faker("pybool")
     closed = factory.Faker("pybool")
     author_id = factory.Faker("pyint")
-    author_username = factory.Faker("pystr")
+    author_username = factory.LazyAttribute(
+        lambda f: (
+            random.choice(f.usernames) if f.usernames else Faker().pystr()  # noqa: S311
+        )
+    )
     updated_at = factory.Faker("date_time")
     created_at = factory.Faker("date_time")
     last_activity_at = factory.Faker("date_time")

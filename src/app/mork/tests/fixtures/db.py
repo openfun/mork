@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session as SASession
 from mork.api.v1 import app as v1
 from mork.conf import settings
 from mork.db import get_session
+from mork.edx.mongo.database import OpenEdxMongoDB
 from mork.edx.mysql.database import OpenEdxMySQLDB
 from mork.edx.mysql.factories.base import Session, engine
 from mork.edx.mysql.models.base import Base as EdxBase
@@ -30,13 +31,14 @@ def edx_mysql_db():
 
 @pytest.fixture
 def edx_mongo_db():
-    """Test MongDB database fixture."""
-    connect(
-        db=settings.EDX_MONGO_DB_NAME,
+    """Test edx MongoDB database fixture."""
+    connection = connect(
         host=settings.EDX_MONGO_DB_HOST,
+        db=settings.EDX_MONGO_DB_NAME,
         mongo_client_class=mongomock.MongoClient,
     )
-    yield
+    db = OpenEdxMongoDB(connection)
+    yield db
     disconnect()
 
 

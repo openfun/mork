@@ -4,11 +4,19 @@ from unittest.mock import Mock
 from uuid import uuid4
 
 import pytest
+from mongoengine.errors import OperationError
+from mongoengine.queryset.visitor import Q
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
-from mork.celery.tasks.edx import delete_edx_mysql_user, delete_edx_platform_user
-from mork.edx.mysql import crud
+from mork.celery.tasks.edx import (
+    delete_edx_mongo_user,
+    delete_edx_mysql_user,
+    delete_edx_platform_user,
+)
+from mork.edx.mongo.factories import CommentFactory, CommentThreadFactory
+from mork.edx.mongo.models import Comment, CommentThread
+from mork.edx.mysql import crud as mysql
 from mork.edx.mysql.factories.auth import EdxAuthUserFactory
 from mork.exceptions import (
     UserDeleteError,
@@ -196,11 +204,11 @@ def test_delete_edx_mysql_user(edx_mysql_db, monkeypatch):
     )
 
     # Check both users exist on the MySQL database
-    assert crud.get_user(
+    assert mysql.get_user(
         edx_mysql_db.session,
         email="johndoe1@example.com",
     )
-    assert crud.get_user(
+    assert mysql.get_user(
         edx_mysql_db.session,
         email="johndoe2@example.com",
     )
@@ -208,11 +216,11 @@ def test_delete_edx_mysql_user(edx_mysql_db, monkeypatch):
     delete_edx_mysql_user(email="johndoe1@example.com")
 
     # Check only one remains
-    assert not crud.get_user(
+    assert not mysql.get_user(
         edx_mysql_db.session,
         email="johndoe1@example.com",
     )
-    assert crud.get_user(
+    assert mysql.get_user(
         edx_mysql_db.session,
         email="johndoe2@example.com",
     )
@@ -232,7 +240,7 @@ def test_delete_edx_mysql_user_protected(edx_mysql_db, monkeypatch):
     delete_edx_mysql_user(email=email)
 
     # Check the user still exists on the edX MySQL database
-    assert crud.get_user(
+    assert mysql.get_user(
         edx_mysql_db.session,
         email="johndoe1@example.com",
     )
@@ -257,3 +265,57 @@ def test_delete_edx_mysql_user_with_failure(edx_mysql_db, monkeypatch):
         match=f"Failed to delete user with email='{email}' from edX MySQL",
     ):
         delete_edx_mysql_user(email=email)
+
+
+def test_delete_edx_mongo_user(edx_mongo_db, monkeypatch):
+    """Test to delete user's data from MongoDB."""
+    # Create one comment and one thread for two different users
+    user_1 = "Johndoe1"
+    CommentFactory.create(author_username=user_1)
+    CommentThreadFactory.create(author_username=user_1)
+    user_2 = "Johndoe2"
+    CommentFactory.create(author_username=user_2)
+    CommentThreadFactory.create(author_username=user_2)
+
+    edx_mongo_db.disconnect = lambda: None
+    monkeypatch.setattr(
+        "mork.celery.tasks.edx.OpenEdxMongoDB", lambda *args: edx_mongo_db
+    )
+
+    # Check both users have comments in the MongoDB database
+    assert Comment.objects(Q(author_username=user_1)).all().count() == 1
+    assert CommentThread.objects(Q(author_username=user_1)).all().count() == 1
+    assert Comment.objects(Q(author_username=user_2)).all().count() == 1
+    assert CommentThread.objects(Q(author_username=user_2)).all().count() == 1
+
+    delete_edx_mongo_user(username=user_1)
+
+    # Check only one user remains
+    assert Comment.objects(Q(author_username=user_1)).all().count() == 0
+    assert CommentThread.objects(Q(author_username=user_1)).all().count() == 0
+    assert Comment.objects(Q(author_username=user_2)).all().count() == 1
+    assert CommentThread.objects(Q(author_username=user_2)).all().count() == 1
+
+
+def test_delete_edx_mongo_user_with_failure(edx_mongo_db, monkeypatch):
+    """Test to delete user's data from MongoDB with a operation failure."""
+    username = "Johndoe1"
+    CommentFactory.create(author_username=username)
+    CommentThreadFactory.create(author_username=username)
+
+    monkeypatch.setattr(
+        "mork.celery.tasks.edx.OpenEdxMongoDB", lambda *args: edx_mongo_db
+    )
+
+    def mock_anonymize(*args):
+        raise OperationError("An error occurred")
+
+    monkeypatch.setattr(
+        "mork.celery.tasks.edx.mongo.anonymize_comments", mock_anonymize
+    )
+
+    with pytest.raises(
+        UserDeleteError,
+        match=f"Failed to delete comments of user {username} : An error occurred",
+    ):
+        delete_edx_mongo_user(username=username)
