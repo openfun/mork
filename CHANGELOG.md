@@ -8,11 +8,14 @@ and this project adheres to
 
 ## [Unreleased]
 
+## Added
+
+- Add edx mongodb task to anonymize personal data from edx forums
+
 ## [0.4.0] - 2024-11-20
 
 ## Added
 
-- Add edx mongodb connection to anonymize personal data from edx forums
 - Add `users` endpoints for services to retrieve the list of users to delete
 - Flag users for deletion in Mork database when deletion process begins
 - Add status verification checks before and after user deletion in edX

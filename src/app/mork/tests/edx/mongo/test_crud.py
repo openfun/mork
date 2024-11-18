@@ -9,14 +9,15 @@ from mork.edx.mongo.models import Comment, CommentThread
 def test_edx_mongo_crud_anonymize_comments(edx_mongo_db):
     """Test the `anonymize_comments` method."""
     username = "JohnDoe"
-    CommentFactory.create(author_username=username)
-    CommentThreadFactory.create(author_username=username)
+    CommentFactory.create_batch(3, author_username=username)
+    CommentThreadFactory.create_batch(4, author_username=username)
 
-    assert Comment.objects(author_username=username).count() > 0
-    assert CommentThread.objects(author_username=username).count() > 0
+    assert Comment.objects(author_username=username).count() == 3
+    assert CommentThread.objects(author_username=username).count() == 4
 
-    crud.anonymize_comments(username)
+    count = crud.anonymize_comments(username)
 
+    assert count == 7
     comment = Comment.objects().first()
     assert comment.author_username == "[deleted]"
     assert comment.body == "[deleted]"

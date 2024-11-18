@@ -1,6 +1,6 @@
 """Mork edx MongoDB database connection."""
 
-from pymongo import MongoClient
+from mongoengine import connect, disconnect
 
 from mork.conf import settings
 
@@ -8,10 +8,20 @@ from mork.conf import settings
 class OpenEdxMongoDB:
     """Class to connect to the Open edX MongoDB database."""
 
-    session = None
+    connection = None
 
-    def __init__(self):
-        """Instantiate the MongoDB client."""
-        self.client = MongoClient(settings.EDX_MONGO_DB_URL)
-        self.database = self.client[settings.EDX_MONGO_DB_NAME]
-        self.collection = self.database["contents"]
+    def __init__(self, connection=None):
+        """Instantiate the MongoDB connection."""
+        if connection is not None:
+            self.connection = connection
+        else:
+            self.connection = connect(
+                host=settings.EDX_MONGO_DB_HOST,
+                username=settings.EDX_MONGO_DB_USER,
+                password=settings.EDX_MONGO_DB_PASSWORD,
+                db=settings.EDX_MONGO_DB_NAME,
+            )
+
+    def disconnect(self):
+        """Close the connection with MongoDB."""
+        disconnect()

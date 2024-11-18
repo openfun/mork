@@ -82,5 +82,20 @@ services:
     image: mongo:3.0.15
     ports:
       - "27017:27017"
-    env_file: 
+    env_file:
       - .env
+    configs:
+      - source: init-mongo.sh
+        target: /docker-entrypoint-initdb.d/init-mongo.sh
+
+configs:
+  init-mongo.sh:
+    content: |
+      mongo -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" admin <<EOF
+          use $MORK_EDX_MONGO_DB_NAME;
+          db.createUser({
+              user: "$MORK_EDX_MONGO_DB_USER",
+              pwd: "$MORK_EDX_MONGO_DB_PASSWORD",
+              roles: ["readWrite"],
+          });
+      EOF
