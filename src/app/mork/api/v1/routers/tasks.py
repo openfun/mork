@@ -12,6 +12,7 @@ from mork.schemas.tasks import (
     DeleteInactiveUsers,
     DeleteUser,
     EmailInactiveUsers,
+    EmailUser,
     TaskResponse,
     TaskStatus,
     TaskType,
@@ -26,7 +27,7 @@ router = APIRouter(prefix="/tasks", dependencies=[Depends(authenticate_api_key)]
 @router.post("/", status_code=status.HTTP_202_ACCEPTED)
 async def create_task(
     response: Response,
-    task: Union[DeleteInactiveUsers, EmailInactiveUsers, DeleteUser] = Body(
+    task: Union[DeleteInactiveUsers, EmailInactiveUsers, DeleteUser, EmailUser] = Body(
         discriminator="type"
     ),
 ) -> TaskResponse:

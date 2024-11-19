@@ -14,6 +14,7 @@ and this project adheres to
 - Add `users` endpoints for services to retrieve the list of users to delete
 - Flag users for deletion in Mork database when deletion process begins
 - Add status verification checks before and after user deletion in edX
+- Add support for emailing a single user via api
 
 ## Changed
 

@@ -21,9 +21,21 @@ async def test_tasks_auth(http_client: AsyncClient):
     "body_params",
     [
         {"type": "email_inactive_users", "dry_run": False},
+        {
+            "type": "email_user",
+            "email": "johndoe@example.com",
+            "username": "JohnDoe",
+            "dry_run": False,
+        },
         {"type": "delete_inactive_users", "dry_run": False},
         {"type": "delete_user", "email": "johndoe@example.com", "dry_run": False},
         {"type": "email_inactive_users", "dry_run": True},
+        {
+            "type": "email_user",
+            "email": "johndoe@example.com",
+            "username": "JohnDoe",
+            "dry_run": True,
+        },
         {"type": "delete_inactive_users", "dry_run": True},
         {"type": "delete_user", "email": "johndoe@example.com", "dry_run": True},
     ],
@@ -87,15 +99,19 @@ async def test_create_task_invalid_type(http_client: AsyncClient, auth_headers: 
 
 @pytest.mark.anyio
 @pytest.mark.parametrize(
-    "task_type",
-    ["delete_user"],
+    "task_type, params",
+    [
+        ("delete_user", {}),
+        ("email_user", {"email": "johndoe@example.com"}),
+        ("email_user", {"username": "JohnDoe"}),
+    ],
 )
 async def test_create_task_missing_param(
-    http_client: AsyncClient, auth_headers: dict, task_type: str
+    http_client: AsyncClient, auth_headers: dict, task_type: str, params: dict
 ):
     """Test creating a task with a missing parameter."""
 
-    mock_task_create = {"type": task_type}
+    mock_task_create = {"type": task_type, **params}
 
     celery_task = Mock()
     celery_task.delay.return_value.task_id = "1234"
@@ -127,6 +143,7 @@ async def test_get_available_tasks(
         "delete_inactive_users",
         "delete_user",
         "email_inactive_users",
+        "email_user",
     ]
 
 
