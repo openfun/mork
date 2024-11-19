@@ -140,3 +140,8 @@ python_files = [
     "tests.py",
 ]
 testpaths = "**/tests"
+
+[tool.coverage.run]
+omit = [
+    "*/tests/*",
+]
