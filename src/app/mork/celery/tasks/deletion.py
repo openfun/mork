@@ -28,19 +28,23 @@ logger = getLogger(__name__)
 
 
 @app.task
-def delete_inactive_users(dry_run: bool = True):
+def delete_inactive_users(limit: int = 0, dry_run: bool = True):
     """Celery task to delete inactive users accounts."""
     edx_db = OpenEdxMySQLDB()
 
     threshold_date = datetime.now() - settings.DELETION_PERIOD
-
     total = crud.get_inactive_users_count(edx_db.session, threshold_date)
+
+    if limit:
+        total = min(total, limit)
+
     for batch_offset in range(0, total, settings.EDX_MYSQL_QUERY_BATCH_SIZE):
+        batch_limit = min(settings.EDX_MYSQL_QUERY_BATCH_SIZE, total - batch_offset)
         inactive_users = crud.get_inactive_users(
             edx_db.session,
             threshold_date,
             offset=batch_offset,
-            limit=settings.EDX_MYSQL_QUERY_BATCH_SIZE,
+            limit=batch_limit,
         )
 
         delete_group = group(

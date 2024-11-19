@@ -33,7 +33,7 @@ async def create_task(
 ) -> TaskResponse:
     """Create a new task."""
     celery_task = TASK_TYPE_TO_FUNC[task.type]
-    celery_params = task.model_dump(exclude="type")
+    celery_params = task.model_dump(exclude="type", exclude_none=True)
 
     result = celery_task.delay(**celery_params)
 

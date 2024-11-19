@@ -21,6 +21,7 @@ async def test_tasks_auth(http_client: AsyncClient):
     "body_params",
     [
         {"type": "email_inactive_users", "dry_run": False},
+        {"type": "email_inactive_users", "limit": 100, "dry_run": False},
         {
             "type": "email_user",
             "email": "johndoe@example.com",
@@ -28,6 +29,7 @@ async def test_tasks_auth(http_client: AsyncClient):
             "dry_run": False,
         },
         {"type": "delete_inactive_users", "dry_run": False},
+        {"type": "delete_inactive_users", "limit": 100, "dry_run": False},
         {"type": "delete_user", "email": "johndoe@example.com", "dry_run": False},
         {"type": "email_inactive_users", "dry_run": True},
         {

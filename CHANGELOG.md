@@ -15,6 +15,7 @@ and this project adheres to
 - Flag users for deletion in Mork database when deletion process begins
 - Add status verification checks before and after user deletion in edX
 - Add support for emailing a single user via api
+- Add an optional `limit` parameter for bulk deletion and warning tasks
 
 ## Changed
 
