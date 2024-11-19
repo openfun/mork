@@ -6,7 +6,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, EmailStr
 
 from mork.celery.tasks.deletion import delete_inactive_users, delete_user
-from mork.celery.tasks.emailing import warn_inactive_users
+from mork.celery.tasks.emailing import warn_inactive_users, warn_user
 
 
 @unique
@@ -27,6 +27,7 @@ class TaskType(str, Enum):
     """Possible task types."""
 
     EMAIL_INACTIVE_USERS = "email_inactive_users"
+    EMAIL_USER = "email_user"
     DELETE_INACTIVE_USERS = "delete_inactive_users"
     DELETE_USER = "delete_user"
 
@@ -57,6 +58,14 @@ class DeleteUser(TaskCreateBase):
     email: EmailStr
 
 
+class EmailUser(TaskCreateBase):
+    """Model for creating a task to email one user."""
+
+    type: Literal[TaskType.EMAIL_USER]
+    email: EmailStr
+    username: str
+
+
 class TaskResponse(BaseModel):
     """Model for a task response."""
 
@@ -66,6 +75,7 @@ class TaskResponse(BaseModel):
 
 TASK_TYPE_TO_FUNC = {
     TaskType.EMAIL_INACTIVE_USERS: warn_inactive_users,
+    TaskType.EMAIL_USER: warn_user,
     TaskType.DELETE_INACTIVE_USERS: delete_inactive_users,
     TaskType.DELETE_USER: delete_user,
 }
