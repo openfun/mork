@@ -66,8 +66,38 @@ def test_delete_inactive_users(edx_mysql_db, monkeypatch):
     )
 
 
+def test_delete_inactive_users_with_limit(edx_mysql_db, monkeypatch):
+    """Test the `delete_inactive_users` function with limit."""
+    # 2 users that did not log in for 3 years
+    EdxAuthUserFactory.create(
+        last_login=Faker().date_time_between(end_date="-3y"),
+        email="johndoe1@example.com",
+    )
+    EdxAuthUserFactory.create(
+        last_login=Faker().date_time_between(end_date="-3y"),
+        email="johndoe2@example.com",
+    )
+
+    monkeypatch.setattr(
+        "mork.celery.tasks.deletion.OpenEdxMySQLDB", lambda *args: edx_mysql_db
+    )
+
+    mock_group = Mock()
+    monkeypatch.setattr("mork.celery.tasks.deletion.group", mock_group)
+    mock_delete_user = Mock()
+    monkeypatch.setattr("mork.celery.tasks.deletion.delete_user", mock_delete_user)
+
+    delete_inactive_users(limit=1, dry_run=False)
+
+    mock_group.assert_called_once_with(
+        [
+            mock_delete_user.s(email="johndoe1@example.com", dry_run=False),
+        ]
+    )
+
+
 def test_delete_inactive_users_with_batch_size(edx_mysql_db, monkeypatch):
-    """Test the `warn_inactive_users` function."""
+    """Test the `warn_inactive_users` function with batch size."""
     # 2 users that did not log in for 3 years
     EdxAuthUserFactory.create(
         last_login=Faker().date_time_between(end_date="-3y"),

@@ -3,7 +3,7 @@
 from enum import Enum, unique
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, PositiveInt
 
 from mork.celery.tasks.deletion import delete_inactive_users, delete_user
 from mork.celery.tasks.emailing import warn_inactive_users, warn_user
@@ -43,12 +43,14 @@ class DeleteInactiveUsers(TaskCreateBase):
     """Model for creating a task to delete all inactive users."""
 
     type: Literal[TaskType.DELETE_INACTIVE_USERS]
+    limit: PositiveInt | None = None
 
 
 class EmailInactiveUsers(TaskCreateBase):
     """Model for creating a task to email all inactive users."""
 
     type: Literal[TaskType.EMAIL_INACTIVE_USERS]
+    limit: PositiveInt | None = None
 
 
 class DeleteUser(TaskCreateBase):
