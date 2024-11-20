@@ -52,6 +52,7 @@ async def lifespan(app: FastAPI):  # noqa: ARG001
                 FastApiIntegration(),
             ],
         )
+        sentry_sdk.set_tag("application", "api")
 
     yield
     engine.dispose()
