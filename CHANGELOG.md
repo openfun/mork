@@ -14,7 +14,7 @@ and this project adheres to
 
 ## [0.4.0] - 2024-11-20
 
-## Added
+### Added
 
 - Add `users` endpoints for services to retrieve the list of users to delete
 - Flag users for deletion in Mork database when deletion process begins
@@ -22,38 +22,38 @@ and this project adheres to
 - Add support for emailing a single user via api
 - Add an optional `limit` parameter for bulk deletion and warning tasks
 
-## Changed
+### Changed
 
 - Add a dry-run parameter to the task creation API (defaults to True)
 - Introduce API versioning with `v1` namespace
 
-## Fixed
+### Fixed
 
 - Fix HTTP 500 errors on heartbeat endpoint when QueuePool limits are reached
 
 ## [0.3.0] - 2024-11-04
 
-## Added
+### Added
 
 - Allow to OPTIONS and POST `tasks` endpoint without a trailing slash
 
-## Fixed
+### Fixed
 
 - Remove unused `REDIS_` environment variables that cause conflict on k8s
 
 ## [0.2.0] - 2024-10-30
 
-## Added
+### Added
 
 - Add configuration for Celery result backend transport options
 
-## Fixed
+### Fixed
 
 - Fix relations in student_manualenrollmentaudit table for cascade delete
 
 ## [0.1.0] - 2024-10-22
 
-### Added
+#### Added
 
 - Bootstrap base backend boilerplate
 - Implement tasks endpoints
