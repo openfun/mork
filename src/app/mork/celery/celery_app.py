@@ -3,7 +3,12 @@
 from celery import Celery
 
 app = Celery(
-    "mork", include=["mork.celery.tasks.deletion", "mork.celery.tasks.emailing"]
+    "mork",
+    include=[
+        "mork.celery.tasks.deletion",
+        "mork.celery.tasks.edx",
+        "mork.celery.tasks.emailing",
+    ],
 )
 
 # Using a string here means the worker doesn't have to serialize
