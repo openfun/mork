@@ -150,6 +150,16 @@ Environment variables
   value: "{{ .Values.email.siteBaseUrl }}"
 - name: MORK_EMAIL_SITE_LOGIN_URL
   value: "{{ .Values.email.siteLoginUrl }}"
+- name: MORK_SENTRY_DSN
+  value: "{{ .Values.sentry.dsn }}"
+- name: MORK_SENTRY_EXECUTION_ENVIRONMENT
+  value: "{{ .Values.sentry.environment }}"
+- name: MORK_SENTRY_API_TRACES_SAMPLE_RATE
+  value: "{{ .Values.sentry.apiSampleRate }}"
+- name: MORK_SENTRY_CELERY_TRACES_SAMPLE_RATE
+  value: "{{ .Values.sentry.celerySampleRate }}"
+- name: MORK_SENTRY_IGNORE_HEALTH_CHECKS
+  value: "{{ .Values.sentry.ignoreHealthChecks }}"
 
 {{- range $key, $val := .Values.env.secret }}
 - name: {{ $val.envName }}

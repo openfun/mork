@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- Add environment variables for Sentry configuration
+
 ## [0.4.0] - 2024-11-20
 
 ## Added
@@ -20,17 +24,17 @@ and this project adheres to
 
 ## [0.3.0] - 2024-11-04
 
-## Changed
+### Changed
 
 - Upgrade appVersion to `0.3.0`
 
 ## [0.2.0] - 2024-10-30
 
-## Added
+### Added
 
 - Add configuration of Celery result backend transport options
 
-## Changed
+### Changed
 
 - Upgrade appVersion to `0.2.0`
 
