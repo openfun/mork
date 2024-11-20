@@ -157,6 +157,12 @@ email:
   siteBaseUrl: "https://fun-mooc.fr"
   siteLoginUrl: "https://lms.fun-mooc.fr/login"
 
+sentry:
+  environment: development
+  dsn: https://fake@key.ingest.sentry.io/1234567
+  apiSampleRate: 1.0
+  celerySampleRate: 1.0
+  ignoreHealthChecks: true
 
 loggingConfig:
   version: 1
