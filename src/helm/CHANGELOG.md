@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+## Added
+
+- Add environment variable `MORK_API_SERVER_HOST` that points to the API service
+
 ## [0.3.0] - 2024-11-04
 
 ## Changed

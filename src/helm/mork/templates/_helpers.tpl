@@ -55,6 +55,8 @@ app.kubernetes.io/part-of: mork
 Environment variables
 */}}
 {{- define "mork.envs" -}}
+- name: "MORK_API_SERVER_HOST"
+  value: "{{ include "mork.fullname" . }}-api"
 - name: "MORK_API_SERVER_PORT"
   value: "{{ .Values.api.port }}"
 - name: "MORK_API_KEYS"
