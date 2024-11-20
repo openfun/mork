@@ -106,6 +106,7 @@ class Settings(BaseSettings):
     SENTRY_DSN: Optional[str] = None
     SENTRY_EXECUTION_ENVIRONMENT: str = "development"
     SENTRY_API_TRACES_SAMPLE_RATE: float = 1.0
+    SENTRY_CELERY_TRACES_SAMPLE_RATE: float = 1.0
     SENTRY_IGNORE_HEALTH_CHECKS: bool = False
 
     @property

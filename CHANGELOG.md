@@ -8,9 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
-## Added
+### Added
 
 - Add edx mongodb task to anonymize personal data from edx forums
+- Add Sentry configuration for Celery
 
 ## [0.4.0] - 2024-11-20
 
