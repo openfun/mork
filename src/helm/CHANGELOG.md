@@ -12,13 +12,17 @@ and this project adheres to
 
 - Add environment variables for Sentry configuration
 
+### Changed
+
+- Rename secret key reference for populating `MORK_EDX_MYSQL_DB_PASSWORD`
+
 ## [0.4.0] - 2024-11-20
 
-## Added
+### Added
 
 - Add environment variable `MORK_API_SERVER_HOST` that points to the API service
 
-## Changed
+### Changed
 
 - Upgrade appVersion to `0.3.0`
 

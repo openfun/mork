@@ -92,7 +92,7 @@ Environment variables
 - name: MORK_EDX_MYSQL_DB_PASSWORD
   valueFrom:
     secretKeyRef:
-      name: mork-edx-mysql-db
+      name: mork-edx-database
       key: MORK_EDX_MYSQL_DB_PASSWORD
 - name: MORK_EDX_MYSQL_DB_PORT
   value: "{{ .Values.edx.mysql.port }}"
