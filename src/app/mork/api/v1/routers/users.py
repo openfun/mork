@@ -164,6 +164,8 @@ async def update_user_status(
             status_code=status.HTTP_404_NOT_FOUND, detail=message
         ) from exc
 
+    session.commit()
+
     response_user = UserStatusUpdate(
         id=updated.user_id,
         service_name=updated.service_name,

@@ -16,6 +16,7 @@ and this project adheres to
 ### Fixed
 
 - Correct email templates path in Dockerfile
+- Ensure API status updates are committed to database
 
 ## [0.4.0] - 2024-11-20
 
