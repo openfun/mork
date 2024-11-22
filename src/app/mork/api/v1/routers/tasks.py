@@ -52,7 +52,7 @@ async def get_available_tasks(response: Response) -> dict:
     return {"task_types": list(TaskType)}
 
 
-@router.get("/status/{task_id}")
+@router.get("/{task_id}/status")
 async def get_task_status(task_id: str) -> TaskResponse:
     """Get the task status for `task_id`."""
     status = AsyncResult(task_id).state

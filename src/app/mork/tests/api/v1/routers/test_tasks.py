@@ -13,7 +13,7 @@ async def test_tasks_auth(http_client: AsyncClient):
     # see https://github.com/tiangolo/fastapi/discussions/9130
     assert (await http_client.post("/v1/tasks/")).status_code == 403
     assert (await http_client.options("/v1/tasks/")).status_code == 403
-    assert (await http_client.get("/v1/tasks/status/1234")).status_code == 403
+    assert (await http_client.get("/v1/tasks/1234/status")).status_code == 403
 
 
 @pytest.mark.anyio
@@ -66,7 +66,7 @@ async def test_create_task(
         assert response_data.get("id")
         assert response_data.get("status") == "PENDING"
         assert (
-            response.headers["location"] == f"/tasks/status/{response_data.get("id")}"
+            response.headers["location"] == f"/tasks/{response_data.get("id")}/status"
         )
 
         expected_params = {
@@ -159,7 +159,7 @@ async def test_get_task_status(http_client: AsyncClient, auth_headers: dict):
 
     with patch("mork.api.v1.tasks.AsyncResult", celery_result):
         response = await http_client.get(
-            f"/v1/tasks/status/{task_id}",
+            f"/v1/tasks/{task_id}/status",
             headers=auth_headers,
         )
         response_data = response.json()

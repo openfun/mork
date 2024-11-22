@@ -13,6 +13,10 @@ and this project adheres to
 - Add edx mongodb task to anonymize personal data from edx forums
 - Add Sentry configuration for Celery
 
+### Changed
+
+- Improve task status endpoint path to `tasks/task_id/status`
+
 ### Fixed
 
 - Correct email templates path in Dockerfile
