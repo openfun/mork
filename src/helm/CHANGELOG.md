@@ -19,6 +19,7 @@ and this project adheres to
 ### Fixed
 
 - Narrow Celery deployment selector labels
+- Add API component label to the migration job
 
 ## [0.4.0] - 2024-11-20
 
