@@ -13,6 +13,10 @@ and this project adheres to
 - Add edx mongodb task to anonymize personal data from edx forums
 - Add Sentry configuration for Celery
 
+### Fixed
+
+- Correct email templates path in Dockerfile
+
 ## [0.4.0] - 2024-11-20
 
 ### Added
