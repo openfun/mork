@@ -66,7 +66,7 @@ ARG DOCKER_USER=1000
 USER ${DOCKER_USER}
 
 # Copy mork mails
-COPY --from=mail-builder /mail/app/mork/templates /app/src/app/mork/templates
+COPY --from=mail-builder /mail/app/mork/templates /app/mork/templates
 
 CMD ["uvicorn", \
      "mork.api:app", \
