@@ -9,6 +9,7 @@ metadata:
 spec:
   selector:
     matchLabels:
+      app.kubernetes.io/component: celery
       {{- include "mork.selectorLabels" . | nindent 6 }}
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
