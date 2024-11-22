@@ -16,6 +16,10 @@ and this project adheres to
 
 - Rename secret key reference for populating `MORK_EDX_MYSQL_DB_PASSWORD`
 
+### Fixed
+
+- Narrow Celery deployment selector labels
+
 ## [0.4.0] - 2024-11-20
 
 ### Added
