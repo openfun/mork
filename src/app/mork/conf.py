@@ -28,10 +28,10 @@ class Settings(BaseSettings):
     API_KEYS: list[str] = ["APIKeyToBeChanged"]
 
     # Warning task configuration
-    WARNING_PERIOD: timedelta = "P3Y30D"
+    WARNING_PERIOD: timedelta = "P5Y30D"
 
     # Deletion task configuration
-    DELETION_PERIOD: timedelta = "P3Y"
+    DELETION_PERIOD: timedelta = "P5Y"
     DELETE_MAX_RETRIES: int = 3
 
     # Edx forum configuration
