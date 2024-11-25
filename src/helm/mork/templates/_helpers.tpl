@@ -121,6 +121,10 @@ Environment variables
   value: "{{ .Values.edx.mongo.port }}"
 - name: MORK_EDX_MONGO_DB_DEBUG
   value: "{{ .Values.edx.mongo.debug }}"
+- name: MORK_BREVO_API_URL
+  value: "{{ .Values.brevo.apiUrl }}"
+- name: MORK_BREVO_API_KEY
+  value: "{{ .Values.brevo.apiKey }}"
 - name: MORK_CELERY_BROKER_URL
   value: "{{ .Values.celery.brokerUrl }}"
 - name: MORK_CELERY_BROKER_TRANSPORT_OPTIONS

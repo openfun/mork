@@ -1,9 +1,10 @@
 """Tests for Mork Celery deletion tasks."""
 
 import logging
-from unittest.mock import Mock, call
+from unittest.mock import Mock, call, patch
 
 import pytest
+from celery import group
 from faker import Faker
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
@@ -177,77 +178,32 @@ def test_delete_inactive_users_with_dry_run(edx_mysql_db, monkeypatch):
 def test_delete_user(monkeypatch):
     """Test the `delete_user` function."""
 
-    mock_chain = Mock()
-    monkeypatch.setattr("mork.celery.tasks.deletion.chain", mock_chain)
+    with (
+        patch("mork.celery.tasks.deletion.remove_email_status.si") as mock_remove_email,
+        patch("mork.celery.tasks.deletion.mark_user_for_deletion.si") as mock_mark,
+        patch("mork.celery.tasks.deletion.delete_edx_platform_user.s") as mock_edx,
+        patch("mork.celery.tasks.deletion.delete_brevo_platform_user.s") as mock_brevo,
+        patch("mork.celery.tasks.deletion.chain") as mock_chain,
+    ):
+        email = "johndoe@example.com"
+        reason = DeletionReason.USER_REQUESTED
+        delete_user(email, reason, dry_run=False)
 
-    mock_mark_user_for_deletion = Mock()
-    monkeypatch.setattr(
-        "mork.celery.tasks.deletion.mark_user_for_deletion", mock_mark_user_for_deletion
-    )
-    mock_delete_edx_platform_user = Mock()
-    monkeypatch.setattr(
-        "mork.celery.tasks.deletion.delete_edx_platform_user",
-        mock_delete_edx_platform_user,
-    )
-    mock_remove_email_status = Mock()
-    monkeypatch.setattr(
-        "mork.celery.tasks.deletion.remove_email_status", mock_remove_email_status
-    )
-    email = "johndoe@example.com"
-    reason = DeletionReason.USER_REQUESTED
-    delete_user(email, reason, dry_run=False)
-
-    mock_chain.assert_called_once_with(
-        mock_remove_email_status.si(email=email),
-        mock_mark_user_for_deletion.si(email=email, reason=reason),
-        mock_delete_edx_platform_user.s(email=email),
-    )
-    mock_chain.assert_has_calls([call().delay()])
+        mock_chain.assert_called_once_with(
+            mock_remove_email(email=email),
+            mock_mark(email=email, reason=reason),
+            group(mock_edx(email=email), mock_brevo(email=email)),
+        )
 
 
 def test_delete_user_with_dry_run(monkeypatch):
     """Test the `delete_user` function with dry run activated (by default)."""
-    mock_mark_user_for_deletion = Mock()
-    monkeypatch.setattr(
-        "mork.celery.tasks.deletion.mark_user_for_deletion", mock_mark_user_for_deletion
-    )
-    mock_delete_edx_platform_user = Mock()
-    monkeypatch.setattr(
-        "mork.celery.tasks.deletion.delete_edx_platform_user",
-        mock_delete_edx_platform_user,
-    )
-    mock_remove_email_status = Mock()
-    monkeypatch.setattr(
-        "mork.celery.tasks.deletion.remove_email_status", mock_remove_email_status
-    )
-    email = "johndoe@example.com"
-    delete_user(email)
 
-    mock_delete_edx_platform_user.assert_not_called()
-    mock_remove_email_status.assert_not_called()
+    with patch("mork.celery.tasks.deletion.chain") as mock_chain:
+        email = "johndoe@example.com"
+        delete_user(email)
 
-    mock_chain = Mock()
-    monkeypatch.setattr("mork.celery.tasks.deletion.chain", mock_chain)
-
-    mock_mark_user_for_deletion = Mock()
-    monkeypatch.setattr(
-        "mork.celery.tasks.deletion.mark_user_for_deletion", mock_mark_user_for_deletion
-    )
-    mock_delete_edx_platform_user = Mock()
-    monkeypatch.setattr(
-        "mork.celery.tasks.deletion.delete_edx_platform_user",
-        mock_delete_edx_platform_user,
-    )
-    mock_remove_email_status = Mock()
-    monkeypatch.setattr(
-        "mork.celery.tasks.deletion.remove_email_status", mock_remove_email_status
-    )
-    email = "johndoe@example.com"
-    reason = DeletionReason.USER_REQUESTED
-    delete_user(email, reason)
-
-    mock_chain.assert_not_called()
-    mock_chain.delay.assert_not_called()
+        mock_chain.assert_not_called()
 
 
 def test_mark_user_for_deletion(edx_mysql_db, db_session, caplog, monkeypatch):

@@ -76,6 +76,10 @@ class Settings(BaseSettings):
     EDX_MONGO_DB_PORT: int = 27017
     EDX_MONGO_DB_DEBUG: bool = False
 
+    # Brevo configuration
+    BREVO_API_URL: str = "https://api.brevo.com/v3"
+    BREVO_API_KEY: str = "ToBeChanged"
+
     # Emails
     EMAIL_HOST: str = "mailcatcher"
     EMAIL_HOST_USER: str = ""

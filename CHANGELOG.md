@@ -14,6 +14,7 @@ and this project adheres to
 - Add `created_at` and `updated_at` fields to response from user API
 - Add custom liveness and readiness probe for Celery
 - Add `PROTECTED` status to user deletion workflow
+- Add task to delete contacts from Brevo
 
 ### Fixed
 
