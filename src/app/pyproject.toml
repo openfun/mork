@@ -32,13 +32,13 @@ dependencies = [
     "mongoengine==0.29.1",
     "mongomock==4.3.0",
     "psycopg2-binary==2.9.10",
-    "pydantic==2.9.2",
+    "pydantic==2.10.1",
     "pydantic_settings==2.6.1",
     "python-datauri==2.2.0",
     "pymongo==3.13.0", # pin as it is the last version compatible with MongoDB 3.0
     "pymysql==1.1.1",
     "redis==5.2.0",
-    "sentry-sdk[celery,fastapi]==2.18.0",
+    "sentry-sdk[celery,fastapi]==2.19.0",
     "SQLAlchemy==2.0.36", 
 ]
 dynamic = ["version"]
@@ -60,8 +60,8 @@ dev = [
     "flower==2.0.1",
     "pytest==8.3.3",
     "pytest-cov==6.0.0",
-    "pytest-httpx==0.33.0",
-    "ruff==0.7.4",
+    "pytest-httpx==0.34.0",
+    "ruff==0.8.0",
 ]
 
 [tool.setuptools.dynamic]
