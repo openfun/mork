@@ -55,24 +55,30 @@ app.kubernetes.io/part-of: mork
 Environment variables
 */}}
 {{- define "mork.envs" -}}
-- name: "MORK_API_SERVER_HOST"
+- name: MORK_API_SERVER_HOST
   value: "{{ include "mork.fullname" . }}-api"
-- name: "MORK_API_SERVER_PORT"
+- name: MORK_API_SERVER_PORT
   value: "{{ .Values.api.port }}"
-- name: "MORK_API_KEYS"
+- name: MORK_API_KEYS
   valueFrom:
     secretKeyRef:
       name: mork-api-keys
       key: MORK_API_KEYS
-- name: "MORK_DB_ENGINE"
+- name: MORK_DELETION_PERIOD
+  value: "{{ .Values.deletion.period }}"
+- name: MORK_DELETE_MAX_RETRIES
+  value: "{{ .Values.deletion.maxRetries }}"
+- name: MORK_EDX_FORUM_PLACEHOLDER_USER_ID
+  value: "{{ .Values.deletion.forumUserId }}"
+- name: MORK_DB_ENGINE
   value: "{{ .Values.db.engine }}"
-- name: "MORK_DB_HOST"
+- name: MORK_DB_HOST
   value: "{{ .Values.db.host }}"
-- name: "MORK_DB_NAME"
+- name: MORK_DB_NAME
   value: "{{ .Values.db.name }}"
-- name: "MORK_DB_USER"
+- name: MORK_DB_USER
   value: "{{ .Values.db.user }}"
-- name: "MORK_DB_PASSWORD"
+- name: MORK_DB_PASSWORD
   valueFrom:
     secretKeyRef:
       name: mork-database
@@ -125,6 +131,8 @@ Environment variables
   value: {{ .Values.celery.resultBackendTransportOptions | squote }}
 - name: MORK_CELERY_TASK_DEFAULT_QUEUE
   value: "{{ .Values.celery.taskDefaultQueue }}"
+- name: "MORK_WARNING_PERIOD"
+  value: "{{ .Values.email.period }}"
 - name: MORK_EMAIL_HOST
   value: "{{ .Values.email.host }}"
 - name: MORK_EMAIL_HOST_USER
