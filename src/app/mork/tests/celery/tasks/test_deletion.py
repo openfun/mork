@@ -14,6 +14,7 @@ from mork.celery.tasks.deletion import (
     mark_user_for_deletion,
     remove_email_status,
 )
+from mork.conf import settings
 from mork.edx.mysql.factories.auth import EdxAuthUserFactory
 from mork.exceptions import UserDeleteError
 from mork.factories.tasks import EmailStatusFactory
@@ -28,22 +29,22 @@ from mork.models.users import (
 
 def test_delete_inactive_users(edx_mysql_db, monkeypatch):
     """Test the `delete_inactive_users` function."""
-    # 2 users that did not log in for 3 years
+    # 2 users that did not log in for more than the deletion period
     EdxAuthUserFactory.create(
-        last_login=Faker().date_time_between(end_date="-3y"),
+        last_login=Faker().date_time_between(end_date=-settings.DELETION_PERIOD),
         email="johndoe1@example.com",
     )
     EdxAuthUserFactory.create(
-        last_login=Faker().date_time_between(end_date="-3y"),
+        last_login=Faker().date_time_between(end_date=-settings.DELETION_PERIOD),
         email="johndoe2@example.com",
     )
     # 2 users that logged in recently
     EdxAuthUserFactory.create(
-        last_login=Faker().date_time_between(start_date="-3y"),
+        last_login=Faker().date_time_between(start_date=-settings.DELETION_PERIOD),
         email="janedah1@example.com",
     )
     EdxAuthUserFactory.create(
-        last_login=Faker().date_time_between(start_date="-3y"),
+        last_login=Faker().date_time_between(start_date=-settings.DELETION_PERIOD),
         email="janedah2@example.com",
     )
 
@@ -68,13 +69,13 @@ def test_delete_inactive_users(edx_mysql_db, monkeypatch):
 
 def test_delete_inactive_users_with_limit(edx_mysql_db, monkeypatch):
     """Test the `delete_inactive_users` function with limit."""
-    # 2 users that did not log in for 3 years
+    # 2 users that did not log in for more than the deletion period
     EdxAuthUserFactory.create(
-        last_login=Faker().date_time_between(end_date="-3y"),
+        last_login=Faker().date_time_between(end_date=-settings.DELETION_PERIOD),
         email="johndoe1@example.com",
     )
     EdxAuthUserFactory.create(
-        last_login=Faker().date_time_between(end_date="-3y"),
+        last_login=Faker().date_time_between(end_date=-settings.DELETION_PERIOD),
         email="johndoe2@example.com",
     )
 
@@ -98,13 +99,13 @@ def test_delete_inactive_users_with_limit(edx_mysql_db, monkeypatch):
 
 def test_delete_inactive_users_with_batch_size(edx_mysql_db, monkeypatch):
     """Test the `warn_inactive_users` function with batch size."""
-    # 2 users that did not log in for 3 years
+    # 2 users that did not log in for more than the deletion period
     EdxAuthUserFactory.create(
-        last_login=Faker().date_time_between(end_date="-3y"),
+        last_login=Faker().date_time_between(end_date=-settings.DELETION_PERIOD),
         email="johndoe1@example.com",
     )
     EdxAuthUserFactory.create(
-        last_login=Faker().date_time_between(end_date="-3y"),
+        last_login=Faker().date_time_between(end_date=-settings.DELETION_PERIOD),
         email="johndoe2@example.com",
     )
 
@@ -144,13 +145,13 @@ def test_delete_inactive_users_with_batch_size(edx_mysql_db, monkeypatch):
 
 def test_delete_inactive_users_with_dry_run(edx_mysql_db, monkeypatch):
     """Test the `delete_inactive_users` function with dry run activated (by default)."""
-    # 2 users that did not log in for 3 years
+    # 2 users that did not log in for more than the deletion period
     EdxAuthUserFactory.create(
-        last_login=Faker().date_time_between(end_date="-3y"),
+        last_login=Faker().date_time_between(end_date=-settings.DELETION_PERIOD),
         email="johndoe1@example.com",
     )
     EdxAuthUserFactory.create(
-        last_login=Faker().date_time_between(end_date="-3y"),
+        last_login=Faker().date_time_between(end_date=-settings.DELETION_PERIOD),
         email="johndoe2@example.com",
     )
 
