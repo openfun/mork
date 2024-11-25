@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- Add environment variables for Brevo configuration
+
 ### Changed
 
 - Change Celery liveness and readiness probes to file-based probes

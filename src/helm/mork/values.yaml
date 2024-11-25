@@ -127,6 +127,10 @@ edx:
     port: 27017
     debug: false
 
+brevo:
+  apiUrl: "https://api.brevo.com/v3"
+  apiKey: ""
+
 # Celery configuration
 celery:
   command:
