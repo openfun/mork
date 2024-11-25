@@ -11,6 +11,7 @@ and this project adheres to
 ### Added
 
 - Add environment variables for Sentry configuration
+- Add environment variables for deletion and emailing tasks configuration
 
 ### Changed
 

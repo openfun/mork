@@ -144,8 +144,15 @@ celery:
   resultBackendTransportOptions: '{"master_name": "mymaster"}'
   taskDefaultQueue: "celery"
 
+# Deletion configuration
+deletion:
+  period: "P5Y"
+  maxRetries: 3
+  forumUserId: "1234"
+
 # Email sending configuration
 email:
+  period: "P5Y30D"
   host: "mailcatcher"
   user: ""
   port: 1025
