@@ -95,7 +95,7 @@ def mark_user_for_deletion(email: str, reason: DeletionReason) -> UUID:
     edx_mysql_db.session.close()
 
     if not auth_user:
-        msg = f"User with {email=} not found in edx database"
+        msg = "User not found in edx database"
         logger.error(msg)
         raise UserDeleteError(msg)
 

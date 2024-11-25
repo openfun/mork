@@ -262,7 +262,7 @@ def test_delete_edx_mysql_user_with_failure(edx_mysql_db, monkeypatch):
 
     with pytest.raises(
         UserDeleteError,
-        match=f"Failed to delete user with email='{email}' from edX MySQL",
+        match="Failed to delete user from edX MySQL",
     ):
         delete_edx_mysql_user(email=email)
 

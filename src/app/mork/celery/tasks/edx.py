@@ -75,7 +75,7 @@ def delete_edx_mysql_user(email: str):
         logger.info(f"Skipping MySQL deletion for user with {email=} : {exc}")
     except SQLAlchemyError as exc:
         db.session.rollback()
-        msg = f"Failed to delete user with {email=} from edX MySQL"
+        msg = "Failed to delete user from edX MySQL"
         logger.error(msg)
         raise UserDeleteError(msg) from exc
     finally:

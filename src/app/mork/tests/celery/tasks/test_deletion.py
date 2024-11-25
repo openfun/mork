@@ -309,9 +309,7 @@ def test_mark_user_for_deletion_nonexistent_user(
     )
     email = "johndoe@example.com"
     # Try to mark this user for deletion
-    with pytest.raises(
-        UserDeleteError, match=f"User with {email=} not found in edx database"
-    ):
+    with pytest.raises(UserDeleteError, match="User not found in edx database"):
         mark_user_for_deletion(email, DeletionReason.GDPR)
 
 
