@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix missing component label in Celery deployment
+
 ## [0.5.0] - 2024-11-25
 
 ### Added
