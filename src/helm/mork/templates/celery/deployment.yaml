@@ -21,6 +21,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
+        app.kubernetes.io/component: celery
         {{- include "mork.labels" . | nindent 8 }}
     spec:
       {{- include "mork.imagePullSecrets" . | nindent 6 }}
