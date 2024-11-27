@@ -1,5 +1,6 @@
 """Mork users schemas."""
 
+from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr
@@ -27,6 +28,8 @@ class UserRead(BaseModel):
     email: EmailStr
     reason: DeletionReason
     service_statuses: list[UserServiceStatusRead]
+    created_at: datetime
+    updated_at: datetime
 
 
 class UserStatusRead(BaseModel):
