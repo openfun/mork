@@ -68,10 +68,10 @@ def delete_user(
 ):
     """Celery task that deletes a specific user."""
     if dry_run:
-        logger.info(f"Dry run: User with {email=} would have been deleted")
+        logger.info("Dry run: User would have been deleted")
         return
 
-    logger.info(f"Starting deletion of user with {email=}")
+    logger.debug(f"Starting deletion of user with {email=}")
 
     delete_chain = chain(
         remove_email_status.si(email),
@@ -104,7 +104,7 @@ def mark_user_for_deletion(email: str, reason: DeletionReason) -> UUID:
     # Check if user already exist in Mork database
     user_exist = mork_db.session.scalar(select(User).where(User.email == email))
     if user_exist:
-        logger.info(f"User with {email=} is already marked for deletion")
+        logger.info("User is already marked for deletion")
         return user_exist.id
 
     # Add user to Mork database
@@ -153,15 +153,15 @@ def remove_email_status(email: str):
         mork_db.session.query(EmailStatus).filter(EmailStatus.email == email).first()
     )
     if not user_to_delete:
-        logger.warning("Email status - No user found with email %s for deletion", email)
+        logger.warning("Email status not found")
         return
 
-    mork_db.session.delete(user_to_delete)
     try:
+        mork_db.session.delete(user_to_delete)
         mork_db.session.commit()
     except SQLAlchemyError:
         mork_db.session.rollback()
-        logger.error("Email status - Failed to delete user with email %s", email)
+        logger.error("Failed to delete email status")
         return
     finally:
         mork_db.session.close()

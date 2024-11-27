@@ -11,7 +11,7 @@ from mork.conf import settings
 from mork.db import MorkDB
 from mork.edx.mysql import crud
 from mork.edx.mysql.database import OpenEdxMySQLDB
-from mork.exceptions import EmailAlreadySent, EmailSendError
+from mork.exceptions import EmailSendError
 from mork.mail import send_email
 from mork.models.tasks import EmailStatus
 
@@ -55,13 +55,14 @@ def warn_user(self, email: str, username: str, dry_run: bool = True):
     """Celery task that warns the specified user by sending an email."""
     # Check that user has not already received a warning email
     if check_email_already_sent(email):
-        raise EmailAlreadySent("An email has already been sent to this user")
-
-    if dry_run:
-        logger.info(f"Dry run: An email would have been sent to user with {email=} ")
+        logger.warning("An email has already been sent to this user")
         return
 
-    logger.info(f"Sending an email to user with {email=}")
+    if dry_run:
+        logger.info("Dry run: An email would have been sent")
+        return
+
+    logger.debug(f"Sending an email to user with {email=}")
     try:
         send_email(email, username)
     except EmailSendError as exc:

@@ -13,7 +13,7 @@ from mork.celery.tasks.emailing import (
 )
 from mork.conf import settings
 from mork.edx.mysql.factories.auth import EdxAuthUserFactory
-from mork.exceptions import EmailAlreadySent, EmailSendError
+from mork.exceptions import EmailSendError
 from mork.factories.tasks import EmailStatusFactory
 
 
@@ -237,10 +237,12 @@ def test_warn_user_already_sent(monkeypatch):
         "mork.celery.tasks.emailing.check_email_already_sent", lambda x: True
     )
 
-    with pytest.raises(
-        EmailAlreadySent, match="An email has already been sent to this user"
-    ):
-        warn_user("johndoe@example.com", "JohnDoe")
+    mock_send_email = Mock()
+    monkeypatch.setattr("mork.celery.tasks.emailing.send_email", mock_send_email)
+
+    warn_user("johndoe@example.com", "JohnDoe")
+
+    mock_send_email.assert_not_called()
 
 
 def test_warn_user_sending_failure(monkeypatch):

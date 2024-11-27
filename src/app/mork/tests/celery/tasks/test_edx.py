@@ -121,11 +121,7 @@ def test_delete_edx_platform_user_invalid_status(db_session, monkeypatch):
         "mork.celery.tasks.edx.update_status_in_mork", mock_update_status_in_mork
     )
 
-    with pytest.raises(
-        UserStatusError,
-        match=f"User {str(user.id)} is not to be deleted. Status: DeletionStatus.DELETED",  # noqa: E501
-    ):
-        delete_edx_platform_user(user.id)
+    delete_edx_platform_user(user.id)
 
     mock_delete_edx_mysql_user.assert_not_called()
     mock_delete_edx_mongo_user.assert_not_called()
@@ -188,7 +184,7 @@ def test_delete_edx_platform_user_failed_status_update(db_session, monkeypatch):
 
     with pytest.raises(
         UserStatusError,
-        match=f"Failed to update deletion status to deleted for user {user.id}",
+        match=f"Failed to update deletion status to 'deleted' for user {user.id}",
     ):
         delete_edx_platform_user(user.id)
 
@@ -316,6 +312,6 @@ def test_delete_edx_mongo_user_with_failure(edx_mongo_db, monkeypatch):
 
     with pytest.raises(
         UserDeleteError,
-        match=f"Failed to delete comments of user {username} : An error occurred",
+        match="Failed to delete comments: An error occurred",
     ):
         delete_edx_mongo_user(username=username)

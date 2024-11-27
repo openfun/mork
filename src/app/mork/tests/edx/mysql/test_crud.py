@@ -158,7 +158,7 @@ def test_edx_crud_delete_user_missing(edx_mysql_db):
 
     email = "john_doe@example.com"
 
-    with pytest.raises(UserNotFound, match=f"User with {email=} does not exist"):
+    with pytest.raises(UserNotFound, match="User does not exist"):
         crud.delete_user(edx_mysql_db.session, email=email)
 
 
@@ -246,7 +246,7 @@ def test_edx_crud_delete_user_protected_table(edx_mysql_db):
 
     with pytest.raises(
         UserProtected,
-        match=f"User with {email=} is linked to a protected table and cannot be deleted",  # noqa: E501
+        match="User is linked to a protected table and cannot be deleted",
     ):
         crud.delete_user(edx_mysql_db.session, email=email)
 

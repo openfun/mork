@@ -292,7 +292,7 @@ def test_mark_user_for_deletion(edx_mysql_db, db_session, caplog, monkeypatch):
     assert (
         "mork.celery.tasks.deletion",
         logging.INFO,
-        f"User with email='{inserted_user.email}' is already marked for deletion",
+        "User is already marked for deletion",
     ) in caplog.record_tuples
 
     # Reset factory persistence
@@ -379,7 +379,7 @@ def test_remove_email_status_no_entry(caplog, db_session, monkeypatch):
     assert (
         "mork.celery.tasks.deletion",
         logging.WARNING,
-        "Email status - No user found with email johndoe1@example.com for deletion",
+        "Email status not found",
     ) in caplog.record_tuples
 
 
@@ -407,5 +407,5 @@ def test_remove_email_status_with_failure(caplog, db_session, monkeypatch):
     assert (
         "mork.celery.tasks.deletion",
         logging.ERROR,
-        "Email status - Failed to delete user with email johndoe1@example.com",
+        "Failed to delete email status",
     ) in caplog.record_tuples

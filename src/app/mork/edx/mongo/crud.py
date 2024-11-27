@@ -37,6 +37,6 @@ def anonymize_comments(username: str) -> int:
         anonymous=True,
     )
 
-    logger.info(f"Anonymized {comment_count} comment(s) for user {username}")
+    logger.info(f"Anonymized {comment_count} comment(s)")
 
     return comment_count
