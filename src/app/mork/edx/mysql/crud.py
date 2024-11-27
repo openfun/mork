@@ -21,6 +21,7 @@ from mork.edx.mysql.models.dark import DarkLangDarklangconfig
 from mork.edx.mysql.models.student import StudentCourseenrollmentallowed
 from mork.edx.mysql.models.util import UtilRatelimitconfiguration
 from mork.edx.mysql.models.verify import VerifyStudentHistoricalverificationdeadline
+from mork.edx.mysql.models.wiki import WikiArticle, WikiArticlerevision
 from mork.exceptions import UserNotFound, UserProtected
 
 logger = getLogger(__name__)
@@ -105,6 +106,8 @@ def _has_protected_children(session: Session, user_id) -> bool:
         select(1).where(
             VerifyStudentHistoricalverificationdeadline.history_user_id == user_id
         ),
+        select(1).where(WikiArticle.owner_id == user_id),
+        select(1).where(WikiArticlerevision.user_id == user_id),
     )
 
     # Execute the union query and check if any results exist

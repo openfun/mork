@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- Add and protect `wiki_article` and `wiki_articlerevision` tables
+
 ### Fixed
 
 - Scrub `email` and `username` fields from logs and exceptions sent to Sentry

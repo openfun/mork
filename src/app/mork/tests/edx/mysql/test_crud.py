@@ -238,6 +238,8 @@ def test_edx_crud_delete_user_protected_table(edx_mysql_db):
         "dark_lang_darklangconfig",
         "util_ratelimitconfiguration",
         "verify_student_historicalverificationdeadline",
+        "wiki_article",
+        "wiki_articlerevision",
     ]
 
     for table_name in protected_tables:
