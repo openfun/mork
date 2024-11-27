@@ -121,13 +121,13 @@ def delete_user(session: Session, email: str) -> None:
     """
     user_to_delete = session.scalar(select(AuthUser).where(AuthUser.email == email))
     if not user_to_delete:
-        msg = f"User with {email=} does not exist"
-        logger.error(msg)
+        msg = "User does not exist"
+        logger.warning(msg)
         raise UserNotFound(msg)
 
     if _has_protected_children(session, user_to_delete.id):
-        msg = f"User with {email=} is linked to a protected table and cannot be deleted"
-        logger.error(msg)
+        msg = "User is linked to a protected table and cannot be deleted"
+        logger.warning(msg)
         raise UserProtected(msg)
 
     # Delete entries in student_courseenrollmentallowed table containing user email

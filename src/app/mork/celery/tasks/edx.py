@@ -42,20 +42,20 @@ def delete_edx_platform_user(self, user_id: UUID):
 
     status = get_service_status(user, ServiceName.EDX)
     if status != DeletionStatus.TO_DELETE:
-        msg = f"User {user_id} is not to be deleted. Status: {status}"
-        logger.error(msg)
-        raise UserStatusError(msg)
+        logger.warning(f"User {user_id} is not to be deleted. Status: {status}")
+        return
 
     try:
         delete_edx_mysql_user(email=user.email)
         delete_edx_mongo_user(username=user.username)
     except UserDeleteError as exc:
+        logger.exception(exc)
         raise self.retry(exc=exc) from exc
 
     if not update_status_in_mork(
         user_id=user_id, service=ServiceName.EDX, status=DeletionStatus.DELETED
     ):
-        msg = f"Failed to update deletion status to deleted for user {user_id}"
+        msg = f"Failed to update deletion status to 'deleted' for user {user_id}"
         logger.error(msg)
         raise UserStatusError(msg)
 
@@ -72,7 +72,7 @@ def delete_edx_mysql_user(email: str):
         db.session.commit()
     except (UserProtected, UserNotFound) as exc:
         db.session.rollback()
-        logger.info(f"Skipping MySQL deletion for user with {email=} : {exc}")
+        logger.info(f"Skipping MySQL deletion : {exc}")
     except SQLAlchemyError as exc:
         db.session.rollback()
         msg = "Failed to delete user from edX MySQL"
@@ -90,7 +90,7 @@ def delete_edx_mongo_user(username: str):
     try:
         mongo.anonymize_comments(username)
     except OperationError as exc:
-        msg = f"Failed to delete comments of user {username} : {exc}"
+        msg = f"Failed to delete comments: {exc}"
         logger.error(msg)
         raise UserDeleteError(msg) from exc
     finally:
