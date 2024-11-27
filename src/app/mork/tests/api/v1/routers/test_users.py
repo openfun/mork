@@ -3,6 +3,7 @@
 from uuid import uuid4
 
 import pytest
+from faker import Faker
 from httpx import AsyncClient
 from sqlalchemy import func, select
 
@@ -245,8 +246,10 @@ async def test_user_read(db_session, http_client: AsyncClient, auth_headers: dic
     UserServiceStatusFactory._meta.sqlalchemy_session = db_session
     UserFactory._meta.sqlalchemy_session = db_session
 
+    creation_date = Faker().date_time()
+
     # Create one user that needs to be deleted on all services
-    user = UserFactory.create()
+    user = UserFactory.create(created_at=creation_date, updated_at=creation_date)
 
     # Get id of newly created user
     user_id = db_session.scalar(select(User.id))
@@ -280,6 +283,8 @@ async def test_user_read(db_session, http_client: AsyncClient, auth_headers: dic
                 "status": "to_delete",
             },
         ],
+        "created_at": creation_date.isoformat(),
+        "updated_at": creation_date.isoformat(),
     }
 
 

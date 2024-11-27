@@ -11,6 +11,7 @@ and this project adheres to
 ### Added
 
 - Add and protect `wiki_article` and `wiki_articlerevision` tables
+- Add `created_at` and `updated_at` fields to response from user API
 
 ### Fixed
 
