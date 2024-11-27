@@ -8,6 +8,12 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.5.1] - 2024-11-26
+
+### Fixed
+
+- Fix missing component label in Celery deployment
+
 ## [0.5.0] - 2024-11-25
 
 ### Added
@@ -58,6 +64,7 @@ and this project adheres to
 - Implement base Helm chart
 
 [unreleased]: https://github.com/openfun/mork/tree/main/src/helm
+[0.5.1]: https://github.com/openfun/mork/releases/tag/helm/v0.5.1
 [0.5.0]: https://github.com/openfun/mork/releases/tag/helm/v0.5.0
 [0.4.0]: https://github.com/openfun/mork/releases/tag/helm/v0.4.0
 [0.3.0]: https://github.com/openfun/mork/releases/tag/helm/v0.3.0
