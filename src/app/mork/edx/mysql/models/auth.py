@@ -48,6 +48,7 @@ from .verify import (
     VerifyStudentHistoricalverificationdeadline,
     VerifyStudentSoftwaresecurephotoverification,
 )
+from .wiki import WikiArticle, WikiArticlerevision
 
 
 class AuthUser(Base):
@@ -311,6 +312,16 @@ class AuthUser(Base):
         "VerifyStudentSoftwaresecurephotoverification",
         foreign_keys=[VerifyStudentSoftwaresecurephotoverification.user_id],
         primaryjoin="VerifyStudentSoftwaresecurephotoverification.user_id == AuthUser.id",  # noqa: E501
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    wiki_article: Mapped[List["WikiArticle"]] = relationship(
+        "WikiArticle",
+        back_populates="owner",
+        cascade="all, delete-orphan",
+    )
+    wiki_articlerevision: Mapped[List["WikiArticlerevision"]] = relationship(
+        "WikiArticlerevision",
         back_populates="user",
         cascade="all, delete-orphan",
     )

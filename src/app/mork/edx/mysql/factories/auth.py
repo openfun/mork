@@ -51,6 +51,7 @@ from .verify import (
     EdxVerifyStudentHistoricalverificationdeadlineFactory,
     EdxVerifyStudentSoftwaresecurephotoverificationFactory,
 )
+from .wiki import WikiArticleFactory, WikiArticlerevisionFactory
 
 
 class EdxAuthRegistrationFactory(BaseSQLAlchemyModelFactory):
@@ -186,6 +187,18 @@ class EdxAuthUserFactory(BaseSQLAlchemyModelFactory):
                 "history_user",
                 size=3,
                 history_user_id=factory.SelfAttribute("..id"),
+            ),
+            wiki_article=factory.RelatedFactoryList(
+                WikiArticleFactory,
+                "owner",
+                size=3,
+                owner_id=factory.SelfAttribute("..id"),
+            ),
+            wiki_articlerevision=factory.RelatedFactoryList(
+                WikiArticlerevisionFactory,
+                "user",
+                size=3,
+                user_id=factory.SelfAttribute("..id"),
             ),
         )
 
