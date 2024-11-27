@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+- Scrub `email` and `username` fields from logs and exceptions sent to Sentry
+
 ## [0.5.0] - 2024-11-25
 
 ### Added
