@@ -1,8 +1,9 @@
 """Alembic configuration."""
 
-from logging.config import fileConfig
+import alembic_postgresql_enum
 
 from alembic import context
+from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 
 from mork.conf import settings

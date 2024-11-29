@@ -41,21 +41,39 @@ def delete_edx_platform_user(self, user_id: UUID):
         raise UserNotFound(msg)
 
     status = get_service_status(user, ServiceName.EDX)
-    if status != DeletionStatus.TO_DELETE:
-        logger.warning(f"User {user_id} is not to be deleted. Status: {status}")
+
+    if status == DeletionStatus.PROTECTED:
+        logger.warning(f"User {user_id} is protected.")
         return
 
+    if status != DeletionStatus.TO_DELETE:
+        msg = f"User {user_id} cannot be deleted. Status: {status}"
+        logger.error(msg)
+        raise UserStatusError(msg)
+
+    new_status = DeletionStatus.DELETED
     try:
         delete_edx_mysql_user(email=user.email)
+    except UserProtected:
+        logger.info(f"User {user_id} is protected")
+        new_status = DeletionStatus.PROTECTED
+    except UserDeleteError as exc:
+        logger.exception(exc)
+        raise self.retry(exc=exc) from exc
+
+    try:
         delete_edx_mongo_user(username=user.username)
     except UserDeleteError as exc:
         logger.exception(exc)
         raise self.retry(exc=exc) from exc
 
     if not update_status_in_mork(
-        user_id=user_id, service=ServiceName.EDX, status=DeletionStatus.DELETED
+        user_id=user_id, service=ServiceName.EDX, status=new_status
     ):
-        msg = f"Failed to update deletion status to 'deleted' for user {user_id}"
+        msg = (
+            f"Failed to update deletion status to '{new_status.value}' "
+            f"for user {user_id}"
+        )
         logger.error(msg)
         raise UserStatusError(msg)
 
@@ -70,9 +88,13 @@ def delete_edx_mysql_user(email: str):
     try:
         mysql.delete_user(db.session, email=email)
         db.session.commit()
-    except (UserProtected, UserNotFound) as exc:
+    except UserNotFound as exc:
         db.session.rollback()
         logger.info(f"Skipping MySQL deletion : {exc}")
+    except UserProtected:
+        db.session.rollback()
+        db.session.close()
+        raise
     except SQLAlchemyError as exc:
         db.session.rollback()
         msg = "Failed to delete user from edX MySQL"

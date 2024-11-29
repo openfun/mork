@@ -1,5 +1,6 @@
 """Tests for Mork Celery edx tasks."""
 
+import logging
 from unittest.mock import Mock
 from uuid import uuid4
 
@@ -64,6 +65,41 @@ def test_delete_edx_platform_user(db_session, monkeypatch):
     )
 
 
+def test_delete_edx_platform_user_protected(db_session, monkeypatch):
+    """Test to delete user and update its status to protected."""
+    UserServiceStatusFactory._meta.sqlalchemy_session = db_session
+    UserFactory._meta.sqlalchemy_session = db_session
+
+    # Create one user in the database
+    UserFactory.create()
+
+    # Get user from db
+    user = UserRead.model_validate(db_session.scalar(select(User)))
+
+    monkeypatch.setattr("mork.celery.tasks.edx.get_user_from_mork", lambda x: user)
+
+    mock_delete_edx_mysql_user = Mock(side_effect=UserProtected())
+    monkeypatch.setattr(
+        "mork.celery.tasks.edx.delete_edx_mysql_user", mock_delete_edx_mysql_user
+    )
+    mock_delete_edx_mongo_user = Mock()
+    monkeypatch.setattr(
+        "mork.celery.tasks.edx.delete_edx_mongo_user", mock_delete_edx_mongo_user
+    )
+    mock_update_status_in_mork = Mock(return_value=True)
+    monkeypatch.setattr(
+        "mork.celery.tasks.edx.update_status_in_mork", mock_update_status_in_mork
+    )
+
+    delete_edx_platform_user(user.id)
+
+    mock_delete_edx_mysql_user.assert_called_once_with(email=user.email)
+    mock_delete_edx_mongo_user.assert_called_once_with(username=user.username)
+    mock_update_status_in_mork.assert_called_once_with(
+        user_id=user.id, service=ServiceName.EDX, status=DeletionStatus.PROTECTED
+    )
+
+
 def test_delete_edx_platform_user_invalid_user(monkeypatch):
     """Test to delete user from edX platform with an invalid user."""
 
@@ -93,14 +129,14 @@ def test_delete_edx_platform_user_invalid_user(monkeypatch):
     mock_update_status_in_mork.assert_not_called()
 
 
-def test_delete_edx_platform_user_invalid_status(db_session, monkeypatch):
-    """Test to delete user from edX platform with an invalid status."""
+def test_delete_edx_platform_user_protected_status(db_session, monkeypatch):
+    """Test to delete user from edX platform with a status PROTECTED."""
     UserServiceStatusFactory._meta.sqlalchemy_session = db_session
     UserFactory._meta.sqlalchemy_session = db_session
 
-    # Create one user in the database that is already deleted on edx
+    # Create one user in the database that is protected on edx
     UserFactory.create(
-        service_statuses={ServiceName.EDX: DeletionStatus.DELETED},
+        service_statuses={ServiceName.EDX: DeletionStatus.PROTECTED},
     )
 
     # Get user from db
@@ -128,6 +164,45 @@ def test_delete_edx_platform_user_invalid_status(db_session, monkeypatch):
     mock_update_status_in_mork.assert_not_called()
 
 
+def test_delete_edx_platform_user_invalid_status(db_session, monkeypatch):
+    """Test to delete user from edX platform with an invalid status."""
+    UserServiceStatusFactory._meta.sqlalchemy_session = db_session
+    UserFactory._meta.sqlalchemy_session = db_session
+
+    # Create one user in the database that is protected on edx
+    UserFactory.create(
+        service_statuses={ServiceName.EDX: DeletionStatus.DELETED},
+    )
+
+    # Get user from db
+    user = UserRead.model_validate(db_session.scalar(select(User)))
+
+    monkeypatch.setattr("mork.celery.tasks.edx.get_user_from_mork", lambda x: user)
+
+    mock_delete_edx_mysql_user = Mock()
+    monkeypatch.setattr(
+        "mork.celery.tasks.edx.delete_edx_mysql_user", mock_delete_edx_mysql_user
+    )
+    mock_delete_edx_mongo_user = Mock()
+    monkeypatch.setattr(
+        "mork.celery.tasks.edx.delete_edx_mongo_user", mock_delete_edx_mongo_user
+    )
+    mock_update_status_in_mork = Mock(return_value=True)
+    monkeypatch.setattr(
+        "mork.celery.tasks.edx.update_status_in_mork", mock_update_status_in_mork
+    )
+
+    with pytest.raises(
+        UserStatusError,
+        match=f"User {user.id} cannot be deleted. Status: DeletionStatus.DELETED",
+    ):
+        delete_edx_platform_user(user.id)
+
+    mock_delete_edx_mysql_user.assert_not_called()
+    mock_delete_edx_mongo_user.assert_not_called()
+    mock_update_status_in_mork.assert_not_called()
+
+
 def test_delete_edx_platform_user_failed_delete(db_session, monkeypatch):
     """Test to delete user from edX platform with a failed delete."""
     UserServiceStatusFactory._meta.sqlalchemy_session = db_session
@@ -141,13 +216,23 @@ def test_delete_edx_platform_user_failed_delete(db_session, monkeypatch):
 
     monkeypatch.setattr("mork.celery.tasks.edx.get_user_from_mork", lambda x: user)
 
-    def mock_delete_edx_mysql_user(*args, **kwars):
-        raise UserDeleteError("An error occurred")
-
+    mock_delete_edx_mysql_user = Mock(side_effect=UserDeleteError("An error occurred"))
     monkeypatch.setattr(
         "mork.celery.tasks.edx.delete_edx_mysql_user", mock_delete_edx_mysql_user
     )
     mock_delete_edx_mongo_user = Mock()
+    monkeypatch.setattr(
+        "mork.celery.tasks.edx.delete_edx_mongo_user", mock_delete_edx_mongo_user
+    )
+
+    with pytest.raises(UserDeleteError, match="An error occurred"):
+        delete_edx_platform_user(user.id)
+
+    mock_delete_edx_mysql_user = Mock()
+    monkeypatch.setattr(
+        "mork.celery.tasks.edx.delete_edx_mysql_user", mock_delete_edx_mysql_user
+    )
+    mock_delete_edx_mongo_user = Mock(side_effect=UserDeleteError("An error occurred"))
     monkeypatch.setattr(
         "mork.celery.tasks.edx.delete_edx_mongo_user", mock_delete_edx_mongo_user
     )
@@ -233,13 +318,31 @@ def test_delete_edx_mysql_user_protected(edx_mysql_db, monkeypatch):
 
     monkeypatch.setattr("mork.celery.tasks.edx.mysql.delete_user", mock_delete_user)
 
-    delete_edx_mysql_user(email=email)
+    with pytest.raises(UserProtected, match="An error occurred"):
+        delete_edx_mysql_user(email=email)
 
     # Check the user still exists on the edX MySQL database
     assert mysql.get_user(
         edx_mysql_db.session,
         email="johndoe1@example.com",
     )
+
+
+def test_delete_edx_mysql_user_not_found(edx_mysql_db, monkeypatch, caplog):
+    """Test that deleting a nonexistent user from MySQL should silently return."""
+
+    monkeypatch.setattr(
+        "mork.celery.tasks.edx.OpenEdxMySQLDB", lambda *args: edx_mysql_db
+    )
+
+    with caplog.at_level(logging.INFO):
+        delete_edx_mysql_user(email="johndoe@example.com")
+
+    assert (
+        "mork.celery.tasks.edx",
+        logging.INFO,
+        "Skipping MySQL deletion : User does not exist",
+    ) in caplog.record_tuples
 
 
 def test_delete_edx_mysql_user_with_failure(edx_mysql_db, monkeypatch):
