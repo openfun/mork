@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.6.0] - 2024-12-03
+
 ### Added
 
 - Add environment variables for Brevo configuration
@@ -15,6 +17,8 @@ and this project adheres to
 ### Changed
 
 - Change Celery liveness and readiness probes to file-based probes
+- Upgrade appVersion to `0.6.0`
+
 
 ## [0.5.1] - 2024-11-26
 
@@ -72,6 +76,7 @@ and this project adheres to
 - Implement base Helm chart
 
 [unreleased]: https://github.com/openfun/mork/tree/main/src/helm
+[0.6.0]: https://github.com/openfun/mork/releases/tag/helm/v0.6.0
 [0.5.1]: https://github.com/openfun/mork/releases/tag/helm/v0.5.1
 [0.5.0]: https://github.com/openfun/mork/releases/tag/helm/v0.5.0
 [0.4.0]: https://github.com/openfun/mork/releases/tag/helm/v0.4.0
