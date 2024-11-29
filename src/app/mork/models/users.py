@@ -40,6 +40,7 @@ class DeletionStatus(str, enum.Enum):
     TO_DELETE = "to_delete"
     DELETING = "deleting"
     DELETED = "deleted"
+    PROTECTED = "protected"
 
 
 class UserServiceStatus(Base):

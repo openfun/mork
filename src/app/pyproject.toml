@@ -25,6 +25,7 @@ license = { file = "LICENSE.md" }
 keywords = ["FastAPI", "Celery", "emails", "Open edX"]
 dependencies = [
     "alembic==1.14.0",
+    "alembic-postgresql-enum==1.4.0",
     "celery[redis]==5.4.0",
     "fastapi[standard]==0.115.5",
     "Jinja2==3.1.4",
