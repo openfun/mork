@@ -4,7 +4,7 @@ from logging import getLogger
 from uuid import UUID
 
 from mongoengine.errors import OperationError
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import DBAPIError, SQLAlchemyError
 
 from mork.celery.celery_app import app
 from mork.celery.utils import (
@@ -95,7 +95,7 @@ def delete_edx_mysql_user(email: str):
         db.session.rollback()
         db.session.close()
         raise
-    except SQLAlchemyError as exc:
+    except (SQLAlchemyError, DBAPIError) as exc:
         db.session.rollback()
         msg = "Failed to delete user from edX MySQL"
         logger.error(msg)

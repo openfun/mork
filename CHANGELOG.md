@@ -19,6 +19,7 @@ and this project adheres to
 ### Fixed
 
 - Scrub `email` and `username` fields from logs and exceptions sent to Sentry
+- Catch errors from the database driver
 
 ## [0.5.0] - 2024-11-25
 

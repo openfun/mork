@@ -6,7 +6,7 @@ from uuid import UUID
 
 from celery import chain, group
 from sqlalchemy import insert, select
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import DBAPIError, SQLAlchemyError
 
 from mork.celery.celery_app import app
 from mork.celery.tasks.brevo import delete_brevo_platform_user
@@ -91,9 +91,15 @@ def mark_user_for_deletion(email: str, reason: DeletionReason) -> UUID:
     edx_mysql_db = OpenEdxMySQLDB()
     edx_mysql_db.session.expire_on_commit = False
 
-    auth_user = crud.get_user(edx_mysql_db.session, email)
-
-    edx_mysql_db.session.close()
+    try:
+        auth_user = crud.get_user(edx_mysql_db.session, email)
+    except (SQLAlchemyError, DBAPIError) as exc:
+        edx_mysql_db.session.rollback()
+        msg = "Failed to read user from edX MySQL"
+        logger.error(msg)
+        raise UserDeleteError(msg) from exc
+    finally:
+        edx_mysql_db.session.close()
 
     if not auth_user:
         msg = "User not found in edx database"
@@ -135,7 +141,7 @@ def mark_user_for_deletion(email: str, reason: DeletionReason) -> UUID:
 
     try:
         mork_db.session.commit()
-    except SQLAlchemyError as exc:
+    except (SQLAlchemyError, DBAPIError) as exc:
         mork_db.session.rollback()
         logger.error(f"Failed to mark user to be deleted - {exc}")
         raise UserDeleteError("Failed to mark user to be deleted") from exc
@@ -160,7 +166,7 @@ def remove_email_status(email: str):
     try:
         mork_db.session.delete(user_to_delete)
         mork_db.session.commit()
-    except SQLAlchemyError:
+    except (SQLAlchemyError, DBAPIError):
         mork_db.session.rollback()
         logger.error("Failed to delete email status")
         return
