@@ -270,7 +270,24 @@ def test_mark_user_for_deletion_nonexistent_user(
         mark_user_for_deletion(email, DeletionReason.GDPR)
 
 
-def test_mark_user_for_deletion_failure(edx_mysql_db, db_session, monkeypatch):
+def test_mark_user_for_deletion_read_failure(edx_mysql_db, db_session, monkeypatch):
+    """Test the `mark_user_for_deletion` function with a read failure from MySQL."""
+
+    def mock_get_user(*args, **kwargs):
+        raise SQLAlchemyError("An error occurred")
+
+    monkeypatch.setattr("mork.celery.tasks.deletion.crud.get_user", mock_get_user)
+
+    monkeypatch.setattr(
+        "mork.celery.tasks.deletion.OpenEdxMySQLDB", lambda *args: edx_mysql_db
+    )
+    auth_user = EdxAuthUserFactory.create()
+
+    with pytest.raises(UserDeleteError, match="Failed to read user from edX MySQL"):
+        mark_user_for_deletion(auth_user.email, reason=DeletionReason.GDPR)
+
+
+def test_mark_user_for_deletion_write_failure(edx_mysql_db, db_session, monkeypatch):
     """Test the `mark_user_for_deletion` function with a write failure."""
 
     def mock_session_commit():
