@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.6.0] - 2024-12-02
+
 ### Added
 
 - Add and protect `wiki_article` and `wiki_articlerevision` tables
@@ -87,7 +89,8 @@ and this project adheres to
 - Add celery task to warn inactive users by email
 - Add celery task to delete inactive users from edx database
 
-[unreleased]: https://github.com/openfun/mork/compare/v0.5.0...main
+[unreleased]: https://github.com/openfun/mork/compare/v0.6.0...main
+[0.6.0]: https://github.com/openfun/mork/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/openfun/mork/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/openfun/mork/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/openfun/mork/compare/v0.2.0...v0.3.0
