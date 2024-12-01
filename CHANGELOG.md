@@ -12,6 +12,7 @@ and this project adheres to
 
 - Add and protect `wiki_article` and `wiki_articlerevision` tables
 - Add `created_at` and `updated_at` fields to response from user API
+- Add custom liveness and readiness probe for Celery
 
 ### Fixed
 

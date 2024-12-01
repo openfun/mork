@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Changed
+
+- Change Celery liveness and readiness probes to file-based probes
+
 ## [0.5.1] - 2024-11-26
 
 ### Fixed

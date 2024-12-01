@@ -7,6 +7,8 @@ from sentry_sdk.scrubber import DEFAULT_PII_DENYLIST, EventScrubber
 from mork import __version__
 from mork.conf import settings
 
+from .probe import LivenessProbe
+
 app = Celery(
     "mork",
     include=[
@@ -15,6 +17,7 @@ app = Celery(
         "mork.celery.tasks.emailing",
     ],
 )
+app.steps["worker"].add(LivenessProbe)
 
 
 @signals.celeryd_init.connect
