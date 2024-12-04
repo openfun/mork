@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+- Remove user email from Brevo request breadcrumb before sending to Sentry
+
 ## [0.6.0] - 2024-12-02
 
 ### Added

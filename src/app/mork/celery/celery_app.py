@@ -20,6 +20,23 @@ app = Celery(
 app.steps["worker"].add(LivenessProbe)
 
 
+def before_send(event, hint):  # noqa: ARG001
+    """Remove user email from the event sent to Sentry."""
+    if not event.get("breadcrumbs"):
+        return event
+
+    for breadcrumb in event["breadcrumbs"].get("values", []):
+        data = breadcrumb.get("data", {})
+        url = data.get("url", "")
+
+        # Remove user email from Brevo request URL
+        if "/contacts/" in url:
+            data["url"] = url.replace(url.split("/contacts/")[-1], "[Filtered]")
+            breadcrumb["data"] = data
+
+    return event
+
+
 @signals.celeryd_init.connect
 def init_sentry(**_kwargs):
     """Initialize Sentry SDK on Celery startup."""
@@ -34,6 +51,7 @@ def init_sentry(**_kwargs):
             max_breadcrumbs=50,
             send_default_pii=False,
             event_scrubber=EventScrubber(pii_denylist=pii_denylist),
+            before_send=before_send,
         )
         sentry_sdk.set_tag("application", "celery")
 
