@@ -11,6 +11,7 @@ and this project adheres to
 ### Changed
 
 - Disable Brevo request on empty Brevo API URL setting
+- Activate recursive scrubbing of Sentry events
 
 ### Fixed
 

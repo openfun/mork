@@ -50,7 +50,7 @@ def init_sentry(**_kwargs):
             environment=settings.SENTRY_EXECUTION_ENVIRONMENT,
             max_breadcrumbs=50,
             send_default_pii=False,
-            event_scrubber=EventScrubber(pii_denylist=pii_denylist),
+            event_scrubber=EventScrubber(pii_denylist=pii_denylist, recursive=True),
             before_send=before_send,
         )
         sentry_sdk.set_tag("application", "celery")
