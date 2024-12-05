@@ -14,7 +14,9 @@ metadata:
 spec:
   template:
     metadata:
-      labels: {{- include "mork.selectorLabels" $ | nindent 8 }}
+      labels: 
+        app.kubernetes.io/component: api
+        {{- include "mork.selectorLabels" $ | nindent 8 }}
     spec:
       {{- include "mork.imagePullSecrets" $ | nindent 6 }}
       containers:
@@ -24,8 +26,8 @@ spec:
           env:
             {{- include "mork.envs" $ | nindent 12 }}
           command: {{ .command | toJson }}
-          {{- if $.Values.resources }}
-          resources: {{ toYaml $.Values.resources | nindent 12 }}
+          {{- if $.Values.api.resources }}
+          resources: {{ toYaml $.Values.api.resources | nindent 12 }}
           {{- end }}
           volumeMounts:
             - name: logging-config

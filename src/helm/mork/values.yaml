@@ -7,11 +7,7 @@ image:
   pullPolicy: IfNotPresent
   tag: "0.6.0"
 
-replicaCount: 1
-
 imagePullSecrets: []
-
-podAnnotations: {}
 
 service:
   type: ClusterIP
@@ -25,42 +21,6 @@ ingress:
   tls:
     enabled: false
     certificateSecretName: mork-certificate
-
-affinity:
-  podAntiAffinity:
-    preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 100
-        podAffinityTerm:
-          labelSelector:
-            matchExpressions:
-              - key: deployment
-                operator: In
-                values:
-                  - "mork"
-          topologyKey: kubernetes.io/hostname
-
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 10
-  targetCPUUtilizationPercentage: 80
-  targetMemoryUtilizationPercentage: 80
-
-nodeSelector: {}
-
-tolerations: []
-
-jobs:
-  dbMigrate:
-    name: "mork-db-migrate"
-    command:
-      - "alembic"
-      - "-c"
-      - "/app/mork/alembic.ini"
-      - "upgrade"
-      - "head"
-      
-    restartPolicy: Never
 
 # Additional volumes on the output Deployment definition.
 volumes:
@@ -97,9 +57,69 @@ api:
       - "upgrade"
       - "head"
 
-  cronjobs: []
-  
+  replicaCount: 1
   resources: {}
+  podAnnotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: deployment
+                  operator: In
+                  values:
+                    - "mork"
+            topologyKey: kubernetes.io/hostname
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
+# Celery configuration
+celery:
+  command:
+    - "celery"
+    - "-A"
+    - "mork.celery.celery_app"
+    - "worker"
+    - "-l"
+    - "INFO"
+    - "-n"
+    - "mork@%"
+  brokerUrl: "redis://redis:6379/0"
+  brokerTransportOptions: '{"master_name": "mymaster"}'
+  resultBackend: "redis://redis:6379/0"
+  resultBackendTransportOptions: '{"master_name": "mymaster"}'
+  taskDefaultQueue: "celery"
+
+  replicaCount: 1
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: deployment
+                  operator: In
+                  values:
+                    - "mork"
+            topologyKey: kubernetes.io/hostname
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
 
 # Mork database configuration
 db:
@@ -131,22 +151,6 @@ brevo:
   apiUrl: "https://api.brevo.com/v3"
   apiKey: ""
 
-# Celery configuration
-celery:
-  command:
-    - "celery"
-    - "-A"
-    - "mork.celery.celery_app"
-    - "worker"
-    - "-l"
-    - "INFO"
-    - "-n"
-    - "mork@%"
-  brokerUrl: "redis://redis:6379/0"
-  brokerTransportOptions: '{"master_name": "mymaster"}'
-  resultBackend: "redis://redis:6379/0"
-  resultBackendTransportOptions: '{"master_name": "mymaster"}'
-  taskDefaultQueue: "celery"
 
 # Deletion configuration
 deletion:
