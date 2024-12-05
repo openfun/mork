@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Changed
+
+- Refactor API and Celery deployments to have specific deployment values
+
 ## [0.6.0] - 2024-12-03
 
 ### Added
