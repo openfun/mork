@@ -1,6 +1,7 @@
 """Tests for Mork Celery Brevo tasks."""
 
 import logging
+import uuid
 from unittest.mock import Mock
 from uuid import uuid4
 
@@ -52,6 +53,21 @@ def test_delete_brevo_platform_user(db_session, monkeypatch):
     mock_update_status_in_mork.assert_called_once_with(
         user_id=user.id, service=ServiceName.BREVO, status=DeletionStatus.DELETED
     )
+
+
+def test_delete_brevo_platform_user_empty_setting(db_session, monkeypatch):
+    """Test to delete user from Brevo platform when the API URL is not set."""
+
+    monkeypatch.setattr("mork.celery.tasks.brevo.settings.BREVO_API_URL", "")
+
+    mock_delete_brevo_user = Mock()
+    monkeypatch.setattr(
+        "mork.celery.tasks.brevo.delete_brevo_user", mock_delete_brevo_user
+    )
+
+    delete_brevo_platform_user(uuid.uuid4())
+
+    mock_delete_brevo_user.assert_not_called()
 
 
 def test_delete_brevo_platform_user_invalid_user(monkeypatch):

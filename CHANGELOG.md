@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Changed
+
+- Disable Brevo request on empty Brevo API URL setting
+
 ### Fixed
 
 - Remove user email from Brevo request breadcrumb before sending to Sentry

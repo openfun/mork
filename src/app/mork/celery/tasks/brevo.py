@@ -28,6 +28,10 @@ logger = getLogger(__name__)
 )
 def delete_brevo_platform_user(self, user_id: UUID):
     """Task to delete user from the Brevo platform."""
+    if not settings.BREVO_API_URL:
+        logger.info("Brevo API URL not set, skipping deletion.")
+        return
+
     user = get_user_from_mork(user_id)
     if not user:
         msg = f"User {user_id} could not be retrieved from Mork"
