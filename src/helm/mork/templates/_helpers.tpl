@@ -124,7 +124,10 @@ Environment variables
 - name: MORK_BREVO_API_URL
   value: "{{ .Values.brevo.apiUrl }}"
 - name: MORK_BREVO_API_KEY
-  value: "{{ .Values.brevo.apiKey }}"
+  valueFrom:
+    secretKeyRef:
+      name: mork-brevo-api-key
+      key: MORK_BREVO_API_KEY
 - name: MORK_CELERY_BROKER_URL
   value: "{{ .Values.celery.brokerUrl }}"
 - name: MORK_CELERY_BROKER_TRANSPORT_OPTIONS

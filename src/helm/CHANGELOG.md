@@ -11,6 +11,7 @@ and this project adheres to
 ### Changed
 
 - Refactor API and Celery deployments to have specific deployment values
+- Set Brevo API key from a secret instead of helm value
 
 ## [0.6.0] - 2024-12-03
 
