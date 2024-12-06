@@ -149,7 +149,6 @@ edx:
 
 brevo:
   apiUrl: "https://api.brevo.com/v3"
-  apiKey: ""
 
 
 # Deletion configuration
