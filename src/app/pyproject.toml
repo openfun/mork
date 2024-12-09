@@ -27,19 +27,19 @@ dependencies = [
     "alembic==1.14.0",
     "alembic-postgresql-enum==1.4.0",
     "celery[redis]==5.4.0",
-    "fastapi[standard]==0.115.5",
+    "fastapi[standard]==0.115.6",
     "Jinja2==3.1.4",
     "jinja2-simple-tags==0.6.1",
     "mongoengine==0.29.1",
     "mongomock==4.3.0",
     "psycopg2-binary==2.9.10",
-    "pydantic==2.10.2",
+    "pydantic==2.10.3",
     "pydantic_settings==2.6.1",
     "python-datauri==3.0.1",
     "pymongo==3.13.0", # pin as it is the last version compatible with MongoDB 3.0
     "pymysql==1.1.1",
-    "redis==5.2.0",
-    "sentry-sdk[celery,fastapi]==2.19.0",
+    "redis==5.2.1",
+    "sentry-sdk[celery,fastapi]==2.19.2",
     "SQLAlchemy==2.0.36", 
 ]
 dynamic = ["version"]
@@ -62,7 +62,7 @@ dev = [
     "pytest==8.3.4",
     "pytest-cov==6.0.0",
     "pytest-httpx==0.35.0",
-    "ruff==0.8.1",
+    "ruff==0.8.2",
 ]
 
 [tool.setuptools.dynamic]
