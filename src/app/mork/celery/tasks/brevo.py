@@ -39,6 +39,11 @@ def delete_brevo_platform_user(self, user_id: UUID):
         raise UserNotFound(msg)
 
     status = get_service_status(user, ServiceName.BREVO)
+
+    if status == DeletionStatus.DELETED:
+        logger.warning(f"User {user_id} has already been deleted.")
+        return
+
     if status != DeletionStatus.TO_DELETE:
         msg = f"User {user_id} is not to be deleted. Status: {status}"
         logger.error(msg)
