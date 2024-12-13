@@ -94,8 +94,8 @@ def test_delete_brevo_platform_user_invalid_user(monkeypatch):
     mock_update_status_in_mork.assert_not_called()
 
 
-def test_delete_brevo_platform_user_invalid_status(db_session, monkeypatch):
-    """Test to delete user from Brevo platform with an invalid status."""
+def test_delete_brevo_platform_user_deleted_status(db_session, monkeypatch, caplog):
+    """Test to delete user from Brevo platform already deleted."""
     UserServiceStatusFactory._meta.sqlalchemy_session = db_session
     UserFactory._meta.sqlalchemy_session = db_session
 
@@ -118,9 +118,47 @@ def test_delete_brevo_platform_user_invalid_status(db_session, monkeypatch):
         "mork.celery.tasks.brevo.update_status_in_mork", mock_update_status_in_mork
     )
 
+    # User is already deleted, silently exit the task
+    with caplog.at_level(logging.WARNING):
+        delete_brevo_platform_user(user.id)
+
+    assert (
+        "mork.celery.tasks.brevo",
+        logging.WARNING,
+        f"User {str(user.id)} has already been deleted.",
+    ) in caplog.record_tuples
+
+    mock_delete_brevo_user.assert_not_called()
+    mock_update_status_in_mork.assert_not_called()
+
+
+def test_delete_brevo_platform_user_invalid_status(db_session, monkeypatch, caplog):
+    """Test to delete user from Brevo platform with an invalid status."""
+    UserServiceStatusFactory._meta.sqlalchemy_session = db_session
+    UserFactory._meta.sqlalchemy_session = db_session
+
+    # Create one user in the database that is being deleted on brevo
+    UserFactory.create(
+        service_statuses={ServiceName.BREVO: DeletionStatus.DELETING},
+    )
+
+    # Get user from db
+    user = UserRead.model_validate(db_session.scalar(select(User)))
+
+    monkeypatch.setattr("mork.celery.tasks.brevo.get_user_from_mork", lambda x: user)
+
+    mock_delete_brevo_user = Mock()
+    monkeypatch.setattr(
+        "mork.celery.tasks.brevo.delete_brevo_user", mock_delete_brevo_user
+    )
+    mock_update_status_in_mork = Mock(return_value=True)
+    monkeypatch.setattr(
+        "mork.celery.tasks.brevo.update_status_in_mork", mock_update_status_in_mork
+    )
+
     with pytest.raises(
         UserStatusError,
-        match=f"User {str(user.id)} is not to be deleted. Status: DeletionStatus.DELETED",  # noqa: E501
+        match=f"User {str(user.id)} is not to be deleted. Status: DeletionStatus.DELETING",  # noqa: E501
     ):
         delete_brevo_platform_user(user.id)
 

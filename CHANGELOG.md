@@ -12,6 +12,7 @@ and this project adheres to
 
 - Disable Brevo request on empty Brevo API URL setting
 - Activate recursive scrubbing of Sentry events
+- Silently exit brevo task for already deleted users
 
 ### Fixed
 
