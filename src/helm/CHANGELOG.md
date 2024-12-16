@@ -8,10 +8,13 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.7.0] - 2024-12-16
+
 ### Changed
 
 - Refactor API and Celery deployments to have specific deployment values
 - Set Brevo API key from a secret instead of helm value
+- Upgrade appVersion to `0.7.0`
 
 ## [0.6.0] - 2024-12-03
 
@@ -81,6 +84,7 @@ and this project adheres to
 - Implement base Helm chart
 
 [unreleased]: https://github.com/openfun/mork/tree/main/src/helm
+[0.7.0]: https://github.com/openfun/mork/releases/tag/helm/v0.7.0
 [0.6.0]: https://github.com/openfun/mork/releases/tag/helm/v0.6.0
 [0.5.1]: https://github.com/openfun/mork/releases/tag/helm/v0.5.1
 [0.5.0]: https://github.com/openfun/mork/releases/tag/helm/v0.5.0
