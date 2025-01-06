@@ -52,7 +52,7 @@ class Settings(BaseSettings):
     DB_HOST: str = "postgresql"
     DB_NAME: str = "mork-db"
     DB_USER: str = "fun"
-    DB_PASSWORD: str = "pass"
+    DB_PASSWORD: str = "pass"  # noqa: S105
     DB_PORT: int = 5432
     DB_DEBUG: bool = False
     TEST_DB_NAME: str = "test-mork-db"
@@ -62,7 +62,7 @@ class Settings(BaseSettings):
     EDX_MYSQL_DB_HOST: str = "mysql"
     EDX_MYSQL_DB_NAME: str = "edxapp"
     EDX_MYSQL_DB_USER: str = "edxapp"
-    EDX_MYSQL_DB_PASSWORD: str = "password"
+    EDX_MYSQL_DB_PASSWORD: str = "password"  # noqa: S105
     EDX_MYSQL_DB_PORT: int = 3306
     EDX_MYSQL_DB_DEBUG: bool = False
     EDX_MYSQL_QUERY_BATCH_SIZE: int = 1000
@@ -72,7 +72,7 @@ class Settings(BaseSettings):
     EDX_MONGO_DB_HOST: str = "mongo"
     EDX_MONGO_DB_NAME: str = "cs_comments_service"
     EDX_MONGO_DB_USER: str = "cs_comments_service"
-    EDX_MONGO_DB_PASSWORD: str = "password"
+    EDX_MONGO_DB_PASSWORD: str = "password"  # noqa: S105
     EDX_MONGO_DB_PORT: int = 27017
     EDX_MONGO_DB_DEBUG: bool = False
 
