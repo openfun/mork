@@ -119,7 +119,7 @@ class Settings(BaseSettings):
         return (
             f"{self.DB_ENGINE}://"
             f"{self.DB_USER}:{self.DB_PASSWORD}@"
-            f"{self.DB_HOST}/{self.DB_NAME}"
+            f"{self.DB_HOST}/{self.DB_NAME}?client_encoding=utf-8"
         )
 
     @property
@@ -128,7 +128,7 @@ class Settings(BaseSettings):
         return (
             f"{self.DB_ENGINE}://"
             f"{self.DB_USER}:{self.DB_PASSWORD}@"
-            f"{self.DB_HOST}/{self.TEST_DB_NAME}"
+            f"{self.DB_HOST}/{self.TEST_DB_NAME}?client_encoding=utf-8"
         )
 
     @property

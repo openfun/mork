@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix ASCII encoding issue for email containing non-ASCII characters
+
 ## [0.7.0] - 2024-12-16
 
 ### Changed
