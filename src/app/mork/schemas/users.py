@@ -25,7 +25,7 @@ class UserRead(BaseModel):
     id: UUID
     username: str
     edx_user_id: int
-    email: EmailStr
+    email: str
     reason: DeletionReason
     service_statuses: list[UserServiceStatusRead]
     created_at: datetime
