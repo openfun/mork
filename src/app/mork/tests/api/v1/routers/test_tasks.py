@@ -31,6 +31,7 @@ async def test_tasks_auth(http_client: AsyncClient):
         {"type": "delete_inactive_users", "dry_run": False},
         {"type": "delete_inactive_users", "limit": 100, "dry_run": False},
         {"type": "delete_user", "email": "johndoe@example.com", "dry_run": False},
+        {"type": "delete_user", "email": "johndoe@wrong.email.", "dry_run": False},
         {"type": "email_inactive_users", "dry_run": True},
         {
             "type": "email_user",
@@ -66,7 +67,7 @@ async def test_create_task(
         assert response_data.get("id")
         assert response_data.get("status") == "PENDING"
         assert (
-            response.headers["location"] == f"/tasks/{response_data.get("id")}/status"
+            response.headers["location"] == f"/tasks/{response_data.get('id')}/status"
         )
 
         expected_params = {

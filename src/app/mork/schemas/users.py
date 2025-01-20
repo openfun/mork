@@ -3,7 +3,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict
 
 from mork.models.users import DeletionReason, DeletionStatus, ServiceName
 
@@ -25,7 +25,7 @@ class UserRead(BaseModel):
     id: UUID
     username: str
     edx_user_id: int
-    email: EmailStr
+    email: str
     reason: DeletionReason
     service_statuses: list[UserServiceStatusRead]
     created_at: datetime

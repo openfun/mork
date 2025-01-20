@@ -289,6 +289,60 @@ async def test_user_read(db_session, http_client: AsyncClient, auth_headers: dic
 
 
 @pytest.mark.anyio
+async def test_user_read_with_invalid_email(
+    db_session, http_client: AsyncClient, auth_headers: dict
+):
+    """Test the behavior of retrieving one user with an invalid email address."""
+    UserServiceStatusFactory._meta.sqlalchemy_session = db_session
+    UserFactory._meta.sqlalchemy_session = db_session
+
+    creation_date = Faker().date_time()
+
+    # Create one user with an invalid email, that needs to be deleted
+    user = UserFactory.create(
+        email="johndoe@example.com.",
+        created_at=creation_date,
+        updated_at=creation_date,
+    )
+
+    # Get id of newly created user
+    user_id = db_session.scalar(select(User.id))
+
+    response = await http_client.get(f"/v1/users/{str(user_id)}", headers=auth_headers)
+
+    assert response.status_code == 200
+
+    # Verify the retrieved data matches the expected format
+    assert response.json() == {
+        "id": str(user_id),
+        "username": user.username,
+        "edx_user_id": user.edx_user_id,
+        "email": user.email,
+        "reason": user.reason.value,
+        "service_statuses": [
+            {
+                "service_name": "ashley",
+                "status": "to_delete",
+            },
+            {
+                "service_name": "edx",
+                "status": "to_delete",
+            },
+            {
+                "service_name": "brevo",
+                "status": "to_delete",
+            },
+            {
+                "service_name": "joanie",
+                "status": "to_delete",
+            },
+        ],
+        "created_at": creation_date.isoformat(),
+        "updated_at": creation_date.isoformat(),
+    }
+
+
+@pytest.mark.anyio
 @pytest.mark.parametrize("invalid_id", ["foo", 123, "a1-a2-aa", uuid4().hex + "a"])
 async def test_user_read_invalid_id(
     db_session, http_client: AsyncClient, auth_headers: dict, invalid_id

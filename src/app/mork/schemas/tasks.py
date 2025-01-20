@@ -57,7 +57,7 @@ class DeleteUser(TaskCreateBase):
     """Model for creating a task to delete one user."""
 
     type: Literal[TaskType.DELETE_USER]
-    email: EmailStr
+    email: str
 
 
 class EmailUser(TaskCreateBase):
