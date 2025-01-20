@@ -12,6 +12,10 @@ and this project adheres to
 
 - Fix ASCII encoding issue for email containing non-ASCII characters
 
+### Removed
+
+- Remove email validation for emails coming from edx
+
 ## [0.7.0] - 2024-12-16
 
 ### Changed
