@@ -42,6 +42,7 @@ from .student import (
     EdxStudentHistoricalcourseenrollmentFactory,
     EdxStudentLanguageproficiencyFactory,
     EdxStudentLoginfailureFactory,
+    EdxStudentManualenrollmentauditFactory,
     EdxStudentPendingemailchangeFactory,
     EdxStudentUserstandingFactory,
 )
@@ -350,6 +351,12 @@ class EdxAuthUserFactory(BaseSQLAlchemyModelFactory):
         "user",
         size=3,
         user_id=factory.SelfAttribute("..id"),
+    )
+    student_manualenrollmentaudit = factory.RelatedFactoryList(
+        EdxStudentManualenrollmentauditFactory,
+        "enrolled_by",
+        size=3,
+        enrolled_by_id=factory.SelfAttribute("..id"),
     )
     student_pendingemailchange = factory.RelatedFactory(
         EdxStudentPendingemailchangeFactory, user_id=factory.SelfAttribute("..id")
