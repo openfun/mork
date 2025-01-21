@@ -87,7 +87,7 @@ class AuthUser(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
-    auth_user_groups: Mapped["AuthUserGroups"] = relationship(
+    auth_user_groups: Mapped[List["AuthUserGroups"]] = relationship(
         "AuthUserGroups",
         back_populates="user",
         cascade="all, delete-orphan",
