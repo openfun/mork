@@ -261,7 +261,7 @@ class StudentManualenrollmentaudit(Base):
 
     id: Mapped[int] = mapped_column(INTEGER(11), primary_key=True)
     enrollment_id: Mapped[int] = mapped_column(INTEGER(11), index=True)
-    enrolled_by_id: Mapped[int] = mapped_column(INTEGER(11), index=True)
+    enrolled_by_id: Mapped[int] = mapped_column(INTEGER(11), nullable=True, index=True)
     enrolled_email: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     time_stamp: Mapped[datetime.datetime] = mapped_column(DateTime)
     state_transition: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -269,6 +269,9 @@ class StudentManualenrollmentaudit(Base):
 
     enrollment: Mapped["StudentCourseenrollment"] = relationship(
         "StudentCourseenrollment", back_populates="student_manualenrollmentaudit"
+    )
+    enrolled_by: Mapped["AuthUser"] = relationship(  # noqa: F821
+        "AuthUser", back_populates="student_manualenrollmentaudit"
     )
 
 

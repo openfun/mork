@@ -162,7 +162,7 @@ def test_edx_crud_delete_user_missing(edx_mysql_db):
         crud.delete_user(edx_mysql_db.session, email=email)
 
 
-def test_edx_crud_delete_user(edx_mysql_db):
+def test_edx_crud_delete_user_cascades(edx_mysql_db):
     """Test the `delete_user` method."""
     email = "john_doe@example.com"
     EdxAuthUserFactory.create_batch(1, email=email)
@@ -197,7 +197,6 @@ def test_edx_crud_delete_user(edx_mysql_db):
         "student_historicalcourseenrollment",
         "student_languageproficiency",
         "student_loginfailures",
-        "student_manualenrollmentaudit",
         "student_pendingemailchange",
         "student_userstanding",
         "user_api_userpreference",
@@ -217,6 +216,35 @@ def test_edx_crud_delete_user(edx_mysql_db):
     for table_name in related_tables:
         table = Base.metadata.tables[table_name]
         assert edx_mysql_db.session.query(table).count() == 0
+
+
+def test_edx_crud_delete_user_manual_enrollment_audit(edx_mysql_db):
+    """Test delete_user behavior with manual enrollment audit records."""
+    email = "john_doe@example.com"
+    # Create one user with:
+    # - 9 manual enrollment audits where user is the enrollee
+    # - 3 manual enrollment audits where user is the enroller
+    EdxAuthUserFactory.create_batch(1, email=email)[0]
+
+    manual_enrollment_table = Base.metadata.tables["student_manualenrollmentaudit"]
+    initial_audit_count = edx_mysql_db.session.query(manual_enrollment_table).count()
+    assert initial_audit_count == 12
+
+    # Delete the user
+    crud.delete_user(edx_mysql_db.session, email=email)
+
+    # Verify user was deleted
+    assert edx_mysql_db.session.query(AuthUser).count() == 0
+
+    # Check remaining audit records
+    remaining_audits = edx_mysql_db.session.query(manual_enrollment_table).all()
+
+    # Only the 3 audits where user was the enroller should remain
+    assert len(remaining_audits) == 3
+
+    # Verify remaining records have NULL enrolled_by_id
+    for audit in remaining_audits:
+        assert audit.enrolled_by_id is None
 
 
 def test_edx_crud_delete_user_protected_table(edx_mysql_db):

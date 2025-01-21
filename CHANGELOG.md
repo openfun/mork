@@ -12,6 +12,7 @@ and this project adheres to
 
 - Fix ASCII encoding issue for email containing non-ASCII characters
 - Fix edX `auth_user_groups` relation 
+- Fix edX `studebt_manualenrollmentaudit` relation
 
 ### Removed
 
