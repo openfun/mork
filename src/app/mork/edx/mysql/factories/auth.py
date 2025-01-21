@@ -220,8 +220,11 @@ class EdxAuthUserFactory(BaseSQLAlchemyModelFactory):
     auth_userprofile = factory.RelatedFactory(
         EdxAuthUserprofileFactory, user_id=factory.SelfAttribute("..id")
     )
-    auth_user_groups = factory.RelatedFactory(
-        EdxAuthUserGroupsFactory, user_id=factory.SelfAttribute("..id")
+    auth_user_groups = factory.RelatedFactoryList(
+        EdxAuthUserGroupsFactory,
+        "user",
+        size=3,
+        user_id=factory.SelfAttribute("..id"),
     )
     bulk_email_courseemail = factory.RelatedFactoryList(
         EdxBulkEmailCourseemailFactory,
