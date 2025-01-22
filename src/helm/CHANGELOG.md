@@ -8,6 +8,12 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.8.0] - 2025-01-22
+
+### Changed
+
+- Upgrade appVersion to `0.8.0`
+
 ## [0.7.0] - 2024-12-16
 
 ### Changed
@@ -84,6 +90,7 @@ and this project adheres to
 - Implement base Helm chart
 
 [unreleased]: https://github.com/openfun/mork/tree/main/src/helm
+[0.8.0]: https://github.com/openfun/mork/releases/tag/helm/v0.8.0
 [0.7.0]: https://github.com/openfun/mork/releases/tag/helm/v0.7.0
 [0.6.0]: https://github.com/openfun/mork/releases/tag/helm/v0.6.0
 [0.5.1]: https://github.com/openfun/mork/releases/tag/helm/v0.5.1
