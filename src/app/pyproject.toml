@@ -40,7 +40,7 @@ dependencies = [
     "pymysql==1.1.1",
     "redis==5.2.1",
     "sentry-sdk[celery,fastapi]==2.20.0",
-    "SQLAlchemy==2.0.37", 
+    "SQLAlchemy==2.0.38", 
 ]
 dynamic = ["version"]
 
@@ -57,12 +57,12 @@ ci = [
 dev = [
     "black==25.1.0",
     "build==1.2.2.post1",
-    "factory_boy==3.3.1",
+    "factory_boy==3.3.3",
     "flower==2.0.1",
     "pytest==8.3.4",
     "pytest-cov==6.0.0",
     "pytest-httpx==0.35.0",
-    "ruff==0.9.4",
+    "ruff==0.9.5",
 ]
 
 [tool.setuptools.dynamic]
