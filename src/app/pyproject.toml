@@ -39,7 +39,7 @@ dependencies = [
     "pymongo==3.13.0", # pin as it is the last version compatible with MongoDB 3.0
     "pymysql==1.1.1",
     "redis==5.2.1",
-    "sentry-sdk[celery,fastapi]==2.20.0",
+    "sentry-sdk[celery,fastapi]==2.22.0",
     "SQLAlchemy==2.0.38", 
 ]
 dynamic = ["version"]
@@ -62,7 +62,7 @@ dev = [
     "pytest==8.3.4",
     "pytest-cov==6.0.0",
     "pytest-httpx==0.35.0",
-    "ruff==0.9.5",
+    "ruff==0.9.6",
 ]
 
 [tool.setuptools.dynamic]
