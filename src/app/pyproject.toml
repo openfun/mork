@@ -25,7 +25,7 @@ license = { file = "LICENSE.md" }
 keywords = ["FastAPI", "Celery", "emails", "Open edX"]
 dependencies = [
     "alembic==1.14.1",
-    "alembic-postgresql-enum==1.6.1",
+    "alembic-postgresql-enum==1.7.0",
     "celery[redis]==5.4.0",
     "fastapi[standard]==0.115.8",
     "Jinja2==3.1.5",
@@ -34,7 +34,7 @@ dependencies = [
     "mongomock==4.3.0",
     "psycopg2-binary==2.9.10",
     "pydantic==2.10.6",
-    "pydantic_settings==2.7.1",
+    "pydantic_settings==2.8.0",
     "python-datauri==3.0.2",
     "pymongo==3.13.0", # pin as it is the last version compatible with MongoDB 3.0
     "pymysql==1.1.1",
@@ -62,7 +62,7 @@ dev = [
     "pytest==8.3.4",
     "pytest-cov==6.0.0",
     "pytest-httpx==0.35.0",
-    "ruff==0.9.6",
+    "ruff==0.9.7",
 ]
 
 [tool.setuptools.dynamic]
