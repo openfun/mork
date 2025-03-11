@@ -160,7 +160,7 @@ async def test_users_read_invalid_params(
         ({"deletion_status": "deleted"}, 6),
         ({"deletion_status": "to_delete", "service": "ashley"}, 3),
         ({"deletion_status": "to_delete", "service": "joanie"}, 2),
-        ({"deletion_status": "to_delete", "service": "brevo"}, 0),
+        ({"deletion_status": "to_delete", "service": "sarbacane"}, 0),
     ],
 )
 async def test_users_read_filter(
@@ -185,7 +185,7 @@ async def test_users_read_filter(
         3,
         service_statuses={
             ServiceName.ASHLEY: DeletionStatus.TO_DELETE,
-            ServiceName.BREVO: DeletionStatus.DELETED,
+            ServiceName.SARBACANE: DeletionStatus.DELETED,
             ServiceName.EDX: DeletionStatus.DELETED,
             ServiceName.JOANIE: DeletionStatus.DELETED,
         },
@@ -195,7 +195,7 @@ async def test_users_read_filter(
         2,
         service_statuses={
             ServiceName.ASHLEY: DeletionStatus.DELETED,
-            ServiceName.BREVO: DeletionStatus.DELETED,
+            ServiceName.SARBACANE: DeletionStatus.DELETED,
             ServiceName.EDX: DeletionStatus.DELETED,
             ServiceName.JOANIE: DeletionStatus.TO_DELETE,
         },
@@ -205,7 +205,7 @@ async def test_users_read_filter(
         1,
         service_statuses={
             ServiceName.ASHLEY: DeletionStatus.DELETED,
-            ServiceName.BREVO: DeletionStatus.DELETED,
+            ServiceName.SARBACANE: DeletionStatus.DELETED,
             ServiceName.EDX: DeletionStatus.DELETED,
             ServiceName.JOANIE: DeletionStatus.DELETED,
         },
@@ -275,11 +275,11 @@ async def test_user_read(db_session, http_client: AsyncClient, auth_headers: dic
                 "status": "to_delete",
             },
             {
-                "service_name": "brevo",
+                "service_name": "joanie",
                 "status": "to_delete",
             },
             {
-                "service_name": "joanie",
+                "service_name": "sarbacane",
                 "status": "to_delete",
             },
         ],
@@ -329,11 +329,11 @@ async def test_user_read_with_invalid_email(
                 "status": "to_delete",
             },
             {
-                "service_name": "brevo",
+                "service_name": "joanie",
                 "status": "to_delete",
             },
             {
-                "service_name": "joanie",
+                "service_name": "sarbacane",
                 "status": "to_delete",
             },
         ],
@@ -500,7 +500,7 @@ async def test_user_read_status_invalid_service(
     "service_name, deletion_status",
     [
         ("ashley", "deleting"),
-        ("brevo", "deleting"),
+        ("sarbacane", "deleting"),
         ("edx", "deleted"),
         ("joanie", "deleted"),
     ],

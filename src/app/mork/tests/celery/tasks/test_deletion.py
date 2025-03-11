@@ -182,7 +182,9 @@ def test_delete_user(monkeypatch):
         patch("mork.celery.tasks.deletion.remove_email_status.si") as mock_remove_email,
         patch("mork.celery.tasks.deletion.mark_user_for_deletion.si") as mock_mark,
         patch("mork.celery.tasks.deletion.delete_edx_platform_user.s") as mock_edx,
-        patch("mork.celery.tasks.deletion.delete_brevo_platform_user.s") as mock_brevo,
+        patch(
+            "mork.celery.tasks.deletion.delete_sarbacane_platform_user.s"
+        ) as mock_sarbacane,
         patch("mork.celery.tasks.deletion.chain") as mock_chain,
     ):
         email = "johndoe@example.com"
@@ -192,7 +194,7 @@ def test_delete_user(monkeypatch):
         mock_chain.assert_called_once_with(
             mock_remove_email(email=email),
             mock_mark(email=email, reason=reason),
-            group(mock_edx(email=email), mock_brevo(email=email)),
+            group(mock_edx(email=email), mock_sarbacane(email=email)),
         )
 
 

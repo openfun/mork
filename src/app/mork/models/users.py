@@ -25,6 +25,7 @@ class ServiceName(str, enum.Enum):
     EDX = "edx"
     BREVO = "brevo"
     JOANIE = "joanie"
+    SARBACANE = "sarbacane"
 
 
 class DeletionReason(str, enum.Enum):
