@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Changed
+
+- Migrate from Brevo to Sarbacane
+
 ## [0.8.0] - 2025-01-22
 
 ### Changed

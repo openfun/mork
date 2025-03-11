@@ -9,8 +9,8 @@ from sqlalchemy import insert, select
 from sqlalchemy.exc import DBAPIError, SQLAlchemyError
 
 from mork.celery.celery_app import app
-from mork.celery.tasks.brevo import delete_brevo_platform_user
 from mork.celery.tasks.edx import delete_edx_platform_user
+from mork.celery.tasks.sarbacane import delete_sarbacane_platform_user
 from mork.conf import settings
 from mork.db import MorkDB
 from mork.edx.mysql import crud
@@ -77,7 +77,7 @@ def delete_user(
     delete_chain = chain(
         remove_email_status.si(email),
         mark_user_for_deletion.si(email=email, reason=reason),
-        group(delete_edx_platform_user.s(), delete_brevo_platform_user.s()),
+        group(delete_edx_platform_user.s(), delete_sarbacane_platform_user.s()),
     )
 
     delete_chain.delay()
@@ -136,6 +136,7 @@ def mark_user_for_deletion(email: str, reason: DeletionReason) -> UUID:
                 "status": DeletionStatus.TO_DELETE,
             }
             for service in ServiceName
+            if service != ServiceName.BREVO
         ],
     )
 

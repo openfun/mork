@@ -29,10 +29,11 @@ def before_send(event, hint):  # noqa: ARG001
         data = breadcrumb.get("data", {})
         url = data.get("url", "")
 
-        # Remove user email from Brevo request URL
-        if "/contacts/" in url:
-            data["url"] = url.replace(url.split("/contacts/")[-1], "[Filtered]")
-            breadcrumb["data"] = data
+        # Remove user email from Sarbacane request URLs
+        for endpoint in ["/contacts", "/unsubscribers", "/complaints"]:
+            if endpoint in url:
+                data["url"] = url.replace(url.split(f"{endpoint}")[-1], "[Filtered]")
+                breadcrumb["data"] = data
 
     return event
 

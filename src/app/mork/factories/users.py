@@ -48,7 +48,11 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
         if not create:
             return
 
-        service_states = {service: DeletionStatus.TO_DELETE for service in ServiceName}
+        service_states = {
+            service: DeletionStatus.TO_DELETE
+            for service in ServiceName
+            if service != ServiceName.BREVO
+        }
 
         if isinstance(extracted, dict):
             service_states.update(extracted)

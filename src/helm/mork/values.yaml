@@ -147,9 +147,8 @@ edx:
     port: 27017
     debug: false
 
-brevo:
-  apiUrl: "https://api.brevo.com/v3"
-
+sarbacane:
+  apiUrl: "https://sarbacaneapis.com/v1"
 
 # Deletion configuration
 deletion:
