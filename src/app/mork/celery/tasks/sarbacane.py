@@ -99,7 +99,8 @@ def _delete_contact(client: httpx.Client, endpoint: str, email: str):
         response = client.delete(f"{endpoint}?email={email}")
         response.raise_for_status()
     except httpx.HTTPStatusError as exc:
-        if exc.response.status_code == httpx.codes.NOT_FOUND:
+        data = exc.response.json() if exc.response.content else {}
+        if data.get("message") == "No contacts versions to delete":
             logger.info(f"User not found at {endpoint}")
         else:
             msg = f"Failed to delete user contact at {endpoint}"

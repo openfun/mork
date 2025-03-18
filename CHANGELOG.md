@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix incorrect status code check when deleting user contact
+
 ## [0.9.0] - 2025-03-17
 
 ### Changed

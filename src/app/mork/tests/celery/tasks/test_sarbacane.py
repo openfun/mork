@@ -249,7 +249,8 @@ def test_delete_sarbacane_user(httpx_mock):
         url=f"{settings.SARBACANE_API_URL}/lists/list0/contacts?email={email}",
         method="DELETE",
         headers=headers,
-        status_code=404,
+        status_code=500,
+        json={"message": "No contacts versions to delete"},
     )
     httpx_mock.add_response(
         url=f"{settings.SARBACANE_API_URL}/lists/list1/contacts?email={email}",
@@ -270,7 +271,8 @@ def test_delete_sarbacane_user(httpx_mock):
         url=f"{settings.SARBACANE_API_URL}/blacklists/blacklist0/unsubscribers?email={email}",
         method="DELETE",
         headers=headers,
-        status_code=404,
+        status_code=500,
+        json={"message": "No contacts versions to delete"},
     )
     httpx_mock.add_response(
         url=f"{settings.SARBACANE_API_URL}/blacklists/blacklist1/unsubscribers?email={email}",
@@ -357,7 +359,8 @@ def test_delete_sarbacane_user_not_found(httpx_mock, caplog):
         url=f"{settings.SARBACANE_API_URL}/lists/list0/contacts?email={email}",
         method="DELETE",
         headers=headers,
-        status_code=404,
+        status_code=500,
+        json={"message": "No contacts versions to delete"},
     )
 
     # Mock requests on /blacklists endpoint
@@ -366,7 +369,7 @@ def test_delete_sarbacane_user_not_found(httpx_mock, caplog):
         method="GET",
         headers=headers,
         status_code=200,
-        json=[],
+        json={},
     )
 
     # Make sure no error is raised if contact not found on Sarbacane
