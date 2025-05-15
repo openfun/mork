@@ -12,6 +12,10 @@ and this project adheres to
 
 - Fix incorrect status code check when deleting user contact
 
+### Removed
+
+- Remove uniqueness constraint on username field
+
 ## [0.9.0] - 2025-03-17
 
 ### Changed

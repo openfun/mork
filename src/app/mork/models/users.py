@@ -85,7 +85,7 @@ class User(Base):
     id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid4
     )
-    username: Mapped[str] = mapped_column(String(254), unique=True, nullable=False)
+    username: Mapped[str] = mapped_column(String(254), nullable=False)
     edx_user_id: Mapped[int] = mapped_column(Integer(), unique=True)
     email: Mapped[str] = mapped_column(String(254), nullable=False)
     reason: Mapped[DeletionReason] = mapped_column(
