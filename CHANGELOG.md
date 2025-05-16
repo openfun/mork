@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.10.0] - 2025-05-16
+
 ### Fixed
 
 - Fix incorrect status code check when deleting user contact
@@ -127,7 +129,8 @@ and this project adheres to
 - Add celery task to warn inactive users by email
 - Add celery task to delete inactive users from edx database
 
-[unreleased]: https://github.com/openfun/mork/compare/v0.9.0...main
+[unreleased]: https://github.com/openfun/mork/compare/v0.10.0...main
+[0.10.0]: https://github.com/openfun/mork/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/openfun/mork/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/openfun/mork/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/openfun/mork/compare/v0.6.0...v0.7.0
