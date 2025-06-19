@@ -39,10 +39,7 @@ class Heartbeat(BaseModel):
 
 @router.get("/__lbheartbeat__")
 async def lbheartbeat() -> None:
-    """Load balancer heartbeat.
-
-    Return a 200 when the server is running.
-    """
+    """Load balancer heartbeat."""
     return
 
 
@@ -50,9 +47,9 @@ async def lbheartbeat() -> None:
 async def heartbeat(
     session: Annotated[Session, Depends(get_session)], response: Response
 ) -> Heartbeat:
-    """Application heartbeat.
+    """Main application health check endpoint.
 
-    Return a 200 if all checks are successful.
+    Returns 200 if everything is OK, 500 otherwise.
     """
     statuses = Heartbeat(
         database=DatabaseStatus.OK if is_db_alive(session) else DatabaseStatus.ERROR,
