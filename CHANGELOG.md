@@ -8,6 +8,12 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- Add advanced filtering capabilities to 
+  `/v1/users` endpoint
+  - `email` parameter for partial email matching
+  - `username` parameter for partial username matching
 ## [0.10.0] - 2025-05-16
 
 ### Fixed
