@@ -34,7 +34,7 @@ def render_template(template: str, context) -> str:
 def send_email(email_address: str, username: str):
     """Initialize connection to SMTP and send a warning email."""
     template_vars = {
-        "title": "Votre compte va être supprimé dans 30 jours.",
+        "title": "Your account will be deleted in 30 days.",
         "email": email_address,
         "fullname": username,
         "site": {
@@ -57,7 +57,7 @@ def send_email(email_address: str, username: str):
     message = MIMEMultipart("alternative")
     message["From"] = settings.EMAIL_FROM
     message["To"] = email_address
-    message["Subject"] = "Votre compte va bientôt être supprimé"
+    message["Subject"] = "Your account will be deleted soon"
 
     # Attach the HTML parts. According to RFC 2046, the last part of a multipart
     # message, in this case the HTML message, is best and preferred

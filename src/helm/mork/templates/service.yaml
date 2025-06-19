@@ -1,3 +1,6 @@
+#
+# service.yaml : ressource Service Kubernetes pour exposer l'API Mork sur le cluster.
+#
 ---
 apiVersion: v1
 kind: Service

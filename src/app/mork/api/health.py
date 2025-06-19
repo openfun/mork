@@ -1,4 +1,7 @@
-"""API health router."""
+"""API health router.
+
+This module provides endpoints to check the application and database status.
+"""
 
 import logging
 from enum import Enum
@@ -17,7 +20,7 @@ router = APIRouter()
 
 
 class DatabaseStatus(Enum):
-    """Data backend statuses."""
+    """Possible statuses for the data backend."""
 
     OK = "ok"
     AWAY = "away"
@@ -25,13 +28,16 @@ class DatabaseStatus(Enum):
 
 
 class Heartbeat(BaseModel):
-    """Warren backends status."""
+    """Status of Warren backends (here, the database)."""
 
     database: DatabaseStatus
 
     @property
     def is_alive(self):
-        """A helper that checks the overall status."""
+        """Checks if all services are operational.
+
+        Returns True if the database is OK.
+        """
         if self.database == DatabaseStatus.OK:
             return True
         return False
@@ -39,9 +45,9 @@ class Heartbeat(BaseModel):
 
 @router.get("/__lbheartbeat__")
 async def lbheartbeat() -> None:
-    """Load balancer heartbeat.
+    """Endpoint for the load balancer.
 
-    Return a 200 when the server is running.
+    Returns 200 if the server is working.
     """
     return
 
@@ -50,9 +56,9 @@ async def lbheartbeat() -> None:
 async def heartbeat(
     session: Annotated[Session, Depends(get_session)], response: Response
 ) -> Heartbeat:
-    """Application heartbeat.
+    """Main application health check endpoint.
 
-    Return a 200 if all checks are successful.
+    Returns 200 if everything is OK, 500 otherwise.
     """
     statuses = Heartbeat(
         database=DatabaseStatus.OK if is_db_alive(session) else DatabaseStatus.ERROR,

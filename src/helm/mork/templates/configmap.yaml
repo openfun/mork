@@ -1,3 +1,6 @@
+#
+# configmap.yaml : ConfigMap Kubernetes pour la configuration du logging de l'application Mork.
+#
 apiVersion: v1
 kind: ConfigMap
 metadata:

@@ -1,3 +1,8 @@
+#
+# NOTES.txt : instructions post-installation pour l'utilisateur du chart Helm Mork.
+# Ce fichier affiche des conseils pour accéder à l'application après le déploiement.
+#
+
 CHART NAME: {{ .Chart.Name }}
 CHART VERSION: {{ .Chart.Version }}
 APP VERSION: {{ .Chart.AppVersion }}

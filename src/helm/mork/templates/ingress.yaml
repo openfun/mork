@@ -1,3 +1,6 @@
+#
+# ingress.yaml : ressource Ingress Kubernetes pour exposer l'API Mork en HTTP/HTTPS.
+#
 {{- if .Values.ingress.enabled -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
