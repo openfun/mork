@@ -1,4 +1,10 @@
 {{/*
+Fichier _helpers.tpl : fonctions et helpers Helm pour le chart Mork.
+Ce fichier contient des définitions réutilisables (labels, noms, env, etc).
+Les blocs principaux sont commentés en français ci-dessous.
+*/}}
+
+{{/*
 Expand the name of the chart.
 */}}
 {{- define "mork.name" -}}

@@ -1,4 +1,8 @@
-"""Mork celery configuration file."""
+"""Celery configuration file for Mork.
+
+This module initializes the Celery application, configures Sentry for error handling,
+and adds custom liveness probes.
+"""
 
 import sentry_sdk
 from celery import Celery, signals
@@ -21,7 +25,10 @@ app.steps["worker"].add(LivenessProbe)
 
 
 def before_send(event, hint):  # noqa: ARG001
-    """Remove user email from the event sent to Sentry."""
+    """Removes user email from events sent to Sentry.
+
+    Filters Sarbacane URLs to avoid transmitting sensitive data.
+    """
     if not event.get("breadcrumbs"):
         return event
 
@@ -29,7 +36,7 @@ def before_send(event, hint):  # noqa: ARG001
         data = breadcrumb.get("data", {})
         url = data.get("url", "")
 
-        # Remove user email from Sarbacane request URLs
+        # Removes user email from Sarbacane URLs
         for endpoint in ["/contacts", "/unsubscribers", "/complaints"]:
             if endpoint in url:
                 data["url"] = url.replace(url.split(f"{endpoint}")[-1], "[Filtered]")
@@ -40,7 +47,10 @@ def before_send(event, hint):  # noqa: ARG001
 
 @signals.celeryd_init.connect
 def init_sentry(**_kwargs):
-    """Initialize Sentry SDK on Celery startup."""
+    """Initializes the Sentry SDK when the Celery worker starts.
+
+    Configures PII filtering and execution environment.
+    """
     if settings.SENTRY_DSN is not None:
         pii_denylist = DEFAULT_PII_DENYLIST + ["email", "username"]
         sentry_sdk.init(
@@ -57,8 +67,7 @@ def init_sentry(**_kwargs):
         sentry_sdk.set_tag("application", "celery")
 
 
-# Using a string here means the worker doesn't have to serialize
-# the configuration object to child processes.
-# - namespace='CELERY' means all celery-related configuration keys
-#   should have a `CELERY_` prefix.
+# Using a string here avoids serializing the configuration object in subprocesses.
+# - namespace='CELERY' means that all celery-related configuration keys
+#   must have the `CELERY_` prefix.
 app.config_from_object("mork.conf:settings", namespace="CELERY")

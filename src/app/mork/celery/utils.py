@@ -1,4 +1,7 @@
-"""Celery utils functions."""
+"""Utility functions for Celery (Mork).
+
+This module provides helpers to interact with the Mork API (user retrieval and updates).
+"""
 
 from logging import getLogger
 from uuid import UUID
@@ -13,7 +16,10 @@ logger = getLogger(__name__)
 
 
 def get_user_from_mork(user_id: UUID) -> UserRead | None:
-    """Retrieve user from Mork by ID."""
+    """Retrieves a user from the Mork API using their ID.
+
+    Returns a UserRead object or None in case of error.
+    """
     logger.debug("Get user from Mork")
     logger.debug(f"API URL: {settings.SERVER_URL}")
 
@@ -31,7 +37,10 @@ def get_user_from_mork(user_id: UUID) -> UserRead | None:
 
 
 def get_service_status(user: UserRead, service: ServiceName) -> DeletionStatus | None:
-    """Find the service status entry for a user."""
+    """Finds the deletion status of a user for a given service.
+
+    Returns the status or None if not found.
+    """
     service_status = next(
         (status for status in user.service_statuses if status.service_name == service),
         None,
@@ -42,7 +51,10 @@ def get_service_status(user: UserRead, service: ServiceName) -> DeletionStatus |
 def update_status_in_mork(
     user_id: UUID, service: ServiceName, status: DeletionStatus
 ) -> bool:
-    """Update the user deletion status in Mork."""
+    """Updates the deletion status of a user in Mork via the API.
+
+    Returns True if the update was successful, False otherwise.
+    """
     logger.debug(f"Updating deletion status for user {user_id} in Mork to {status}")
     logger.debug(f"API URL: {settings.SERVER_URL}")
 

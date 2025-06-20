@@ -1,3 +1,7 @@
+#
+# Chart.yaml : métadonnées du chart Helm pour l'application Mork.
+# Ce fichier décrit le nom, la version et le but du chart.
+#
 apiVersion: v2
 
 name: mork

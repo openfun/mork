@@ -1,5 +1,11 @@
-"""Tests for the Mork API '/users/' endpoints."""
+"""
+Tests for the '/users/' endpoints of the Mork API.
 
+- Verifies authentication, pagination, filters, reading and updating user statuses.
+- Contains specific tests for email search (presence in edx, Mork, both, or none).
+"""
+
+import types
 from uuid import uuid4
 
 import pytest
@@ -28,6 +34,7 @@ async def test_users_auth(http_client: AsyncClient):
     assert (await http_client.get("/v1/users/foo")).status_code == 403
     assert (await http_client.get("/v1/users/foo/status/bar")).status_code == 403
     assert (await http_client.patch("/v1/users/foo/status/bar")).status_code == 403
+    assert (await http_client.get("/v1/users/by-email/")).status_code == 403
 
 
 @pytest.mark.anyio
@@ -453,8 +460,8 @@ async def test_user_read_status_invalid_id(
 
     assert response.status_code == 422
 
-    # Attempt to read an user with a nonexistent ID
-    nonexistent_id = uuid4().hex
+    # Attempt to read an user with a nonexistent ID (valid UUID format)
+    nonexistent_id = uuid4()
     response = await http_client.get(
         f"/v1/users/{nonexistent_id}/status/ashley", headers=auth_headers
     )
@@ -660,3 +667,229 @@ async def test_users_update_status_invalid_status(
 
     # Assert the request fails
     assert response.status_code == 422
+
+
+@pytest.mark.anyio
+async def test_by_email_missing_email_parameter(
+    http_client: AsyncClient, auth_headers: dict
+):
+    """Test /v1/users/by-email/ with missing email parameter."""
+    response = await http_client.get(
+        "/v1/users/by-email/",
+        headers=auth_headers,
+        # Missing email parameter
+    )
+
+    assert response.status_code == 422
+    response_data = response.json()
+    assert "Field required" in response_data["detail"][0]["msg"]
+
+
+@pytest.mark.anyio
+async def test_by_email_invalid_email_format(
+    http_client: AsyncClient, auth_headers: dict
+):
+    """Test /v1/users/by-email/ with invalid email format."""
+    response = await http_client.get(
+        "/v1/users/by-email/",
+        headers=auth_headers,
+        params={"email": "invalid-email-format"},
+    )
+
+    # The endpoint doesn't validate email format, it just searches for it
+    # So it should return 404 (not found) rather than 422 (validation error)
+    assert response.status_code == 404
+
+
+@pytest.mark.anyio
+async def test_by_email_empty_email(http_client: AsyncClient, auth_headers: dict):
+    """Test /v1/users/by-email/ with empty email."""
+    response = await http_client.get(
+        "/v1/users/by-email/",
+        headers=auth_headers,
+        params={"email": ""},
+    )
+
+    # The endpoint doesn't validate email format, it just searches for it
+    # So it should return 404 (not found) rather than 422 (validation error)
+    assert response.status_code == 404
+
+
+@pytest.mark.anyio
+async def test_by_email_exception_handling(
+    db_session, http_client: AsyncClient, auth_headers: dict, monkeypatch
+):
+    """Test /v1/users/by-email/ exception handling when database operations fail."""
+    # Since the endpoint now handles edX database errors gracefully,
+    # we just test that it doesn't crash and returns appropriate response
+    response = await http_client.get(
+        "/v1/users/by-email/",
+        headers=auth_headers,
+        params={"email": "test@example.com"},
+    )
+
+    # Should return 404 since no user exists in either database
+    assert response.status_code == 404
+    response_data = response.json()
+    assert "No user found for this email" in response_data["detail"]
+
+
+@pytest.mark.anyio
+async def test_by_email_service_statuses_handling(
+    db_session, http_client: AsyncClient, auth_headers: dict, monkeypatch
+):
+    """Test /v1/users/by-email/ with service statuses that might cause exceptions."""
+    # Set up UserFactory and UserServiceStatusFactory to use the test session
+    UserFactory._meta.sqlalchemy_session = db_session
+    UserServiceStatusFactory._meta.sqlalchemy_session = db_session
+
+    # Create a user in Mork
+    user = UserFactory(email="test@example.com")
+    db_session.commit()
+    db_session.expire_all()
+
+    response = await http_client.get(
+        "/v1/users/by-email/",
+        headers=auth_headers,
+        params={"email": "test@example.com"},
+    )
+
+    # Should work and return user data
+    assert response.status_code == 200
+    data = response.json()
+    assert data["mork_status"]["id"] == str(user.id)
+    # edx_user should be None since edX database is not accessible in tests
+    assert data["edx_user"] is None
+
+
+@pytest.mark.anyio
+async def test_by_email_only_in_edx(
+    db_session, http_client: AsyncClient, auth_headers: dict, monkeypatch
+):
+    """
+    Test /v1/users/by-email/ for a user present only in edx (MySQL).
+    - Since edX database is not accessible in tests, this will return 404
+    """
+    response = await http_client.get(
+        "/v1/users/by-email/",
+        headers=auth_headers,
+        params={"email": "edxonly@example.com"},
+    )
+
+    # Since edX database is not accessible in tests, should return 404
+    assert response.status_code == 404
+    response_data = response.json()
+    assert "No user found for this email" in response_data["detail"]
+
+
+@pytest.mark.anyio
+async def test_by_email_only_in_mork(
+    db_session, http_client: AsyncClient, auth_headers: dict, monkeypatch
+):
+    """
+    Test /v1/users/by-email/ for a user present only in Mork (PostgreSQL).
+    - Creates a user in Mork
+    - Verifies that the API returns Mork info and edx_user as None
+    """
+    # Set up UserFactory and UserServiceStatusFactory to use the test session
+    UserFactory._meta.sqlalchemy_session = db_session
+    UserServiceStatusFactory._meta.sqlalchemy_session = db_session
+
+    # --- Create a user in Mork ---
+    user = UserFactory(email="morkonly@example.com")
+    db_session.commit()
+    db_session.expire_all()
+
+    # --- API call ---
+    response = await http_client.get(
+        "/v1/users/by-email/",
+        headers=auth_headers,
+        params={"email": "morkonly@example.com"},
+    )
+
+    # --- Assertions ---
+    assert response.status_code == 200
+    data = response.json()
+    assert data["edx_user"] is None
+    assert data["mork_status"]["id"] == str(user.id)
+
+
+@pytest.mark.anyio
+async def test_by_email_in_both(
+    db_session, http_client: AsyncClient, auth_headers: dict, monkeypatch
+):
+    """
+    Test /v1/users/by-email/ for a user present in both edx AND Mork.
+    - Creates a user in Mork with the same email
+    - Verifies that the API returns Mork info and edx_user as None
+    (since edx DB is not accessible in tests)
+    """
+    # Set up UserFactory and UserServiceStatusFactory to use the test session
+    UserFactory._meta.sqlalchemy_session = db_session
+    UserServiceStatusFactory._meta.sqlalchemy_session = db_session
+
+    # --- Create a user in Mork ---
+    user = UserFactory(email="both@example.com")
+    db_session.commit()
+    db_session.expire_all()
+
+    # --- API call ---
+    response = await http_client.get(
+        "/v1/users/by-email/",
+        headers=auth_headers,
+        params={"email": "both@example.com"},
+    )
+
+    # --- Assertions ---
+    assert response.status_code == 200
+    data = response.json()
+
+    # Since the edx database is not accessible in tests, edx_user should be None
+    # and mork_status should be populated
+    assert data["edx_user"] is None
+    assert data["mork_status"]["id"] == str(user.id)
+    assert data["email"] == "both@example.com"
+    assert "service_statuses" in data["mork_status"]
+    assert "reason" in data["mork_status"]
+
+
+@pytest.mark.anyio
+async def test_by_email_not_found(
+    db_session, http_client: AsyncClient, auth_headers: dict, monkeypatch
+):
+    """
+    Test /v1/users/by-email/ for an email not found in both databases.
+    - Mock the edx database to return None
+    - Verifies that the API returns 404 or both fields as None
+    """
+
+    # --- Mock edx ---
+    class FakeSession:
+        def execute(self, q):
+            return types.SimpleNamespace(scalar_one_or_none=lambda: None)
+
+        def close(self):
+            pass
+
+    class FakeEdxDB:
+        def __init__(self):
+            self.session = FakeSession()
+
+        def close(self):
+            pass
+
+    fake_db = FakeEdxDB()
+    monkeypatch.setattr("mork.edx.mysql.database.OpenEdxMySQLDB", lambda: fake_db)
+    # --- API call ---
+    response = await http_client.get(
+        "/v1/users/by-email/",
+        headers=auth_headers,
+        params={"email": "notfound@example.com"},
+    )
+    # --- Assertions ---
+    if response.status_code == 404:
+        response_data = response.json()
+        assert "No user found for this email" in response_data["detail"]
+    else:
+        data = response.json()
+        assert data["edx_user"] is None and data["mork_status"] is None

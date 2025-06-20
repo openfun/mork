@@ -1,4 +1,8 @@
-"""Main module for Mork API."""
+"""Main Mork API module.
+
+This module initializes the FastAPI application, configures Sentry for error handling,
+mounts health routes and API version 1.
+"""
 
 from functools import lru_cache
 from urllib.parse import urlparse
@@ -18,12 +22,18 @@ from mork.db import get_engine
 
 @lru_cache(maxsize=None)
 def get_health_check_routes() -> list:
-    """Return the health check routes."""
+    """Returns health check routes.
+
+    Useful for ignoring these routes in Sentry.
+    """
     return [route.path for route in health_router.routes]
 
 
 def filter_transactions(event: dict, hint) -> dict | None:  # noqa: ARG001
-    """Filter transactions for Sentry."""
+    """Filters transactions for Sentry.
+
+    Ignores health check requests if configured.
+    """
     url = urlparse(event["request"]["url"])
 
     if settings.SENTRY_IGNORE_HEALTH_CHECKS and url.path in get_health_check_routes():
@@ -34,7 +44,10 @@ def filter_transactions(event: dict, hint) -> dict | None:  # noqa: ARG001
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):  # noqa: ARG001
-    """Application life span."""
+    """Application lifecycle management.
+
+    Initializes Sentry if configured and manages database connection.
+    """
     engine = get_engine()
 
     # Sentry
@@ -58,10 +71,11 @@ async def lifespan(app: FastAPI):  # noqa: ARG001
     engine.dispose()
 
 
+# Create the main FastAPI application
 app = FastAPI(title="Mork", lifespan=lifespan)
 
-# Health checks
+# Add health check routes
 app.include_router(health_router)
 
-# Mount v1 API
+# Mount API version 1 under the /v1 prefix
 app.mount("/v1", v1)

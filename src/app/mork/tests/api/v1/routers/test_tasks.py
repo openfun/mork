@@ -14,6 +14,7 @@ async def test_tasks_auth(http_client: AsyncClient):
     assert (await http_client.post("/v1/tasks/")).status_code == 403
     assert (await http_client.options("/v1/tasks/")).status_code == 403
     assert (await http_client.get("/v1/tasks/1234/status")).status_code == 403
+    assert (await http_client.post("/v1/tasks/user-status-by-email")).status_code == 403
 
 
 @pytest.mark.anyio
@@ -166,3 +167,150 @@ async def test_get_task_status(http_client: AsyncClient, auth_headers: dict):
         response_data = response.json()
         assert response.status_code == 200
         assert response_data.get("status") == "SUCCESS"
+
+
+@pytest.mark.anyio
+async def test_user_status_by_email_success(
+    db_session, http_client: AsyncClient, auth_headers: dict, monkeypatch
+):
+    """Test user status by email endpoint with successful response."""
+
+    # Mock database session and user data
+    mock_edx_user = Mock()
+    mock_edx_user.id = 123
+    mock_edx_user.username = "testuser"
+    mock_edx_user.first_name = "Test"
+    mock_edx_user.last_name = "User"
+    mock_edx_user.is_active = True
+    mock_edx_user.date_joined = None
+    mock_edx_user.last_login = None
+
+    mock_mork_user = Mock()
+    mock_mork_user.id = "uuid-123"
+    mock_mork_user.service_statuses = []
+    mock_mork_user.reason = Mock()
+    mock_mork_user.reason.value = "inactive"
+    mock_mork_user.created_at = None
+    mock_mork_user.updated_at = None
+
+    # Mock the session properly
+    mock_session = Mock()
+    mock_result = Mock()
+    mock_result.scalar_one_or_none.side_effect = [mock_edx_user, mock_mork_user]
+    mock_session.execute.return_value = mock_result
+
+    # Override the get_session dependency to return our mock session
+    def get_session_override():
+        return mock_session
+
+    from mork.api.v1 import app as v1
+    from mork.db import get_session
+
+    v1.dependency_overrides[get_session] = get_session_override
+
+    try:
+        response = await http_client.post(
+            "/v1/tasks/user-status-by-email",
+            headers=auth_headers,
+            json={"email": "test@example.com"},
+        )
+
+        assert response.status_code == 200
+        response_data = response.json()
+
+        assert response_data["email"] == "test@example.com"
+        assert response_data["edx_user"]["id"] == 123
+        assert response_data["edx_user"]["username"] == "testuser"
+        assert response_data["mork_status"]["id"] == "uuid-123"
+    finally:
+        # Clean up the override
+        v1.dependency_overrides.pop(get_session, None)
+
+
+@pytest.mark.anyio
+async def test_user_status_by_email_not_found(
+    db_session, http_client: AsyncClient, auth_headers: dict, monkeypatch
+):
+    """Test user status by email endpoint when user is not found."""
+
+    # Mock the session to return None for both queries
+    mock_session = Mock()
+    mock_result = Mock()
+    mock_result.scalar_one_or_none.return_value = None
+    mock_session.execute.return_value = mock_result
+
+    # Override the get_session dependency to return our mock session
+    def get_session_override():
+        return mock_session
+
+    from mork.api.v1 import app as v1
+    from mork.db import get_session
+
+    v1.dependency_overrides[get_session] = get_session_override
+
+    try:
+        response = await http_client.post(
+            "/v1/tasks/user-status-by-email",
+            headers=auth_headers,
+            json={"email": "nonexistent@example.com"},
+        )
+
+        assert response.status_code == 404
+        response_data = response.json()
+        assert "No user found for this email" in response_data["detail"]
+    finally:
+        # Clean up the override
+        v1.dependency_overrides.pop(get_session, None)
+
+
+@pytest.mark.anyio
+async def test_user_status_by_email_missing_email(
+    db_session, http_client: AsyncClient, auth_headers: dict
+):
+    """Test user status by email endpoint with missing email parameter."""
+
+    response = await http_client.post(
+        "/v1/tasks/user-status-by-email",
+        headers=auth_headers,
+        json={},  # Missing email
+    )
+
+    assert response.status_code == 422
+
+
+@pytest.mark.anyio
+async def test_user_status_by_email_invalid_email(
+    db_session, http_client: AsyncClient, auth_headers: dict
+):
+    """Test user status by email endpoint with invalid email format."""
+
+    # Mock the session to avoid database access
+    mock_session = Mock()
+    mock_result = Mock()
+    mock_result.scalar_one_or_none.return_value = None
+    mock_session.execute.return_value = mock_result
+
+    # Override the get_session dependency to return our mock session
+    def get_session_override():
+        return mock_session
+
+    from mork.api.v1 import app as v1
+    from mork.db import get_session
+
+    v1.dependency_overrides[get_session] = get_session_override
+
+    try:
+        response = await http_client.post(
+            "/v1/tasks/user-status-by-email",
+            headers=auth_headers,
+            json={"email": "invalid-email"},  # Invalid email format
+        )
+
+        # The endpoint doesn't validate email format, so it will search for the user
+        # and return 404 when no user is found
+        assert response.status_code == 404
+        assert "No user found for this email" in response.text
+
+    finally:
+        # Clean up the override
+        v1.dependency_overrides.clear()

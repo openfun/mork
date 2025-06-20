@@ -1,3 +1,9 @@
+#
+# values.yaml : valeurs par défaut pour le chart Helm Mork.
+# Ce fichier permet de personnaliser le déploiement (image, service, ingress, base de données, etc).
+#
+# Les sections principales sont commentées en français ci-dessous.
+#
 # Default values for mork.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.

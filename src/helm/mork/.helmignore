@@ -1,3 +1,7 @@
+#
+# Fichier .helmignore : liste les fichiers et dossiers à ignorer lors du packaging Helm.
+# Utile pour éviter d'inclure des fichiers inutiles dans le chart.
+#
 # Patterns to ignore when building packages.
 # This supports shell glob matching, relative path matching, and
 # negation (prefixed with !). Only one pattern per line.
