@@ -13,7 +13,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, status
 from sqlalchemy import select, update
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, OperationalError
 from sqlalchemy.orm import Session
 
 from mork.auth import authenticate_api_key
@@ -206,7 +206,7 @@ async def get_user_by_email(
             select(AuthUser).where(AuthUser.email == email)
         ).scalar_one_or_none()
         edx_mysql_db.session.close()
-    except (ConnectionError, OSError, ValueError) as exc:
+    except (ConnectionError, OSError, ValueError, OperationalError) as exc:
         logger.warning(f"Could not connect to edX database for email {email}: {exc}")
         edx_user = None
 

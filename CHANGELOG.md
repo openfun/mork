@@ -14,7 +14,7 @@ and this project adheres to
   causing AttributeError
 - Simplify test to check actual behavior where edx_user is None in test environment
 - Fix endpoint `/v1/users/by-email/` to handle edX database connection errors gracefully
-- Replace generic Exception handling with specific exceptions (ConnectionError, OSError, ValueError)
+- Replace generic Exception handling with specific exceptions (ConnectionError, OSError, ValueError, OperationalError)
 - Fix missing Faker import in test files
 - Ensure all tests pass with proper error handling and expectations
 
