@@ -8,22 +8,40 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- **Enhanced User Filtering**: Add advanced filtering capabilities to `/v1/users` endpoint
+  - `email` parameter for partial email matching
+  - `email_exact` parameter for exact email matching
+  - `username` parameter for partial username matching
+  - `username_exact` parameter for exact username matching
+- **Flexible User Lookup**: Enhance `/v1/users/{user_id}` endpoint to accept both UUID and email
+  - Support direct email lookup in user details endpoint
+  - Add `exclude_deleted` parameter (default: true) to control visibility of deleted users
+- **Improved API Documentation**: Update documentation with comprehensive filtering examples and new endpoint capabilities
+
+### Changed
+
+- **API Simplification**: Remove deprecated `/v1/users/by-email/` endpoint in favor of enhanced main endpoints
+- **Better Error Handling**: Add more descriptive error messages for user not found scenarios
+- **Updated Documentation**: Completely rewrite DOCUMENTATION.md with new filtering capabilities and practical examples
+
 ### Fixed
 
-- Fix test failures in `test_by_email_in_both` by removing complex mocking that was
-  causing AttributeError
+- **User Deletion Process**: Fix user deletion tasks by updating `get_user_from_mork` function to include `exclude_deleted=false` parameter
+- **API Parameter Handling**: Fix FastAPI Query parameter default values to use proper syntax
+- **Test Coverage**: Ensure all tests pass with new API structure and filtering capabilities
+- Fix test failures in `test_by_email_in_both` by removing complex mocking that was causing AttributeError
 - Simplify test to check actual behavior where edx_user is None in test environment
 - Fix endpoint `/v1/users/by-email/` to handle edX database connection errors gracefully
 - Replace generic Exception handling with specific exceptions (ConnectionError, OSError, ValueError, OperationalError)
 - Fix missing Faker import in test files
 - Ensure all tests pass with proper error handling and expectations
 
-### Changed
+### Removed
 
-- Improve test coverage and reliability by accepting actual behavior instead of
-  complex mocking
-- Clean up test code formatting to comply with linting standards
-- Simplify test mocks to avoid 500 errors in CircleCI environment
+- **Deprecated Endpoint**: Remove `/v1/users/by-email/` route as functionality is now integrated into main endpoints
+- **Unused Imports**: Clean up imports that were only needed for the removed endpoint
 
 ## [0.10.0] - 2025-05-16
 

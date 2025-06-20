@@ -25,7 +25,7 @@ def get_user_from_mork(user_id: UUID) -> UserRead | None:
 
     try:
         response = httpx.get(
-            f"{settings.SERVER_URL}/v1/users/{user_id}",
+            f"{settings.SERVER_URL}/v1/users/{user_id}?exclude_deleted=false",
             headers={"X-API-Key": f"{settings.API_KEYS[0]}"},
         )
         response.raise_for_status()
