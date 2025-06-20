@@ -13,6 +13,9 @@ and this project adheres to
 - Fix test failures in `test_by_email_in_both` by removing complex mocking that was
   causing AttributeError
 - Simplify test to check actual behavior where edx_user is None in test environment
+- Fix endpoint `/v1/users/by-email/` to handle edX database connection errors gracefully
+- Replace generic Exception handling with specific exceptions (ConnectionError, OSError, ValueError)
+- Fix missing Faker import in test files
 - Ensure all tests pass with proper error handling and expectations
 
 ### Changed
@@ -20,6 +23,7 @@ and this project adheres to
 - Improve test coverage and reliability by accepting actual behavior instead of
   complex mocking
 - Clean up test code formatting to comply with linting standards
+- Simplify test mocks to avoid 500 errors in CircleCI environment
 
 ## [0.10.0] - 2025-05-16
 

@@ -198,94 +198,88 @@ async def get_user_by_email(
     - edx info (id, username, first_name, last_name, email, etc.)
     - Mork deletion status (service_statuses)
     """
+    # --- Search in edx (MySQL) ---
+    edx_user = None
     try:
-        # --- Search in edx (MySQL) ---
         edx_mysql_db = OpenEdxMySQLDB()
         edx_user = edx_mysql_db.session.execute(
             select(AuthUser).where(AuthUser.email == email)
         ).scalar_one_or_none()
         edx_mysql_db.session.close()
+    except (ConnectionError, OSError, ValueError) as exc:
+        logger.warning(f"Could not connect to edX database for email {email}: {exc}")
+        edx_user = None
 
-        # --- Search in Mork (PostgreSQL) ---
-        mork_user = session.execute(
-            select(MorkUser).where(MorkUser.email == email)
-        ).scalar_one_or_none()
+    # --- Search in Mork (PostgreSQL) ---
+    mork_user = session.execute(
+        select(MorkUser).where(MorkUser.email == email)
+    ).scalar_one_or_none()
 
-        # --- Build response ---
-        result = {"email": email}
+    # --- Build response ---
+    result = {"email": email}
 
-        if edx_user:
-            result["edx_user"] = {
-                "id": getattr(edx_user, "id", None),
-                "username": getattr(edx_user, "username", None),
-                "first_name": getattr(edx_user, "first_name", None),
-                "last_name": getattr(edx_user, "last_name", None),
-                "is_active": bool(getattr(edx_user, "is_active", False)),
-                "date_joined": (
-                    edx_user.date_joined.isoformat()
-                    if getattr(edx_user, "date_joined", None)
-                    else None
-                ),
-                "last_login": (
-                    edx_user.last_login.isoformat()
-                    if getattr(edx_user, "last_login", None)
-                    else None
-                ),
-            }
-        else:
-            result["edx_user"] = None
-
-        if mork_user:
-            # Deletion status for each service
-            try:
-                service_statuses = [
-                    {
-                        "service_name": getattr(
-                            s.service_name, "value", str(s.service_name)
-                        ),
-                        "status": getattr(s.status, "value", str(s.status)),
-                    }
-                    for s in getattr(mork_user, "service_statuses", [])
-                ]
-            except (AttributeError, ValueError) as e:
-                logger.error(f"Error retrieving service statuses: {e}")
-                service_statuses = []
-            created_at = (
-                mork_user.created_at.isoformat()
-                if getattr(mork_user, "created_at", None)
+    if edx_user:
+        result["edx_user"] = {
+            "id": getattr(edx_user, "id", None),
+            "username": getattr(edx_user, "username", None),
+            "first_name": getattr(edx_user, "first_name", None),
+            "last_name": getattr(edx_user, "last_name", None),
+            "is_active": bool(getattr(edx_user, "is_active", False)),
+            "date_joined": (
+                edx_user.date_joined.isoformat()
+                if getattr(edx_user, "date_joined", None)
                 else None
-            )
-            updated_at = (
-                mork_user.updated_at.isoformat()
-                if getattr(mork_user, "updated_at", None)
+            ),
+            "last_login": (
+                edx_user.last_login.isoformat()
+                if getattr(edx_user, "last_login", None)
                 else None
-            )
-            result["mork_status"] = {
-                "id": str(getattr(mork_user, "id", "")),
-                "service_statuses": service_statuses,
-                "reason": getattr(
-                    getattr(mork_user, "reason", None),
-                    "value",
-                    str(getattr(mork_user, "reason", None)),
-                ),
-                "created_at": created_at,
-                "updated_at": updated_at,
-            }
-        else:
-            result["mork_status"] = None
+            ),
+        }
+    else:
+        result["edx_user"] = None
 
-        # --- If no user found, return 404 ---
-        if not edx_user and not mork_user:
-            raise HTTPException(status_code=404, detail="No user found for this email.")
+    if mork_user:
+        # Deletion status for each service
+        try:
+            service_statuses = [
+                {
+                    "service_name": getattr(
+                        s.service_name, "value", str(s.service_name)
+                    ),
+                    "status": getattr(s.status, "value", str(s.status)),
+                }
+                for s in getattr(mork_user, "service_statuses", [])
+            ]
+        except (AttributeError, ValueError) as e:
+            logger.error(f"Error retrieving service statuses: {e}")
+            service_statuses = []
+        created_at = (
+            mork_user.created_at.isoformat()
+            if getattr(mork_user, "created_at", None)
+            else None
+        )
+        updated_at = (
+            mork_user.updated_at.isoformat()
+            if getattr(mork_user, "updated_at", None)
+            else None
+        )
+        result["mork_status"] = {
+            "id": str(getattr(mork_user, "id", "")),
+            "service_statuses": service_statuses,
+            "reason": getattr(
+                getattr(mork_user, "reason", None),
+                "value",
+                str(getattr(mork_user, "reason", None)),
+            ),
+            "created_at": created_at,
+            "updated_at": updated_at,
+        }
+    else:
+        result["mork_status"] = None
 
-        return result
-    except HTTPException:
-        raise
-    except Exception as exc:
-        import traceback
+    # --- If no user found, return 404 ---
+    if not edx_user and not mork_user:
+        raise HTTPException(status_code=404, detail="No user found for this email.")
 
-        logger.exception(f"Error retrieving user by email: {email}")
-        traceback.print_exc()
-        raise HTTPException(
-            status_code=500, detail=f"Internal error retrieving user: {str(exc)}"
-        ) from exc
+    return result
