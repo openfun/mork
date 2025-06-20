@@ -703,9 +703,7 @@ async def test_by_email_invalid_email_format(
 
 
 @pytest.mark.anyio
-async def test_by_email_empty_email(
-    http_client: AsyncClient, auth_headers: dict
-):
+async def test_by_email_empty_email(http_client: AsyncClient, auth_headers: dict):
     """Test /v1/users/by-email/ with empty email."""
     response = await http_client.get(
         "/v1/users/by-email/",
@@ -728,12 +726,14 @@ async def test_by_email_exception_handling(
     class FakeSession:
         def execute(self, q):
             raise Exception("Database connection failed")
+
         def close(self):
             pass
 
     class FakeEdxDB:
         def __init__(self):
             self.session = FakeSession()
+
         def close(self):
             pass
 
@@ -764,12 +764,14 @@ async def test_by_email_service_statuses_handling(
     class FakeSession:
         def execute(self, q):
             return types.SimpleNamespace(scalar_one_or_none=lambda: None)
+
         def close(self):
             pass
 
     class FakeEdxDB:
         def __init__(self):
             self.session = FakeSession()
+
         def close(self):
             pass
 

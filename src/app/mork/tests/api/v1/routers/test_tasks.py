@@ -205,6 +205,7 @@ async def test_user_status_by_email_success(
 
     from mork.api.v1 import app as v1
     from mork.db import get_session
+
     v1.dependency_overrides[get_session] = get_session_override
 
     try:
@@ -244,6 +245,7 @@ async def test_user_status_by_email_not_found(
 
     from mork.api.v1 import app as v1
     from mork.db import get_session
+
     v1.dependency_overrides[get_session] = get_session_override
 
     try:
@@ -294,6 +296,7 @@ async def test_user_status_by_email_invalid_email(
 
     from mork.api.v1 import app as v1
     from mork.db import get_session
+
     v1.dependency_overrides[get_session] = get_session_override
 
     try:
