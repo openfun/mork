@@ -57,8 +57,7 @@ def init_sentry(**_kwargs):
         sentry_sdk.set_tag("application", "celery")
 
 
-# Using a string here means the worker doesn't have to serialize
-# the configuration object to child processes.
-# - namespace='CELERY' means all celery-related configuration keys
-#   should have a `CELERY_` prefix.
+# Using a string here avoids serializing the configuration object in subprocesses.
+# - namespace='CELERY' means that all celery-related configuration keys
+#   must have the `CELERY_` prefix.
 app.config_from_object("mork.conf:settings", namespace="CELERY")
