@@ -30,8 +30,16 @@ router = APIRouter(prefix="/users", dependencies=[Depends(authenticate_api_key)]
 
 @router.get("")
 @router.get("/")
-async def read_users(
+async def read_users(  # noqa: PLR0913
     session: Annotated[Session, Depends(get_session)],
+    email: Annotated[
+        str | None,
+        Query(description="Filter users by email"),
+    ] = None,
+    username: Annotated[
+        str | None,
+        Query(description="Filter users by username"),
+    ] = None,
     service: Annotated[
         ServiceName | None,
         Query(description="The name of the service to filter users on"),
@@ -51,6 +59,14 @@ async def read_users(
 ) -> list[UserRead]:
     """Retrieve a list of users based on the query parameters."""
     statement = select(User)
+
+    # Add email filter
+    if email:
+        statement = statement.where(User.email.ilike(f"%{email}%"))
+
+    # Add username filter
+    if username:
+        statement = statement.where(User.username.ilike(f"%{username}%"))
 
     if service or deletion_status:
         statement = statement.join(UserServiceStatus)

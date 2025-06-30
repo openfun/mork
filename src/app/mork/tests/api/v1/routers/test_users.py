@@ -241,6 +241,65 @@ async def test_users_read_filter(
 
 
 @pytest.mark.anyio
+@pytest.mark.parametrize(
+    "params, expected_count",
+    [
+        ({"email": "TestUser@Example.COM"}, 1),
+        ({"username": "TestUser123"}, 1),
+        ({"email": "TestUser@Example.COM", "username": "TestUser123"}, 1),
+        ({"email": "TestUser@Example.COM", "service": "ashley"}, 1),
+        ({"username": "TestUser123", "deletion_status": "to_delete"}, 1),
+        # Case insensitive search tests
+        ({"email": "testuser@example.com"}, 1),  # Different case
+        ({"username": "testuser123"}, 1),  # Different case
+    ],
+)
+async def test_users_read_filter_email_username(
+    db_session,
+    http_client: AsyncClient,
+    auth_headers: dict,
+    params: dict,
+    expected_count: int,
+):
+    """Test scenarios with email and username query parameters when retrieving users."""
+    UserServiceStatusFactory._meta.sqlalchemy_session = db_session
+    UserFactory._meta.sqlalchemy_session = db_session
+
+    # Create specific users for email and username tests
+    UserFactory.create(
+        email="TestUser@Example.COM",
+        username="TestUser123",
+    )
+
+    # Create additional users with different data to test filtering logic
+    UserFactory.create(
+        email="another@example.com",
+        username="anotheruser",
+    )
+
+    UserFactory.create(
+        email="different@test.org",
+        username="differentuser",
+    )
+
+    # Read users with valid query parameters
+    response = await http_client.get(
+        "/v1/users",
+        headers=auth_headers,
+        params=params,
+    )
+
+    response_data = response.json()
+    assert response.status_code == 200
+
+    # Verify we have the expected count
+    assert len(response_data) == expected_count
+
+    # Verify all IDs are unique
+    assert len({user["id"] for user in response_data}) == expected_count
+
+
+@pytest.mark.anyio
 async def test_user_read(db_session, http_client: AsyncClient, auth_headers: dict):
     """Test the behavior of retrieving one user."""
     UserServiceStatusFactory._meta.sqlalchemy_session = db_session
