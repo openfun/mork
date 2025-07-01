@@ -10,10 +10,13 @@ and this project adheres to
 
 ### Added
 
+## [0.11.0] - 2025-07-01
+
 - Add advanced filtering capabilities to 
   `/v1/users` endpoint
   - `email` parameter for partial email matching
   - `username` parameter for partial username matching
+
 ## [0.10.0] - 2025-05-16
 
 ### Fixed
@@ -135,7 +138,8 @@ and this project adheres to
 - Add celery task to warn inactive users by email
 - Add celery task to delete inactive users from edx database
 
-[unreleased]: https://github.com/openfun/mork/compare/v0.10.0...main
+[unreleased]: https://github.com/openfun/mork/compare/v0.11.0...main
+[0.11.0]: https://github.com/openfun/mork/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/openfun/mork/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/openfun/mork/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/openfun/mork/compare/v0.7.0...v0.8.0
