@@ -8,6 +8,12 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.11.0] - 2025-07-01
+
+### Changed
+
+- Upgrade appVersion to `0.11.0`
+
 ## [0.10.0] - 2025-05-16
 
 ### Changed
