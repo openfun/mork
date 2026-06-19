@@ -28,7 +28,7 @@ dependencies = [
     "alembic-postgresql-enum==1.7.0",
     "celery[redis]==5.4.0",
     "fastapi[standard]==0.115.11",
-    "Jinja2==3.1.5",
+    "Jinja2==3.1.6",
     "jinja2-simple-tags==0.6.1",
     "mongoengine==0.29.1",
     "mongomock==4.3.0",
